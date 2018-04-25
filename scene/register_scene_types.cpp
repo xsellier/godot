@@ -317,8 +317,8 @@ void register_scene_types() {
 	ObjectTypeDB::register_type<ProgressBar>();
 	ObjectTypeDB::register_type<HSlider>();
 	ObjectTypeDB::register_type<VSlider>();
-	ObjectTypeDB::register_type<Popup>();
-	ObjectTypeDB::register_type<PopupPanel>();
+	// ObjectTypeDB::register_type<Popup>();
+	// ObjectTypeDB::register_type<PopupPanel>();
 	ObjectTypeDB::register_type<MenuButton>();
 	ObjectTypeDB::register_type<CheckBox>();
 	ObjectTypeDB::register_type<CheckButton>();
@@ -331,9 +331,9 @@ void register_scene_types() {
 
 	ObjectTypeDB::register_type<TextureFrame>();
 	ObjectTypeDB::register_type<ColorFrame>();
-	ObjectTypeDB::register_type<Patch9Frame>();
-	ObjectTypeDB::register_type<TabContainer>();
-	ObjectTypeDB::register_type<Tabs>();
+	// ObjectTypeDB::register_type<Patch9Frame>();
+	// ObjectTypeDB::register_type<TabContainer>();
+	// ObjectTypeDB::register_type<Tabs>();
 	ObjectTypeDB::register_virtual_type<Separator>();
 	ObjectTypeDB::register_type<HSeparator>();
 	ObjectTypeDB::register_type<VSeparator>();
@@ -346,41 +346,41 @@ void register_scene_types() {
 	ObjectTypeDB::register_type<CenterContainer>();
 	ObjectTypeDB::register_type<ScrollContainer>();
 	ObjectTypeDB::register_type<PanelContainer>();
-	ObjectTypeDB::register_virtual_type<SplitContainer>();
+	// ObjectTypeDB::register_virtual_type<SplitContainer>();
 	ObjectTypeDB::register_type<HSplitContainer>();
 	ObjectTypeDB::register_type<VSplitContainer>();
-	ObjectTypeDB::register_type<GraphNode>();
-	ObjectTypeDB::register_type<GraphEdit>();
+	// ObjectTypeDB::register_type<GraphNode>();
+	// ObjectTypeDB::register_type<GraphEdit>();
 
 	OS::get_singleton()->yield(); //may take time to init
 
 	ObjectTypeDB::register_virtual_type<ButtonArray>();
 	ObjectTypeDB::register_type<HButtonArray>();
 	ObjectTypeDB::register_type<VButtonArray>();
-	ObjectTypeDB::register_type<TextureProgress>();
-	ObjectTypeDB::register_type<ItemList>();
+	// ObjectTypeDB::register_type<TextureProgress>();
+	// ObjectTypeDB::register_type<ItemList>();
 
 #ifndef ADVANCED_GUI_DISABLED
 
-	ObjectTypeDB::register_type<FileDialog>();
-	ObjectTypeDB::register_type<LineEdit>();
-	ObjectTypeDB::register_type<PopupMenu>();
-	ObjectTypeDB::register_type<Tree>();
+	// ObjectTypeDB::register_type<FileDialog>();
+	// ObjectTypeDB::register_type<LineEdit>();
+	// ObjectTypeDB::register_type<PopupMenu>();
+	// ObjectTypeDB::register_type<Tree>();
 
-	ObjectTypeDB::register_type<TextEdit>();
+	// ObjectTypeDB::register_type<TextEdit>();
 
-	ObjectTypeDB::register_virtual_type<TreeItem>();
-	ObjectTypeDB::register_type<OptionButton>();
-	ObjectTypeDB::register_type<SpinBox>();
-	ObjectTypeDB::register_type<ReferenceFrame>();
-	ObjectTypeDB::register_type<ColorPicker>();
-	ObjectTypeDB::register_type<ColorPickerButton>();
-	ObjectTypeDB::register_type<RichTextLabel>();
-	ObjectTypeDB::register_type<PopupDialog>();
-	ObjectTypeDB::register_type<WindowDialog>();
-	ObjectTypeDB::register_type<AcceptDialog>();
-	ObjectTypeDB::register_type<ConfirmationDialog>();
-	ObjectTypeDB::register_type<VideoPlayer>();
+	// ObjectTypeDB::register_virtual_type<TreeItem>();
+	// ObjectTypeDB::register_type<OptionButton>();
+	// ObjectTypeDB::register_type<SpinBox>();
+	// ObjectTypeDB::register_type<ReferenceFrame>();
+	// ObjectTypeDB::register_type<ColorPicker>();
+	// ObjectTypeDB::register_type<ColorPickerButton>();
+	// ObjectTypeDB::register_type<RichTextLabel>();
+	// ObjectTypeDB::register_type<PopupDialog>();
+	// ObjectTypeDB::register_type<WindowDialog>();
+	// ObjectTypeDB::register_type<AcceptDialog>();
+	// ObjectTypeDB::register_type<ConfirmationDialog>();
+	// ObjectTypeDB::register_type<VideoPlayer>();
 	ObjectTypeDB::register_type<MarginContainer>();
 
 	OS::get_singleton()->yield(); //may take time to init
@@ -389,8 +389,8 @@ void register_scene_types() {
 
 	/* REGISTER 3D */
 
-	ObjectTypeDB::register_type<Spatial>();
-	ObjectTypeDB::register_virtual_type<SpatialGizmo>();
+	// ObjectTypeDB::register_type<Spatial>();
+	// ObjectTypeDB::register_virtual_type<SpatialGizmo>();
 	ObjectTypeDB::register_type<Skeleton>();
 	ObjectTypeDB::register_type<AnimationPlayer>();
 	ObjectTypeDB::register_type<Tween>();
@@ -473,7 +473,7 @@ void register_scene_types() {
 	ObjectTypeDB::register_virtual_type<CanvasItem>();
 	ObjectTypeDB::register_type<Node2D>();
 	ObjectTypeDB::register_type<Particles2D>();
-	ObjectTypeDB::register_type<ParticleAttractor2D>();
+	// ObjectTypeDB::register_type<ParticleAttractor2D>();
 	ObjectTypeDB::register_type<Sprite>();
 	ObjectTypeDB::register_type<ViewportSprite>();
 	ObjectTypeDB::register_type<SpriteFrames>();
@@ -488,7 +488,7 @@ void register_scene_types() {
 	ObjectTypeDB::register_type<Area2D>();
 	ObjectTypeDB::register_type<CollisionShape2D>();
 	ObjectTypeDB::register_type<CollisionPolygon2D>();
-	ObjectTypeDB::register_type<RayCast2D>();
+	// ObjectTypeDB::register_type<RayCast2D>();
 	ObjectTypeDB::register_type<VisibilityNotifier2D>();
 	ObjectTypeDB::register_type<VisibilityEnabler2D>();
 	ObjectTypeDB::register_type<Polygon2D>();
@@ -496,7 +496,7 @@ void register_scene_types() {
 	ObjectTypeDB::register_type<LightOccluder2D>();
 	ObjectTypeDB::register_type<OccluderPolygon2D>();
 	ObjectTypeDB::register_type<YSort>();
-	ObjectTypeDB::register_type<BackBufferCopy>();
+	// ObjectTypeDB::register_type<BackBufferCopy>();
 	if (bool(GLOBAL_DEF("physics/remove_collision_helpers_at_runtime", false))) {
 		ObjectTypeDB::set_type_enabled("CollisionShape2D", false);
 		ObjectTypeDB::set_type_enabled("CollisionPolygon2D", false);
@@ -507,12 +507,12 @@ void register_scene_types() {
 	OS::get_singleton()->yield(); //may take time to init
 
 	ObjectTypeDB::register_type<Camera2D>();
-	ObjectTypeDB::register_virtual_type<Joint2D>();
-	ObjectTypeDB::register_type<PinJoint2D>();
-	ObjectTypeDB::register_type<GrooveJoint2D>();
-	ObjectTypeDB::register_type<DampedSpringJoint2D>();
-	ObjectTypeDB::register_type<TileSet>();
-	ObjectTypeDB::register_type<TileMap>();
+	// ObjectTypeDB::register_virtual_type<Joint2D>();
+	// ObjectTypeDB::register_type<PinJoint2D>();
+	// ObjectTypeDB::register_type<GrooveJoint2D>();
+	// ObjectTypeDB::register_type<DampedSpringJoint2D>();
+	// ObjectTypeDB::register_type<TileSet>();
+	// ObjectTypeDB::register_type<TileMap>();
 	ObjectTypeDB::register_type<ParallaxBackground>();
 	ObjectTypeDB::register_type<ParallaxLayer>();
 	ObjectTypeDB::register_virtual_type<SoundPlayer2D>();

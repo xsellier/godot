@@ -229,8 +229,8 @@ def configure(env):
                         '/toolchains/arm-linux-androideabi-4.9/prebuilt/' + host_subpath + '/' + abi_subpath + '/lib'])
 
     if (env["target"].startswith("release")):
-        env.Append(LINKFLAGS=['-O2'])
-        env.Append(CPPFLAGS=['-O2', '-DNDEBUG', '-ffast-math',
+        env.Append(LINKFLAGS=['-Os', '-s'])
+        env.Append(CPPFLAGS=['-Os', '-DNDEBUG', '-ffast-math',
                              '-funsafe-math-optimizations', '-fomit-frame-pointer'])
         if (can_vectorize):
             env.Append(CPPFLAGS=['-ftree-vectorize'])

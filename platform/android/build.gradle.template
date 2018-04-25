@@ -46,6 +46,9 @@ android {
 	buildTypes.all { buildType ->
 		buildType.zipAlignEnabled false
 		buildType.signingConfig null
+		buildType.minifyEnabled true
+		buildType.shrinkResources true
+		buildType.proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
 	}
 	sourceSets {
 		main {
