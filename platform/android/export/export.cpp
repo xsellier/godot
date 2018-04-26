@@ -210,6 +210,7 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 	String package;
 	String name;
 	String icon;
+	String rounded_icon;
 	String cmdline;
 	bool _signed;
 	bool apk_expansion;
@@ -1294,7 +1295,7 @@ Error EditorExportPlatformAndroid::export_project(const String &p_path, bool p_d
 		args.push_back("-digestalg");
 		args.push_back("SHA1");
 		args.push_back("-sigalg");
-		args.push_back("MD5withRSA");
+		args.push_back("SHA1withRSA");
 		String tsa_url = EditorSettings::get_singleton()->get("android/timestamping_authority_url");
 		if (tsa_url != "") {
 			args.push_back("-tsa");
