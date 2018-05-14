@@ -934,4 +934,8 @@ public class Godot extends Activity implements SensorEventListener, IDownloaderC
 		mProgressFraction.setText(Helpers.getDownloadProgressString(progress.mOverallProgress,
 				progress.mOverallTotal));
 	}
+
+	public void throwRuntimeException(final String type, final String functionName, final String details, final String filename, final int line) {
+		throw new RuntimeException(type + " exception: " + functionName + ":" + details + "(" + filename + ":" + Integer.toString(line) + ")");
+	}
 }

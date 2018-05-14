@@ -63,6 +63,7 @@ typedef String (*GetDataDirFunc)();
 typedef String (*GetLocaleFunc)();
 typedef void (*SetClipboardFunc)(const String &);
 typedef String (*GetClipboardFunc)();
+typedef void (*ThrowRuntimeException)(const String &, const String &, const String &, const String &, int);
 typedef String (*GetModelFunc)();
 typedef int (*GetScreenDPIFunc)();
 typedef String (*GetUniqueIDFunc)();
@@ -143,6 +144,7 @@ private:
 	GetLocaleFunc get_locale_func;
 	SetClipboardFunc set_clipboard_func;
 	GetClipboardFunc get_clipboard_func;
+	ThrowRuntimeException throw_runtime_exception;
 	GetModelFunc get_model_func;
 	GetScreenDPIFunc get_screen_dpi_func;
 	ShowVirtualKeyboardFunc show_virtual_keyboard_func;
@@ -262,7 +264,7 @@ public:
 	virtual String get_joy_guid(int p_device) const;
 	void joy_connection_changed(int p_device, bool p_connected, String p_name);
 
-	OS_Android(GFXInitFunc p_gfx_init_func, void *p_gfx_init_ud, OpenURIFunc p_open_uri_func, GetDataDirFunc p_get_data_dir_func, GetLocaleFunc p_get_locale_func, GetModelFunc p_get_model_func, GetScreenDPIFunc p_get_screen_dpi_func, ShowVirtualKeyboardFunc p_show_vk, HideVirtualKeyboardFunc p_hide_vk, SetScreenOrientationFunc p_screen_orient, GetUniqueIDFunc p_get_unique_id, GetSystemDirFunc p_get_sdir_func, VideoPlayFunc p_video_play_func, VideoIsPlayingFunc p_video_is_playing_func, VideoPauseFunc p_video_pause_func, VideoStopFunc p_video_stop_func, SetKeepScreenOnFunc p_set_keep_screen_on_func, AlertFunc p_alert_func, bool p_use_apk_expansion, SetClipboardFunc p_set_clipboard_func, GetClipboardFunc p_get_clipboard_func);
+	OS_Android(GFXInitFunc p_gfx_init_func, void *p_gfx_init_ud, OpenURIFunc p_open_uri_func, GetDataDirFunc p_get_data_dir_func, GetLocaleFunc p_get_locale_func, GetModelFunc p_get_model_func, GetScreenDPIFunc p_get_screen_dpi_func, ShowVirtualKeyboardFunc p_show_vk, HideVirtualKeyboardFunc p_hide_vk, SetScreenOrientationFunc p_screen_orient, GetUniqueIDFunc p_get_unique_id, GetSystemDirFunc p_get_sdir_func, VideoPlayFunc p_video_play_func, VideoIsPlayingFunc p_video_is_playing_func, VideoPauseFunc p_video_pause_func, VideoStopFunc p_video_stop_func, SetKeepScreenOnFunc p_set_keep_screen_on_func, AlertFunc p_alert_func, bool p_use_apk_expansion, SetClipboardFunc p_set_clipboard_func, GetClipboardFunc p_get_clipboard_func, ThrowRuntimeException p_throw_runtime_exception);
 	~OS_Android();
 };
 

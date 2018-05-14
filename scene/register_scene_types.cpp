@@ -355,8 +355,8 @@ void register_scene_types() {
 	OS::get_singleton()->yield(); //may take time to init
 
 	ObjectTypeDB::register_virtual_type<ButtonArray>();
-	ObjectTypeDB::register_type<HButtonArray>();
-	ObjectTypeDB::register_type<VButtonArray>();
+	// ObjectTypeDB::register_type<HButtonArray>();
+	// ObjectTypeDB::register_type<VButtonArray>();
 	// ObjectTypeDB::register_type<TextureProgress>();
 	// ObjectTypeDB::register_type<ItemList>();
 
@@ -364,13 +364,13 @@ void register_scene_types() {
 
 	// ObjectTypeDB::register_type<FileDialog>();
 	// ObjectTypeDB::register_type<LineEdit>();
-	// ObjectTypeDB::register_type<PopupMenu>();
+	ObjectTypeDB::register_type<PopupMenu>();
 	// ObjectTypeDB::register_type<Tree>();
 
 	// ObjectTypeDB::register_type<TextEdit>();
 
 	// ObjectTypeDB::register_virtual_type<TreeItem>();
-	// ObjectTypeDB::register_type<OptionButton>();
+	ObjectTypeDB::register_type<OptionButton>();
 	// ObjectTypeDB::register_type<SpinBox>();
 	// ObjectTypeDB::register_type<ReferenceFrame>();
 	// ObjectTypeDB::register_type<ColorPicker>();
@@ -462,12 +462,12 @@ void register_scene_types() {
 	ObjectTypeDB::register_type<SoundRoomParams>();
 
 #endif
-	ObjectTypeDB::register_type<MeshLibrary>();
+	// ObjectTypeDB::register_type<MeshLibrary>();
 	AcceptDialog::set_swap_ok_cancel(GLOBAL_DEF("display/swap_ok_cancel", bool(OS::get_singleton()->get_swap_ok_cancel())));
 
 	ObjectTypeDB::register_type<SamplePlayer>();
 	ObjectTypeDB::register_type<StreamPlayer>();
-	ObjectTypeDB::register_type<EventPlayer>();
+	// ObjectTypeDB::register_type<EventPlayer>();
 
 	ObjectTypeDB::register_type<CanvasItemMaterial>();
 	ObjectTypeDB::register_virtual_type<CanvasItem>();
@@ -493,8 +493,8 @@ void register_scene_types() {
 	ObjectTypeDB::register_type<VisibilityEnabler2D>();
 	ObjectTypeDB::register_type<Polygon2D>();
 	ObjectTypeDB::register_type<Light2D>();
-	ObjectTypeDB::register_type<LightOccluder2D>();
-	ObjectTypeDB::register_type<OccluderPolygon2D>();
+	// ObjectTypeDB::register_type<LightOccluder2D>();
+	// ObjectTypeDB::register_type<OccluderPolygon2D>();
 	ObjectTypeDB::register_type<YSort>();
 	// ObjectTypeDB::register_type<BackBufferCopy>();
 	if (bool(GLOBAL_DEF("physics/remove_collision_helpers_at_runtime", false))) {
@@ -515,10 +515,10 @@ void register_scene_types() {
 	// ObjectTypeDB::register_type<TileMap>();
 	ObjectTypeDB::register_type<ParallaxBackground>();
 	ObjectTypeDB::register_type<ParallaxLayer>();
-	ObjectTypeDB::register_virtual_type<SoundPlayer2D>();
-	ObjectTypeDB::register_type<SamplePlayer2D>();
+	// ObjectTypeDB::register_virtual_type<SoundPlayer2D>();
+	// ObjectTypeDB::register_type<SamplePlayer2D>();
 	ObjectTypeDB::register_type<TouchScreenButton>();
-	ObjectTypeDB::register_type<RemoteTransform2D>();
+	// ObjectTypeDB::register_type<RemoteTransform2D>();
 
 	OS::get_singleton()->yield(); //may take time to init
 
