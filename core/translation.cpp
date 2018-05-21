@@ -917,8 +917,9 @@ void TranslationServer::set_locale(const String &p_locale) {
 	if (!is_valid_locale(univ_locale)) {
 		String trimmed_locale = get_trimmed_locale(univ_locale);
 
-		ERR_EXPLAIN("Invalid Locale: " + trimmed_locale);
-		ERR_FAIL_COND(!is_valid_locale(trimmed_locale));
+		if (!is_valid_locale(trimmed_locale)) {
+			trimmed_locale = "en";
+		}
 
 		locale = trimmed_locale;
 	} else {

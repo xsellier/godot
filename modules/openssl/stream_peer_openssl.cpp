@@ -433,28 +433,28 @@ Error StreamPeerOpenSSL::accept(Ref<StreamPeer> p_base) {
 
 void StreamPeerOpenSSL::_print_error(int err) {
 
-	err = SSL_get_error(ssl, err);
-	switch (err) {
-		case SSL_ERROR_NONE: ERR_PRINT("NO ERROR: The TLS/SSL I/O operation completed"); break;
-		case SSL_ERROR_ZERO_RETURN: ERR_PRINT("The TLS/SSL connection has been closed.");
-		case SSL_ERROR_WANT_READ:
-		case SSL_ERROR_WANT_WRITE:
-			ERR_PRINT("The operation did not complete.");
-			break;
-		case SSL_ERROR_WANT_CONNECT:
-		case SSL_ERROR_WANT_ACCEPT:
-			ERR_PRINT("The connect/accept operation did not complete");
-			break;
-		case SSL_ERROR_WANT_X509_LOOKUP:
-			ERR_PRINT("The operation did not complete because an application callback set by SSL_CTX_set_client_cert_cb() has asked to be called again.");
-			break;
-		case SSL_ERROR_SYSCALL:
-			ERR_PRINT("Some I/O error occurred. The OpenSSL error queue may contain more information on the error.");
-			break;
-		case SSL_ERROR_SSL:
-			ERR_PRINT("A failure in the SSL library occurred, usually a protocol error.");
-			break;
-	}
+	// err = SSL_get_error(ssl, err);
+	// switch (err) {
+	// 	case SSL_ERROR_NONE: ERR_PRINT("NO ERROR: The TLS/SSL I/O operation completed"); break;
+	// 	case SSL_ERROR_ZERO_RETURN: ERR_PRINT("The TLS/SSL connection has been closed.");
+	// 	case SSL_ERROR_WANT_READ:
+	// 	case SSL_ERROR_WANT_WRITE:
+	// 		ERR_PRINT("The operation did not complete.");
+	// 		break;
+	// 	case SSL_ERROR_WANT_CONNECT:
+	// 	case SSL_ERROR_WANT_ACCEPT:
+	// 		ERR_PRINT("The connect/accept operation did not complete");
+	// 		break;
+	// 	case SSL_ERROR_WANT_X509_LOOKUP:
+	// 		ERR_PRINT("The operation did not complete because an application callback set by SSL_CTX_set_client_cert_cb() has asked to be called again.");
+	// 		break;
+	// 	case SSL_ERROR_SYSCALL:
+	// 		ERR_PRINT("Some I/O error occurred. The OpenSSL error queue may contain more information on the error.");
+	// 		break;
+	// 	case SSL_ERROR_SSL:
+	// 		ERR_PRINT("A failure in the SSL library occurred, usually a protocol error.");
+	// 		break;
+	// }
 }
 
 Error StreamPeerOpenSSL::put_data(const uint8_t *p_data, int p_bytes) {
