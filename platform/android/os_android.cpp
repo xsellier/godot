@@ -203,8 +203,12 @@ void OS_Android::print(const char *p_format, ...) {
 }
 
 void OS_Android::printfatal(const char *cond, const char *p_error_type, const char *p_function, const char *p_err_details, const char *p_file, int p_line) {
+	String last_error = get_last_error();
 
-	throw_runtime_exception(p_error_type, p_function, p_err_details, p_file, p_line);
+	// Throw an exception only if there is an error lasting
+	if (last_error != "") {
+		throw_runtime_exception(p_error_type, p_function, p_err_details, p_file, p_line);
+	}
 }
 
 void OS_Android::alert(const String &p_alert, const String &p_title) {
