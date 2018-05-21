@@ -190,6 +190,7 @@ public class Godot extends Activity implements SensorEventListener, IDownloaderC
 		protected void onGLDrawFrame(GL10 gl) {}
 		protected void onGLSurfaceChanged(GL10 gl, int width, int height) {} // singletons will always miss first onGLSurfaceChanged call
 
+		protected void onError(final String type, final String functionName, final String details, final String filename, final int line) {}
 		public void registerMethods() {}
 	}
 
@@ -935,7 +936,10 @@ public class Godot extends Activity implements SensorEventListener, IDownloaderC
 				progress.mOverallTotal));
 	}
 
-	public void throwRuntimeException(final String type, final String functionName, final String details, final String filename, final int line) {
-		throw new RuntimeException(type + " exception: " + functionName + ":" + details + "(" + filename + ":" + Integer.toString(line) + ")");
+	public void emitErrorSignal(final String type, final String functionName, final String details, final String filename, final int line) {
+		// Allow users to use 3rd party modules to catch godot's errors.
+		for (int i = 0; i < singleton_count; i++) {
+			singletons[i].onError(type, functionName, details, filename, line);
+		}
 	}
 }
