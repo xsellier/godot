@@ -12,8 +12,8 @@
 
     <application
         android:label="@string/godot_project_name_string"
-        android:icon="@drawable/icon"
-        android:roundIcon="@drawable/icon_rounded"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:allowBackup="false"
         $$ADD_APPATTRIBUTE_CHUNKS$$
         >
