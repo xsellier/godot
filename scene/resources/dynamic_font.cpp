@@ -521,7 +521,7 @@ DynamicFontAtSize::Character DynamicFontAtSize::_bitmap_to_character(FT_Bitmap b
 
 	//blit to image and texture
 	{
-		Image img(tex.texture_size, tex.texture_size, 0, Image::FORMAT_GRAYSCALE_ALPHA, tex.imgdata);
+		Image img(tex.texture_size, tex.texture_size, 0, require_format, tex.imgdata);
 
 		if (tex.texture.is_null()) {
 			tex.texture.instance();
@@ -567,7 +567,7 @@ void DynamicFontAtSize::_update_char(CharType p_char) {
 		return;
 	}
 
-	int error = FT_Load_Char(face, p_char, FT_HAS_COLOR(face) ? FT_LOAD_COLOR : FT_LOAD_DEFAULT | 0);
+	int error = FT_Load_Char(face, p_char, FT_HAS_COLOR(face) ? FT_LOAD_COLOR : FT_LOAD_DEFAULT | FT_LOAD_TARGET_NORMAL);
 	if (error) {
 		char_map[p_char] = character;
 		return;
