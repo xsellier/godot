@@ -1153,6 +1153,20 @@ void SceneTree::_change_scene(Node *p_to) {
 	}
 }
 
+void SceneTree::set_use_font_oversampling(bool p_oversampling) {
+
+	use_font_oversampling = p_oversampling;
+	if (use_font_oversampling) {
+		DynamicFontAtSize::font_oversampling = OS::get_singleton()->get_window_size().width / root->get_visible_rect().size.width;
+	} else {
+		DynamicFontAtSize::font_oversampling = 1.0;
+	}
+}
+
+bool SceneTree::is_using_font_oversampling() const {
+	return use_font_oversampling;
+}
+
 Error SceneTree::change_scene(const String &p_path) {
 
 	Ref<PackedScene> new_scene = ResourceLoader::load(p_path);
@@ -1626,20 +1640,6 @@ void SceneTree::_bind_methods() {
 	BIND_CONSTANT(STRETCH_ASPECT_KEEP);
 	BIND_CONSTANT(STRETCH_ASPECT_KEEP_WIDTH);
 	BIND_CONSTANT(STRETCH_ASPECT_KEEP_HEIGHT);
-}
-
-void SceneTree::set_use_font_oversampling(bool p_oversampling) {
-
-	use_font_oversampling = p_oversampling;
-	if (use_font_oversampling) {
-		DynamicFontAtSize::font_oversampling = OS::get_singleton()->get_window_size().width / root->get_visible_rect().size.width;
-	} else {
-		DynamicFontAtSize::font_oversampling = 1.0;
-	}
-}
-
-bool SceneTree::is_using_font_oversampling() const {
-	return use_font_oversampling;
 }
 
 SceneTree *SceneTree::singleton = NULL;
