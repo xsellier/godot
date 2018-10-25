@@ -191,10 +191,10 @@ Error DynamicFontAtSize::_load() {
 
 	if (FT_HAS_COLOR(face)) {
 		int best_match = 0;
-		int diff = ABS(id.size - face->available_sizes[0].width);
+		int diff = ABS(id.size - ((int64_t)face->available_sizes[0].width));
 		scale_color_font = float(id.size) / face->available_sizes[0].width;
 		for (int i = 1; i < face->num_fixed_sizes; i++) {
-			int ndiff = ABS(id.size - face->available_sizes[i].width);
+			int ndiff = ABS(id.size - ((int64_t)face->available_sizes[i].width));
 			if (ndiff < diff) {
 				best_match = i;
 				diff = ndiff;
@@ -567,7 +567,7 @@ void DynamicFontAtSize::_update_char(CharType p_char) {
 		return;
 	}
 
-	int error = FT_Load_Char(face, p_char, FT_HAS_COLOR(face) ? FT_LOAD_COLOR : FT_LOAD_DEFAULT | FT_LOAD_TARGET_NORMAL);
+	int error = FT_Load_Char(face, p_char, FT_HAS_COLOR(face) ? FT_LOAD_COLOR : FT_LOAD_DEFAULT | (font->force_autohinter ? FT_LOAD_FORCE_AUTOHINT : 0));
 	if (error) {
 		char_map[p_char] = character;
 		return;
@@ -762,11 +762,15 @@ bool DynamicFont::is_distance_field_hint() const {
 }
 
 float DynamicFont::draw_char(RID p_canvas_item, const Point2 &p_pos, CharType p_char, CharType p_next, const Color &p_modulate) const {
+	const Ref<DynamicFontAtSize> &font_at_size = data_at_size;
 
 	if (!data_at_size.is_valid())
 		return 0;
 
-	return data_at_size->draw_char(p_canvas_item, p_pos, p_char, p_next, p_modulate, fallback_data_at_size) + spacing_char;
+	const Vector<Ref<DynamicFontAtSize> > &fallbacks = fallback_data_at_size;
+	Color color = p_modulate;
+
+	return font_at_size->draw_char(p_canvas_item, p_pos, p_char, p_next, color, fallbacks) + spacing_char;
 }
 
 void DynamicFont::set_fallback(int p_idx, const Ref<DynamicFontData> &p_data) {
@@ -943,6 +947,12 @@ void DynamicFont::update_oversampling() {
 
 		if (E->self()->data_at_size.is_valid()) {
 			E->self()->data_at_size->update_oversampling();
+
+			for (int i = 0; i < E->self()->fallback_data_at_size.size(); i++) {
+				if (E->self()->fallback_data_at_size[i].is_valid()) {
+					E->self()->fallback_data_at_size[i]->update_oversampling();
+				}
+			}
 
 			changed.push_back(Ref<DynamicFont>(E->self()));
 		}

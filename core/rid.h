@@ -145,21 +145,6 @@ public:
 		return *elem;
 	}
 
-	_FORCE_INLINE_ T *getornull(const RID &p_rid) {
-
-		if (thread_safe) {
-			mutex->lock();
-		}
-
-		T **elem = id_map.getptr(p_rid.get_id());
-
-		if (thread_safe) {
-			mutex->unlock();
-		}
-
-		return *elem;
-	}
-
 	virtual bool owns(const RID &p_rid) const {
 
 		if (thread_safe) {

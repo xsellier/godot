@@ -3399,7 +3399,7 @@ void VisualServerRaster::canvas_item_add_texture_rect(RID p_item, const Rect2 &p
 
 void VisualServerRaster::canvas_item_add_texture_rect_region(RID p_item, const Rect2 &p_rect, RID p_texture, const Rect2 &p_src_rect, const Color &p_modulate, bool p_transpose) {
 	VS_CHANGED;
-	CanvasItem *canvas_item = canvas_item_owner.getornull(p_item);
+	CanvasItem *canvas_item = canvas_item_owner.get(p_item);
 	ERR_FAIL_COND(!canvas_item);
 
 	CanvasItem::CommandRect *rect = memnew(CanvasItem::CommandRect);

@@ -688,7 +688,7 @@ void OS_X11::set_wm_fullscreen(bool p_enabled) {
 	Hints hints;
 	Atom property;
 	hints.flags = 2;
-	hints.decorations = 0;
+	hints.decorations = current_videomode.borderless_window ? 0 : 1;
 	property = XInternAtom(x11_display, "_MOTIF_WM_HINTS", True);
 	XChangeProperty(x11_display, x11_window, property, property, 32, PropModeReplace, (unsigned char *)&hints, 5);
 	if (p_enabled) {
@@ -1124,6 +1124,28 @@ void OS_X11::set_window_always_on_top(bool p_enabled) {
 
 bool OS_X11::is_window_always_on_top() const {
 	return current_videomode.always_on_top;
+}
+
+void OS_X11::set_borderless_window(int p_borderless) {
+
+	if (current_videomode.borderless_window == p_borderless)
+		return;
+
+	current_videomode.borderless_window = p_borderless;
+
+	Hints hints;
+	Atom property;
+	hints.flags = 2;
+	hints.decorations = current_videomode.borderless_window ? 0 : 1;
+	property = XInternAtom(x11_display, "_MOTIF_WM_HINTS", True);
+	XChangeProperty(x11_display, x11_window, property, property, 32, PropModeReplace, (unsigned char *)&hints, 5);
+
+	// Preserve window size
+	set_window_size(Size2(current_videomode.width, current_videomode.height));
+}
+
+bool OS_X11::get_borderless_window() {
+	return current_videomode.borderless_window;
 }
 
 void OS_X11::request_attention() {
@@ -2164,8 +2186,13 @@ void OS_X11::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shape, c
 	if (p_cursor.is_valid()) {
 		Ref<ImageTexture> texture = p_cursor;
 		Ref<AtlasTexture> atlas_texture = p_cursor;
+		Image image;
 		Size2 texture_size;
 		Rect2 atlas_rect;
+
+		if (texture.is_valid()) {
+			image = texture->get_data();
+		}
 
 		if (!texture.is_valid() && atlas_texture.is_valid()) {
 			texture = atlas_texture->get_atlas();
@@ -2183,9 +2210,13 @@ void OS_X11::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shape, c
 		}
 
 		ERR_FAIL_COND(!texture.is_valid());
+		ERR_FAIL_COND(p_hotspot.x < 0 || p_hotspot.y < 0);
 		ERR_FAIL_COND(texture_size.width > 256 || texture_size.height > 256);
+		ERR_FAIL_COND(p_hotspot.x > texture_size.width || p_hotspot.y > texture_size.height);
 
-		Image image = texture->get_data();
+		image = texture->get_data();
+
+		ERR_FAIL_COND(!texture.is_valid());
 
 		// Create the cursor structure
 		XcursorImage *cursor_image = XcursorImageCreate(texture_size.width, texture_size.height);
@@ -2217,7 +2248,7 @@ void OS_X11::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shape, c
 		// Save it for a further usage
 		cursors[p_shape] = XcursorImageLoadCursor(x11_display, cursor_image);
 
-		if (p_shape == CURSOR_ARROW) {
+		if (p_shape == current_cursor) {
 			if (mouse_mode == MOUSE_MODE_VISIBLE) {
 				XDefineCursor(x11_display, x11_window, cursors[p_shape]);
 			}
@@ -2225,6 +2256,15 @@ void OS_X11::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shape, c
 
 		memfree(cursor_image->pixels);
 		XcursorImageDestroy(cursor_image);
+	} else {
+		// Reset to default system cursor
+		if (img[p_shape]) {
+			cursors[p_shape] = XcursorImageLoadCursor(x11_display, img[p_shape]);
+		}
+
+		CursorShape c = current_cursor;
+		current_cursor = CURSOR_MAX;
+		set_cursor_shape(c);
 	}
 }
 
