@@ -585,7 +585,8 @@ void DynamicFontAtSize::update_oversampling() {
 		return;
 
 	FT_Done_FreeType(library);
-	textures.clear();
+	// Do not clear it fucks up the cache
+	// textures.clear();
 	char_map.clear();
 	oversampling = font_oversampling;
 	valid = false;
@@ -764,7 +765,7 @@ bool DynamicFont::is_distance_field_hint() const {
 float DynamicFont::draw_char(RID p_canvas_item, const Point2 &p_pos, CharType p_char, CharType p_next, const Color &p_modulate) const {
 	const Ref<DynamicFontAtSize> &font_at_size = data_at_size;
 
-	if (!data_at_size.is_valid())
+	if (!font_at_size.is_valid())
 		return 0;
 
 	const Vector<Ref<DynamicFontAtSize> > &fallbacks = fallback_data_at_size;
