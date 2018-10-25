@@ -50,10 +50,10 @@ class DynamicFontData : public Resource {
 
 public:
 	struct CacheID {
+
 		union {
 			struct {
 				uint32_t size : 16;
-				uint32_t outline_size : 8;
 				bool mipmaps : 1;
 				bool filter : 1;
 			};
