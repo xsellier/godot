@@ -178,7 +178,7 @@ def configure(env):
 
     common_opts = ['-fno-integrated-as', '-gcc-toolchain', gcc_toolchain_path]
 
-    if env['android_stl']:
+    if env['android_stl'] == 'yes':
         env.Append(CPPFLAGS=["-isystem", env["ANDROID_NDK_ROOT"] + "/sources/cxx-stl/llvm-libc++/include"])
         env.Append(CPPFLAGS=["-isystem", env["ANDROID_NDK_ROOT"] + "/sources/cxx-stl/llvm-libc++abi/include"])
         env.Append(CXXFLAGS=['-frtti',"-std=gnu++14"])
@@ -241,16 +241,16 @@ def configure(env):
         env['SHLIBSUFFIX'] = '.so'
 
     if ndk_version != None and LooseVersion(ndk_version) >= LooseVersion("15.0.4075724"):
-        if LooseVersion(ndk_version) >= LooseVersion("17.1.4828580"):
-            env.Append(LINKFLAGS=['-Wl,--exclude-libs,libgcc.a','-Wl,--exclude-libs,libatomic.a','-nostdlib++'])
-        env.Append(LINKFLAGS=['-shared', '--sysroot=' + lib_sysroot, '-Wl,--warn-shared-textrel'])
-        env.Append(LIBPATH=[env["ANDROID_NDK_ROOT"] + "/sources/cxx-stl/llvm-libc++/libs/"+arch_subpath+"/"])
-        env.Append(LINKFLAGS=[env["ANDROID_NDK_ROOT"] +"/sources/cxx-stl/llvm-libc++/libs/"+arch_subpath+"/libandroid_support.a"])
-        env.Append(LINKFLAGS=[env["ANDROID_NDK_ROOT"] +"/sources/cxx-stl/llvm-libc++/libs/"+arch_subpath+"/libc++_shared.so"])
+        if env['android_stl'] == 'yes':
+            if LooseVersion(ndk_version) >= LooseVersion("17.1.4828580"):
+                env.Append(LINKFLAGS=['-Wl,--exclude-libs,libgcc.a','-Wl,--exclude-libs,libatomic.a','-nostdlib++'])
+            env.Append(LIBPATH=[env["ANDROID_NDK_ROOT"] + "/sources/cxx-stl/llvm-libc++/libs/"+arch_subpath+"/"])
+            env.Append(LINKFLAGS=[env["ANDROID_NDK_ROOT"] +"/sources/cxx-stl/llvm-libc++/libs/"+arch_subpath+"/libandroid_support.a"])
+            env.Append(LINKFLAGS=[env["ANDROID_NDK_ROOT"] +"/sources/cxx-stl/llvm-libc++/libs/"+arch_subpath+"/libc++_shared.so"])
     else:
-        env['LINKFLAGS'] = ['-shared', '--sysroot=' + lib_sysroot, '-Wl,--warn-shared-textrel']
         if mt_link:
             env.Append(LINKFLAGS=['-Wl,--threads'])
+    env.Append(LINKFLAGS=['-shared', '--sysroot=' + lib_sysroot, '-Wl,--warn-shared-textrel'])
 
     if env["android_arch"] == "armv7":
         env.Append(LINKFLAGS=string.split('-Wl,--fix-cortex-a8'))
