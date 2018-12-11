@@ -387,7 +387,6 @@ public:
 	enum CompressionMode {
 		COMPRESSION_FASTLZ = Compression::MODE_FASTLZ,
 		COMPRESSION_DEFLATE = Compression::MODE_DEFLATE,
-		COMPRESSION_ZSTD = Compression::MODE_ZSTD,
 		COMPRESSION_GZIP = Compression::MODE_GZIP
 	};
 
