@@ -99,6 +99,20 @@ Error HTTPRequest::_parse_url(const String &p_url) {
 
 Error HTTPRequest::request(const String &p_url, const Vector<String> &p_custom_headers, bool p_ssl_validate_domain, HTTPClient::Method p_method, const String &p_request_data) {
 
+	CharString charstr = p_request_data.utf8();
+
+	ByteArray retval;
+	size_t len = charstr.length();
+	retval.resize(len);
+	ByteArray::Write w = retval.write();
+	copymem(w.ptr(), charstr.ptr(), len);
+	w = DVector<uint8_t>::Write();
+
+	return request_raw(p_url, p_custom_headers, p_ssl_validate_domain, p_method, retval);
+}
+
+Error HTTPRequest::request_raw(const String &p_url, const Vector<String> &p_custom_headers, bool p_ssl_validate_domain, HTTPClient::Method p_method, const DVector<uint8_t> &p_request_data) {
+
 	ERR_FAIL_COND_V(!is_inside_tree(), ERR_UNCONFIGURED);
 	if (requesting) {
 		ERR_EXPLAIN("HTTPRequest is processing a request. Wait for completion or cancel it before attempting a new one.");
@@ -331,7 +345,7 @@ bool HTTPRequest::_update_connection() {
 			} else {
 				//did not request yet, do request
 
-				Error err = client->request(method, request_string, headers, request_data);
+				Error err = client->request_raw(method, request_string, headers, request_data);
 				if (err != OK) {
 					call_deferred("_request_done", RESULT_CONNECTION_ERROR, 0, StringArray(), ByteArray());
 					return true;
@@ -519,6 +533,7 @@ int HTTPRequest::get_body_size() const {
 void HTTPRequest::_bind_methods() {
 
 	ObjectTypeDB::bind_method(_MD("request", "url", "custom_headers", "ssl_validate_domain", "method", "request_data"), &HTTPRequest::request, DEFVAL(StringArray()), DEFVAL(true), DEFVAL(HTTPClient::METHOD_GET), DEFVAL(String()));
+	ObjectTypeDB::bind_method(_MD("request_raw", "url", "custom_headers", "ssl_validate_domain", "method", "request_data"), &HTTPRequest::request_raw, DEFVAL(StringArray()), DEFVAL(true), DEFVAL(HTTPClient::METHOD_GET), DEFVAL(DVector<uint8_t>()));
 	ObjectTypeDB::bind_method(_MD("cancel_request"), &HTTPRequest::cancel_request);
 
 	ObjectTypeDB::bind_method(_MD("get_http_client_status"), &HTTPRequest::get_http_client_status);
