@@ -1380,11 +1380,7 @@ Error EditorExportPlatformAndroid::export_project(const String &p_path, bool p_d
 		args.push_back("-digestalg");
 		args.push_back("SHA-256");
 		args.push_back("-sigalg");
-<<<<<<< HEAD
-		args.push_back("SHA1withRSA");
-=======
 		args.push_back("SHA256withRSA");
->>>>>>> cde1d5050a41eed5d0cd98946adf234ace604562
 		String tsa_url = EditorSettings::get_singleton()->get("android/timestamping_authority_url");
 		if (tsa_url != "") {
 			args.push_back("-tsa");
