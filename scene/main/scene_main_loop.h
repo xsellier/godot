@@ -84,6 +84,7 @@ private:
 	float fixed_process_time;
 	float idle_process_time;
 	bool accept_quit;
+	bool use_font_oversampling;
 	uint32_t last_id;
 
 #ifdef TOOLS_ENABLED
@@ -333,6 +334,9 @@ public:
 	bool has_group(const StringName &p_identifier) const;
 
 	void set_screen_stretch(StretchMode p_mode, StretchAspect p_aspect, const Size2 p_minsize);
+
+	void set_use_font_oversampling(bool p_oversampling);
+	bool is_using_font_oversampling() const;
 
 	//void change_scene(const String& p_path);
 	//Node *get_loaded_scene();

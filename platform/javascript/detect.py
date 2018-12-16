@@ -30,7 +30,6 @@ def get_flags():
         ('module_etc1_enabled', 'no'),
         ('module_mpc_enabled', 'no'),
         ('module_speex_enabled', 'no'),
-        ('module_theora_enabled', 'no'),
     ]
 
 
@@ -91,6 +90,7 @@ def configure(env):
         env.Append(LINKFLAGS=['--compression', lzma_binpath + "," + lzma_decoder + "," + lzma_dec])
 
     env.Append(LINKFLAGS=['-s', 'ASM_JS=1'])
+    env.Append(LINKFLAGS=['-s', 'WASM=0'])
     env.Append(LINKFLAGS=['-s', 'EXTRA_EXPORTED_RUNTIME_METHODS="[\'FS\']"'])
     env.Append(LINKFLAGS=['--separate-asm'])
     env.Append(LINKFLAGS=['-O2'])

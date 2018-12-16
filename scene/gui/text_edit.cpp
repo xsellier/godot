@@ -4486,6 +4486,7 @@ TextEdit::TextEdit() {
 	cache.line_number_w = 1;
 	cache.breakpoint_gutter_width = 0;
 	breakpoint_gutter_width = 0;
+	set_default_cursor_shape(CURSOR_IBEAM);
 
 	tab_size = 4;
 	text.set_tab_size(tab_size);

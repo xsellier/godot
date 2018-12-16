@@ -40,7 +40,7 @@ void Font::draw_halign(RID p_canvas_item, const Point2 &p_pos, HAlign p_align, f
 		return;
 	}
 
-	float ofs;
+	float ofs = 0.f;
 	switch (p_align) {
 		case HALIGN_LEFT: {
 			ofs = 0;
@@ -498,13 +498,14 @@ float BitmapFont::draw_char(RID p_canvas_item, const Point2 &p_pos, CharType p_c
 		return 0;
 	}
 
-	Point2 cpos = p_pos;
-	cpos.x += c->h_align;
-	cpos.y -= ascent;
-	cpos.y += c->v_align;
 	ERR_FAIL_COND_V(c->texture_idx < -1 || c->texture_idx >= textures.size(), 0);
-	if (c->texture_idx != -1)
+	if (c->texture_idx != -1) {
+		Point2 cpos = p_pos;
+		cpos.x += c->h_align;
+		cpos.y -= ascent;
+		cpos.y += c->v_align;
 		VisualServer::get_singleton()->canvas_item_add_texture_rect_region(p_canvas_item, Rect2(cpos, c->rect.size), textures[c->texture_idx]->get_rid(), c->rect, p_modulate);
+	}
 
 	return get_char_size(p_char, p_next).width;
 }

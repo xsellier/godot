@@ -129,6 +129,8 @@ public:
 	virtual bool can_drop_data(const Point2 &p_point, const Variant &p_data) const;
 	virtual void drop_data(const Point2 &p_point, const Variant &p_data);
 
+	virtual CursorShape get_cursor_shape(const Point2 &p_pos) const;
+
 	void menu_option(int p_option);
 	PopupMenu *get_menu() const;
 

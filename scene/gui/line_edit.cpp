@@ -538,6 +538,13 @@ void LineEdit::drop_data(const Point2 &p_point, const Variant &p_data) {
 	}
 }
 
+Control::CursorShape LineEdit::get_cursor_shape(const Point2 &p_pos) const {
+	if (is_editable()) {
+		return CURSOR_IBEAM;
+	}
+	return Control::get_cursor_shape(p_pos);
+}
+
 void LineEdit::_notification(int p_what) {
 
 	switch (p_what) {

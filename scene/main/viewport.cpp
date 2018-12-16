@@ -1925,7 +1925,22 @@ void Viewport::_gui_input_event(InputEvent p_event) {
 			p_event.mouse_motion.x = pos.x;
 			p_event.mouse_motion.y = pos.y;
 
-			Control::CursorShape cursor_shape = over->get_cursor_shape(pos);
+			Control::CursorShape cursor_shape = Control::CURSOR_ARROW;
+			{
+				Control *c = over;
+				Vector2 cpos = pos;
+				while (c) {
+					cursor_shape = c->get_cursor_shape(cpos);
+					cpos = c->get_transform().xform(cpos);
+					if (cursor_shape != Control::CURSOR_ARROW)
+						break;
+					if (c->data.stop_mouse)
+						break;
+					if (c->is_set_as_toplevel())
+						break;
+					c = c->get_parent_control();
+				}
+			}
 			OS::get_singleton()->set_cursor_shape((OS::CursorShape)cursor_shape);
 
 			if (over->can_process()) {

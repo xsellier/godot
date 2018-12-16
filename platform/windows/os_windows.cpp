@@ -39,10 +39,10 @@
 #include "os/memory_pool_dynamic_static.h"
 #include "os_windows.h"
 
+#include "scene/resources/texture.h"
 #include "servers/audio/audio_server_sw.h"
 #include "servers/visual/visual_server_raster.h"
 #include "servers/visual/visual_server_wrap_mt.h"
-#include "scene/resources/texture.h"
 
 #include "globals.h"
 #include "io/marshalls.h"
@@ -466,7 +466,8 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 		case WM_MBUTTONDBLCLK:
 		case WM_RBUTTONDBLCLK:
 			/*case WM_XBUTTONDOWN:
-		case WM_XBUTTONUP: */ {
+		case WM_XBUTTONUP: */
+			{
 
 				/*
 			LPARAM extra = GetMessageExtraInfo();
@@ -2017,7 +2018,7 @@ void OS_Windows::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shap
 		UINT size = sizeof(UINT) * image_size;
 
 		// Create the BITMAP with alpha channel
-		COLORREF *buffer = (COLORREF *)malloc(sizeof(COLORREF) * image_size);
+		COLORREF *buffer = (COLORREF *)memalloc(sizeof(COLORREF) * image_size);
 
 		for (UINT index = 0; index < image_size; index++) {
 			int row_index = floor(index / texture_size.width) + atlas_rect.pos.y;
@@ -2042,6 +2043,8 @@ void OS_Windows::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shap
 		GetMaskBitmaps(bitmap, clrTransparent, hAndMask, hXorMask);
 
 		if (NULL == hAndMask || NULL == hXorMask) {
+			memfree(buffer);
+			DeleteObject(bitmap);
 			return;
 		}
 
@@ -2056,7 +2059,9 @@ void OS_Windows::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shap
 		cursors[p_shape] = CreateIconIndirect(&iconinfo);
 
 		if (p_shape == CURSOR_ARROW) {
-			SetCursor(cursors[p_shape]);
+			if (mouse_mode == MOUSE_MODE_VISIBLE) {
+				SetCursor(cursors[p_shape]);
+			}
 		}
 
 		if (hAndMask != NULL) {
@@ -2066,6 +2071,9 @@ void OS_Windows::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shap
 		if (hXorMask != NULL) {
 			DeleteObject(hXorMask);
 		}
+
+		memfree(buffer);
+		DeleteObject(bitmap);
 	}
 }
 

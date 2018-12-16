@@ -32,8 +32,11 @@
 
 #ifdef FREETYPE_ENABLED
 #include "io/resource_loader.h"
+#include "os/mutex.h"
 #include "os/thread_safe.h"
+#include "pair.h"
 #include "scene/resources/font.h"
+#include "self_list.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -48,15 +51,17 @@ class DynamicFontData : public Resource {
 public:
 	struct CacheID {
 
-		int size;
-		bool mipmaps;
-		bool filter;
-
+		union {
+			struct {
+				uint32_t size : 16;
+				bool mipmaps : 1;
+				bool filter : 1;
+			};
+			uint32_t key;
+		};
 		bool operator<(CacheID right) const;
 		CacheID() {
-			size = 16;
-			mipmaps = false;
-			filter = false;
+			key = 0;
 		}
 	};
 
@@ -72,7 +77,7 @@ private:
 
 	friend class DynamicFont;
 
-	Ref<DynamicFontAtSize> _get_dynamic_font_at_size(CacheID p_cache);
+	Ref<DynamicFontAtSize> _get_dynamic_font_at_size(CacheID p_cache_id);
 
 protected:
 	static void _bind_methods();
@@ -97,10 +102,12 @@ class DynamicFontAtSize : public Reference {
 	FT_Face face; /* handle to face object */
 	FT_StreamRec stream;
 
-	int ascent;
-	int descent;
-	int linegap;
-	int rect_margin;
+	float ascent;
+	float descent;
+	float linegap;
+	float rect_margin;
+	float oversampling;
+	float scale_color_font;
 
 	uint32_t texture_flags;
 
@@ -121,6 +128,7 @@ class DynamicFontAtSize : public Reference {
 		bool found;
 		int texture_idx;
 		Rect2 rect;
+		Rect2 rect_uv;
 		float v_align;
 		float h_align;
 		float advance;
@@ -129,7 +137,21 @@ class DynamicFontAtSize : public Reference {
 			texture_idx = 0;
 			v_align = 0;
 		}
+
+		static Character not_found();
 	};
+
+	struct TexturePosition {
+		int index;
+		int x;
+		int y;
+	};
+
+	const Pair<const Character *, DynamicFontAtSize *> _find_char_with_font(CharType p_char, const Vector<Ref<DynamicFontAtSize> > &p_fallbacks) const;
+	Character _make_outline_char(CharType p_char);
+	float _get_kerning_advance(const DynamicFontAtSize *font, CharType p_char, CharType p_next) const;
+	TexturePosition _find_texture_pos_for_glyph(int p_color_size, Image::Format p_image_format, int p_width, int p_height);
+	Character _bitmap_to_character(FT_Bitmap bitmap, int yofs, int xofs, float advance);
 
 	static unsigned long _ft_stream_io(FT_Stream stream, unsigned long offset, unsigned char *buffer, unsigned long count);
 	static void _ft_stream_close(FT_Stream stream);
@@ -145,8 +167,9 @@ class DynamicFontAtSize : public Reference {
 	static HashMap<String, Vector<uint8_t> > _fontdata;
 	Error _load();
 
-protected:
 public:
+	static float font_oversampling;
+
 	float get_height() const;
 
 	float get_ascent() const;
@@ -157,6 +180,7 @@ public:
 	float draw_char(RID p_canvas_item, const Point2 &p_pos, CharType p_char, CharType p_next, const Color &p_modulate, const Vector<Ref<DynamicFontAtSize> > &p_fallbacks) const;
 
 	void set_texture_flags(uint32_t p_flags);
+	void update_oversampling();
 
 	DynamicFontAtSize();
 	~DynamicFontAtSize();
@@ -232,9 +256,20 @@ public:
 
 	virtual float draw_char(RID p_canvas_item, const Point2 &p_pos, CharType p_char, CharType p_next = 0, const Color &p_modulate = Color(1, 1, 1)) const;
 
+	SelfList<DynamicFont> font_list;
+
+	static Mutex *dynamic_font_mutex;
+	static SelfList<DynamicFont>::List dynamic_fonts;
+
+	static void initialize_dynamic_fonts();
+	static void finish_dynamic_fonts();
+	static void update_oversampling();
+
 	DynamicFont();
 	~DynamicFont();
 };
+
+VARIANT_ENUM_CAST(DynamicFont::SpacingType);
 
 /////////////
 

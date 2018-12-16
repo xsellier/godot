@@ -30,6 +30,7 @@
 #include "register_core_types.h"
 
 #include "bind/core_bind.h"
+#include "color.h"
 #include "compressed_translation.h"
 #include "core/io/xml_parser.h"
 #include "core_string_names.h"
@@ -199,6 +200,7 @@ void unregister_core_types() {
 
 	unregister_variant_methods();
 
+	Color::cleanup();
 	ObjectTypeDB::cleanup();
 	ResourceCache::clear();
 	CoreStringNames::free();

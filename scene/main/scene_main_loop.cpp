@@ -36,6 +36,7 @@
 #include "os/keyboard.h"
 #include "os/os.h"
 #include "print_string.h"
+#include "scene/resources/dynamic_font.h"
 #include "scene/resources/material.h"
 #include "scene/resources/mesh.h"
 #include "scene/resources/packed_scene.h"
@@ -516,6 +517,11 @@ bool SceneTree::idle(float p_time) {
 
 		last_screen_size = win_size;
 		_update_root_rect();
+
+		if (use_font_oversampling) {
+			DynamicFontAtSize::font_oversampling = OS::get_singleton()->get_window_size().width / root->get_visible_rect().size.width;
+			DynamicFont::update_oversampling();
+		}
 
 		emit_signal("screen_resized");
 	}
@@ -1147,6 +1153,20 @@ void SceneTree::_change_scene(Node *p_to) {
 	}
 }
 
+void SceneTree::set_use_font_oversampling(bool p_oversampling) {
+
+	use_font_oversampling = p_oversampling;
+	if (use_font_oversampling) {
+		DynamicFontAtSize::font_oversampling = OS::get_singleton()->get_window_size().width / root->get_visible_rect().size.width;
+	} else {
+		DynamicFontAtSize::font_oversampling = 1.0;
+	}
+}
+
+bool SceneTree::is_using_font_oversampling() const {
+	return use_font_oversampling;
+}
+
 Error SceneTree::change_scene(const String &p_path) {
 
 	Ref<PackedScene> new_scene = ResourceLoader::load(p_path);
@@ -1596,6 +1616,7 @@ void SceneTree::_bind_methods() {
 	ObjectTypeDB::bind_method(_MD("reload_current_scene"), &SceneTree::reload_current_scene);
 
 	ObjectTypeDB::bind_method(_MD("_change_scene"), &SceneTree::_change_scene);
+	ObjectTypeDB::bind_method(_MD("set_use_font_oversampling", "enable"), &SceneTree::set_use_font_oversampling);
 
 	ADD_SIGNAL(MethodInfo("tree_changed"));
 	ADD_SIGNAL(MethodInfo("node_removed", PropertyInfo(Variant::OBJECT, "node")));

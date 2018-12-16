@@ -278,6 +278,7 @@ static const char *prop_renames[][2] = {
 	{ "input/ray_pickable", "input_ray_pickable" }, // CollisionObject
 	{ "invert/border", "invert_border" }, // Polygon2D
 	{ "invert/enable", "invert_enable" }, // Polygon2D
+	{ "is_pressed", "pressed" }, // BaseButton
 	{ "limit/bottom", "limit_bottom" }, // Camera2D
 	{ "limit/left", "limit_left" }, // Camera2D
 	{ "limit/right", "limit_right" }, // Camera2D
@@ -537,7 +538,7 @@ void EditorExportGodot3::_rename_properties(const String &p_type, List<ExportDat
 				// Check if it's a rotation and save the track number to fix its assigned values
 				if (path_value.find("transform/rot") != -1) {
 					// We found a track 'path' with a "transform/rot" NodePath, its 'keys' need to be fixed
-					found_track_number = prop_name.substr(prop_name.find("/path") - 1, 1);
+					found_track_number = prop_name.get_slice("/", 1);
 					print_line("Found Animation track with 2D rotations: " + prop_name + " = " + path_value);
 				}
 
@@ -561,7 +562,7 @@ void EditorExportGodot3::_rename_properties(const String &p_type, List<ExportDat
 
 					E->get().value = NodePath(track_nodepath + ":" + track_prop);
 				}
-			} else if (found_track_number != "" && prop_name.begins_with("tracks/") && prop_name.ends_with("/keys") && prop_name.find(found_track_number) != -1) {
+			} else if (found_track_number != "" && prop_name == "tracks/" + found_track_number + "/keys") {
 				// Bingo! We found keys matching the track number we had spotted
 				print_line("Fixing sign of 2D rotations in animation track " + found_track_number);
 				Dictionary track_keys = E->get().value;
@@ -670,6 +671,16 @@ void EditorExportGodot3::_rename_properties(const String &p_type, List<ExportDat
 		if ((p_type == "Sprite" || p_type == "Sprite3D") && E->get().name == "region") {
 			E->get().name = "region_enabled";
 		}
+
+		// "click_on_pressed" was renamed to "action_mode" and is now a enum
+		if (E->get().name == "click_on_press") {
+			E->get().name = "action_mode";
+			if (E->get().value) {
+				E->get().value = 0; // ACTION_MODE_BUTTON_PRESS
+			} else {
+				E->get().value = 1; // ACTION_MODE_BUTTON_RELEASE
+			}
+		}
 	}
 
 	// Flip margins based on the previously fixed anchor modes
@@ -689,10 +700,46 @@ void EditorExportGodot3::_rename_properties(const String &p_type, List<ExportDat
 	}
 }
 
+void EditorExportGodot3::_add_new_properties(const String &p_type, List<ExportData::PropertyData> *p_props) {
+	bool add_mouse_filter = false;
+
+	bool ignore_mouse = false;
+	bool stop_mouse = false;
+
+	for (List<ExportData::PropertyData>::Element *E = p_props->front(); E; E = E->next()) {
+		String prop_name = E->get().name;
+		if (prop_name == "focus/ignore_mouse" || prop_name == "focus/stop_mouse") {
+			add_mouse_filter = true;
+
+			if (prop_name == "focus/ignore_mouse") {
+				ignore_mouse = E->get().value;
+			} else if (prop_name == "focus/stop_mouse") {
+				stop_mouse = E->get().value;
+			}
+		}
+	}
+
+	if (add_mouse_filter) {
+		ExportData::PropertyData pdata;
+		pdata.name = "mouse_filter";
+
+		if (ignore_mouse && stop_mouse) {
+			pdata.value = 1; // MOUSE_FILTER_PASS
+		} else if (ignore_mouse && !stop_mouse) {
+			pdata.value = 2; // MOUSE_FILTER_IGNORE
+		} else {
+			pdata.value = 0; // MOUSE_FILTER_STOP
+		}
+
+		p_props->push_back(pdata);
+	}
+}
+
 void EditorExportGodot3::_convert_resources(ExportData &resource) {
 
 	for (int i = 0; i < resource.resources.size(); i++) {
 
+		_add_new_properties(resource.resources[i].type, &resource.resources[i].properties);
 		_rename_properties(resource.resources[i].type, &resource.resources[i].properties);
 
 		if (type_rename_map.has(resource.resources[i].type)) {
@@ -702,6 +749,7 @@ void EditorExportGodot3::_convert_resources(ExportData &resource) {
 
 	for (int i = 0; i < resource.nodes.size(); i++) {
 
+		_add_new_properties(resource.nodes[i].type, &resource.nodes[i].properties);
 		_rename_properties(resource.nodes[i].type, &resource.nodes[i].properties);
 
 		if (type_rename_map.has(resource.nodes[i].type)) {
@@ -796,11 +844,9 @@ void EditorExportGodot3::_unpack_packed_scene(ExportData &resource) {
 			node_data.name = names[name];
 			if (type == 0x7FFFFFFF) {
 				node_data.instanced = true;
-				print_line("name: " + node_data.name + " is instanced");
 			} else {
 				node_data.instanced = false;
 				node_data.type = names[type];
-				print_line("name: " + node_data.name + " type" + node_data.type);
 			}
 
 			node_data.parent_int = parent;
@@ -904,7 +950,6 @@ void EditorExportGodot3::_pack_packed_scene(ExportData &resource) {
 			node_data.push_back(0x7FFFFFFF);
 		} else {
 			int name = _pack_name(node.type);
-			print_line("packing type: " + String(node.type) + " goes to name " + itos(name));
 			node_data.push_back(name);
 		}
 
@@ -1669,12 +1714,10 @@ void EditorExportGodot3::_save_binary_property(const Variant &p_property, FileAc
 				f->store_32(VARIANT_OBJECT);
 				f->store_32(OBJECT_INTERNAL_RESOURCE);
 				f->store_32(str.get_slice(":", 1).to_int());
-				print_line("SAVE RES LOCAL: " + itos(str.get_slice(":", 1).to_int()));
 			} else if (str.begins_with("@RESEXTERNAL:")) {
 				f->store_32(VARIANT_OBJECT);
 				f->store_32(OBJECT_EXTERNAL_RESOURCE_INDEX);
 				f->store_32(str.get_slice(":", 1).to_int());
-				print_line("SAVE RES EXTERNAL: " + itos(str.get_slice(":", 1).to_int()));
 			} else {
 
 				f->store_32(VARIANT_STRING);
@@ -2307,7 +2350,7 @@ Error EditorExportGodot3::_convert_script(const String &p_path, const String &p_
 			regexp.clear();
 
 			// Convert var.type == InputEvent.KEY => var is InputEventKey
-			regexp.compile("(.*)\\.type == InputEvent.KEY(.*)");
+			regexp.compile("(.*)\\.type[ ]*==[ ]*InputEvent.KEY(.*)");
 			res = regexp.find(line);
 			if (res >= 0 && regexp.get_capture_count() == 3) {
 				line = regexp.get_capture(1) + " is InputEventKey" + regexp.get_capture(2);
@@ -2316,7 +2359,7 @@ Error EditorExportGodot3::_convert_script(const String &p_path, const String &p_
 			regexp.clear();
 
 			// Convert var.type == InputEvent.MOUSE_MOTION => var is InputEventMouseMotion
-			regexp.compile("(.*)\\.type == InputEvent.MOUSE_MOTION(.*)");
+			regexp.compile("(.*)\\.type[ ]*==[ ]*InputEvent.MOUSE_MOTION(.*)");
 			res = regexp.find(line);
 			if (res >= 0 && regexp.get_capture_count() == 3) {
 				line = regexp.get_capture(1) + " is InputEventMouseMotion" + regexp.get_capture(2);
@@ -2325,7 +2368,7 @@ Error EditorExportGodot3::_convert_script(const String &p_path, const String &p_
 			regexp.clear();
 
 			// Convert var.type == InputEvent.MOUSE_BUTTON => var is InputEventMouseButton
-			regexp.compile("(.*)\\.type == InputEvent.MOUSE_BUTTON(.*)");
+			regexp.compile("(.*)\\.type[ ]*==[ ]*InputEvent.MOUSE_BUTTON(.*)");
 			res = regexp.find(line);
 			if (res >= 0 && regexp.get_capture_count() == 3) {
 				line = regexp.get_capture(1) + " is InputEventMouseButton" + regexp.get_capture(2);
@@ -2334,7 +2377,7 @@ Error EditorExportGodot3::_convert_script(const String &p_path, const String &p_
 			regexp.clear();
 
 			// Convert var.type == InputEvent.JOYSTICK_MOTION => var is InputEventJoypadMotion
-			regexp.compile("(.*)\\.type == InputEvent.JOYSTICK_MOTION(.*)");
+			regexp.compile("(.*)\\.type[ ]*==[ ]*InputEvent.JOYSTICK_MOTION(.*)");
 			res = regexp.find(line);
 			if (res >= 0 && regexp.get_capture_count() == 3) {
 				line = regexp.get_capture(1) + " is InputEventJoypadMotion" + regexp.get_capture(2);
@@ -2343,10 +2386,28 @@ Error EditorExportGodot3::_convert_script(const String &p_path, const String &p_
 			regexp.clear();
 
 			// Convert var.type == InputEvent.JOYSTICK_BUTTON => var is InputEventJoypadButton
-			regexp.compile("(.*)\\.type == InputEvent.JOYSTICK_BUTTON(.*)");
+			regexp.compile("(.*)\\.type[ ]*==[ ]*InputEvent.JOYSTICK_BUTTON(.*)");
 			res = regexp.find(line);
 			if (res >= 0 && regexp.get_capture_count() == 3) {
 				line = regexp.get_capture(1) + " is InputEventJoypadButton" + regexp.get_capture(2);
+				count++;
+			}
+			regexp.clear();
+
+			// Convert var.type == InputEvent.SCREEN_TOUCH => var is InputEventScreenTouch
+			regexp.compile("(.*)\\.type[ ]*==[ ]*InputEvent.SCREEN_TOUCH(.*)");
+			res = regexp.find(line);
+			if (res >= 0 && regexp.get_capture_count() == 3) {
+				line = regexp.get_capture(1) + " is InputEventScreenTouch" + regexp.get_capture(2);
+				count++;
+			}
+			regexp.clear();
+
+			// Convert var.type == InputEvent.SCREEN_DRAG => var is InputEventScreenDrag
+			regexp.compile("(.*)\\.type[ ]*==[ ]*InputEvent.SCREEN_DRAG(.*)");
+			res = regexp.find(line);
+			if (res >= 0 && regexp.get_capture_count() == 3) {
+				line = regexp.get_capture(1) + " is InputEventScreenDrag" + regexp.get_capture(2);
 				count++;
 			}
 			regexp.clear();
@@ -2597,7 +2658,7 @@ Error EditorExportGodot3::export_godot3(const String &p_path, bool convert_scrip
 
 		progress.step(target_path.get_file(), idx++);
 
-		print_line("exporting: " + target_path);
+		print_line("-- Exporting file: " + target_path);
 
 		if (directory->make_dir_recursive(target_path.get_base_dir()) != OK) {
 			memdelete(directory);
