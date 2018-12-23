@@ -107,7 +107,7 @@ typedef struct
 } zip_fileinfo;
 
 typedef const char* zipcharpc;
-
+typedef unsigned int z_crc_t;
 
 #define APPEND_STATUS_CREATE        (0)
 #define APPEND_STATUS_CREATEAFTER   (1)
