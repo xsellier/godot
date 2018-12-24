@@ -1,79 +1,41 @@
 -dontwarn org.godotengine.godot.**
+-dontwarn android.webkit.JavascriptInterface
+-dontwarn com.amazon.**
+-dontwarn com.crashlytics.**
 -dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
 -dontwarn java.lang.ClassValue
 -dontwarn com.google.errorprone.**
 -dontwarn android.app.slice.SliceManager
 -dontwarn org.apache.commons.codec.**
 
-##############################################
 # Required if you ARE using IAP:
--keep class com.android.vending.billing.**
+-keep class com.android.vending.**
 
-##############################################
-# Crashlytics 2.+
--keep class com.crashlytics.** { *; }
--keep class com.crashlytics.android.**
--keepattributes SourceFile
--keepattributes LineNumberTable
-
-# If you are using custom exceptions, add this line so that custom exception types are skipped during obfuscation:
--keep public class * extends java.lang.Exception
-
-# For Fabric to properly de-obfuscate your crash reports, you need to remove this line from your ProGuard config:
-# -printmapping mapping.txt
-# End Crashlytics
-
-##############################################
-## Google Play Services 4.3.23 specific rules ##
-## https://developer.android.com/google/play-services/setup.html#Proguard ##
--keep public class com.google.api.services.drive.** { public *; }
--keep public class com.google.android.gms.** { public *; }
--dontwarn com.google.android.gms.**
-
--keep class * extends java.util.ListResourceBundle {
-    protected Object[][] getContents();
-}
--keep public class com.google.android.gms.common.internal.safeparcel.SafeParcelable {
-    public static final *** NULL;
-}
--keepnames @com.google.android.gms.common.annotation.KeepName class *
--keepclassmembernames class * {
-   @com.google.android.gms.common.annotation.KeepName *;
-}
--keepnames class * implements android.os.Parcelable {
-   public static final ** CREATOR;
-}
-# End Google Play Services
-
-##############################################
-# Facebook 3.2
--keep class com.facebook.** { *; }
-
-##############################################
-# App compat
--keep public class android.support.v7.widget.** { *; }
--keep public class android.support.v7.internal.widget.** { *; }
--keep public class android.support.v7.internal.view.menu.** { *; }
-
--keep public class * extends android.support.v4.view.ActionProvider {
-    public <init>(android.content.Context);
-}
-
-##############################################
 # Required if you are using Firebase
--keep class com.google.errorprone.annotations.** { *; }
--keep class com.google.firebase.** {*;}
--keepattributes Signature
--keepattributes EnclosingMethod
--keepattributes InnerClasses
--keepattributes *Annotation*
-
-##############################################
-# Misc
+-keep class com.google.firebase.**
+-keep class com.google.android.gms.**
+-keep class com.google.gms.**
+-keep class com.facebook.android.**
+-keep class com.amazon.** {*;}
+-keep class com.crashlytics.** { *; }
+-keep public class com.google.api.services.drive.** { public *; }
 -keep class org.godotengine.godot.** {*;}
 -keep class android.webkit.JavascriptInterface
 -keep class * extends java.util.ListResourceBundle {
    protected Object[][] getContents();
 }
-
+-keep public class com.google.android.gms.common.internal.safeparcel.SafeParcelable {
+   public static final *** NULL;
+}
+ 
+-keepnames @com.google.android.gms.common.annotation.KeepName class *
+-keepclassmembernames class * {
+   @com.google.android.gms.common.annotation.KeepName *;
+}
+ 
+-keepnames class * implements android.os.Parcelable {
+   public static final ** CREATOR;
+}
+-keepattributes *Annotation*
+ 
 -optimizations !code/allocation/variable
