@@ -73,6 +73,8 @@ class MessageQueue {
 
 	static MessageQueue *singleton;
 
+	bool flushing;
+
 public:
 	static MessageQueue *get_singleton();
 
@@ -88,6 +90,8 @@ public:
 	bool print();
 	void statistics();
 	void flush();
+
+	bool is_flushing() const;
 
 	int get_max_buffer_usage() const;
 
