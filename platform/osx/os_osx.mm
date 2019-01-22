@@ -242,7 +242,9 @@ static bool mouse_down_control = false;
 	if (OS_OSX::singleton->main_loop) {
 		Main::force_redraw();
 		//Event retrieval blocks until resize is over. Call Main::iteration() directly.
-		Main::iteration();
+		if (!Main::is_iterating()) { //avoid cyclic loop
+			Main::iteration();
+		}
 	}
 
 	//_GodotInputFramebufferSize(window, fbRect.size.width, fbRect.size.height);

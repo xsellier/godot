@@ -1477,12 +1477,20 @@ float Main::time_accum = 0;
 uint32_t Main::frames = 0;
 uint32_t Main::frame = 0;
 bool Main::force_redraw_requested = false;
+bool Main::iterating = false;
+bool Main::is_iterating() {
+	return iterating;
+}
 
 //for performance metrics
 static uint64_t fixed_process_max = 0;
 static uint64_t idle_process_max = 0;
 
 bool Main::iteration() {
+
+	ERR_FAIL_COND_V(iterating, false);
+
+	iterating = true;
 
 	uint64_t ticks = OS::get_singleton()->get_ticks_usec();
 	uint64_t ticks_elapsed = ticks - last_ticks;
@@ -1610,6 +1618,8 @@ bool Main::iteration() {
 		frame %= 1000000;
 		frames = 0;
 	}
+
+	iterating = false;
 
 	if (OS::get_singleton()->is_in_low_processor_usage_mode() || !OS::get_singleton()->can_draw())
 		OS::get_singleton()->delay_usec(16600); //apply some delay to force idle time (results in about 60 FPS max)

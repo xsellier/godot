@@ -47,12 +47,17 @@ class Main {
 	static uint32_t frames;
 	static uint32_t frame;
 	static bool force_redraw_requested;
+	static bool iterating;
 
 public:
 	static Error setup(const char *execpath, int argc, char *argv[], bool p_second_phase = true);
 	static Error setup2(Thread::ID p_main_tid_override = 0);
 	static bool start();
 	static bool iteration();
+	static void force_redraw();
+
+	static bool is_iterating();
+
 	static void cleanup();
 	static void force_redraw();
 };
