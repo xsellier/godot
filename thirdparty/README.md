@@ -137,6 +137,9 @@ Files extracted from upstream source:
 - all .h files in include/theora/ as theora/
 - COPYING and LICENSE
 
+Upstream patches included in the `patches` directory have been applied
+on top of the 1.1.1 source (not included in any stable release yet).
+
 
 ## libvorbis
 
