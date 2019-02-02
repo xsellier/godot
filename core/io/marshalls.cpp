@@ -27,9 +27,11 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #include "marshalls.h"
 #include "os/keyboard.h"
 #include "print_string.h"
+#include "reference.h"
 #include <limits.h>
 #include <stdio.h>
 
@@ -68,7 +70,6 @@ static Error _decode_string(const uint8_t *&buf, int &len, int *r_len, String &r
 	// Update buffer pos, left data count, and return size
 	buf += strlen;
 	len -= strlen;
-
 	if (r_len) {
 		(*r_len) += 4 + strlen;
 	}
@@ -111,14 +112,15 @@ Error decode_variant(Variant &r_variant, const uint8_t *p_buffer, int p_len, int
 		} break;
 		case Variant::INT: {
 
-			ERR_FAIL_COND_V(len < 4, ERR_INVALID_DATA);
 			if (type & ENCODE_FLAG_64) {
+				ERR_FAIL_COND_V(len < 8, ERR_INVALID_DATA);
 				int64_t val = decode_uint64(buf);
 				r_variant = val;
 				if (r_len)
 					(*r_len) += 8;
 
 			} else {
+				ERR_FAIL_COND_V(len < 4, ERR_INVALID_DATA);
 				int32_t val = decode_uint32(buf);
 				r_variant = val;
 				if (r_len)
@@ -128,13 +130,14 @@ Error decode_variant(Variant &r_variant, const uint8_t *p_buffer, int p_len, int
 		} break;
 		case Variant::REAL: {
 
-			ERR_FAIL_COND_V(len < 4, ERR_INVALID_DATA);
 			if (type & ENCODE_FLAG_64) {
+				ERR_FAIL_COND_V(len < 8, ERR_INVALID_DATA);
 				double val = decode_double(buf);
 				r_variant = val;
 				if (r_len)
 					(*r_len) += 8;
 			} else {
+				ERR_FAIL_COND_V(len < 4, ERR_INVALID_DATA);
 				float val = decode_float(buf);
 				r_variant = val;
 				if (r_len)
@@ -860,7 +863,7 @@ Error encode_variant(const Variant &p_variant, uint8_t *r_buffer, int &r_len) {
 			} else {
 
 				if (buf) {
-					encode_double(p_variant.operator float(), buf);
+					encode_float(p_variant.operator float(), buf);
 				}
 
 				r_len += 4;
