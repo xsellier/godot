@@ -670,7 +670,7 @@ void Variant::evaluate(const Operator &p_op, const Variant &p_a, const Variant &
 				case INT: {
 					switch (p_b.type) {
 						case BOOL: {
-							int b = p_b._data._bool;
+							int64_t b = p_b._data._bool;
 							if (b == 0) {
 
 								r_valid = false;
@@ -680,7 +680,7 @@ void Variant::evaluate(const Operator &p_op, const Variant &p_a, const Variant &
 
 						} break;
 						case INT: {
-							int b = p_b._data._int;
+							int64_t b = p_b._data._int;
 							if (b == 0) {
 
 								r_valid = false;
@@ -3318,8 +3318,8 @@ void Variant::blend(const Variant &a, const Variant &b, float c, Variant &r_dst)
 		}
 			return;
 		case INT: {
-			int va = a._data._int;
-			int vb = b._data._int;
+			int64_t va = a._data._int;
+			int64_t vb = b._data._int;
 			r_dst = int(va + vb * c + 0.5);
 		}
 			return;

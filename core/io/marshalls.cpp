@@ -37,6 +37,9 @@
 #define ERR_FAIL_ADD_OF(a, b, err) ERR_FAIL_COND_V(_S(b) < 0 || _S(a) < 0 || _S(a) > INT_MAX - _S(b), err)
 #define ERR_FAIL_MUL_OF(a, b, err) ERR_FAIL_COND_V(_S(a) < 0 || _S(b) <= 0 || _S(a) > INT_MAX / _S(b), err)
 
+#define ENCODE_MASK 0xFF
+#define ENCODE_FLAG_64 1 << 16
+
 static Error _decode_string(const uint8_t *&buf, int &len, int *r_len, String &r_string) {
 	ERR_FAIL_COND_V(len < 4, ERR_INVALID_DATA);
 
@@ -85,14 +88,14 @@ Error decode_variant(Variant &r_variant, const uint8_t *p_buffer, int p_len, int
 
 	uint32_t type = decode_uint32(buf);
 
-	ERR_FAIL_COND_V(type >= Variant::VARIANT_MAX, ERR_INVALID_DATA);
+	ERR_FAIL_COND_V((type & ENCODE_MASK) >= Variant::VARIANT_MAX, ERR_INVALID_DATA);
 
 	buf += 4;
 	len -= 4;
 	if (r_len)
 		*r_len = 4;
 
-	switch (type) {
+	switch (type & ENCODE_MASK) {
 
 		case Variant::NIL: {
 
@@ -109,19 +112,34 @@ Error decode_variant(Variant &r_variant, const uint8_t *p_buffer, int p_len, int
 		case Variant::INT: {
 
 			ERR_FAIL_COND_V(len < 4, ERR_INVALID_DATA);
-			int32_t val = decode_uint32(buf);
-			r_variant = val;
-			if (r_len)
-				(*r_len) += 4;
+			if (type & ENCODE_FLAG_64) {
+				int64_t val = decode_uint64(buf);
+				r_variant = val;
+				if (r_len)
+					(*r_len) += 8;
+
+			} else {
+				int32_t val = decode_uint32(buf);
+				r_variant = val;
+				if (r_len)
+					(*r_len) += 4;
+			}
 
 		} break;
 		case Variant::REAL: {
 
 			ERR_FAIL_COND_V(len < 4, ERR_INVALID_DATA);
-			float val = decode_float(buf);
-			r_variant = val;
-			if (r_len)
-				(*r_len) += 4;
+			if (type & ENCODE_FLAG_64) {
+				double val = decode_double(buf);
+				r_variant = val;
+				if (r_len)
+					(*r_len) += 8;
+			} else {
+				float val = decode_float(buf);
+				r_variant = val;
+				if (r_len)
+					(*r_len) += 4;
+			}
 
 		} break;
 		case Variant::STRING: {
@@ -768,8 +786,28 @@ Error encode_variant(const Variant &p_variant, uint8_t *r_buffer, int &r_len) {
 
 	r_len = 0;
 
+	uint32_t flags = 0;
+
+	switch (p_variant.get_type()) {
+
+		case Variant::INT: {
+			int64_t val = p_variant;
+			if (val > 0x7FFFFFFF || val < -0x80000000) {
+				flags |= ENCODE_FLAG_64;
+			}
+		} break;
+		case Variant::REAL: {
+
+			double d = p_variant;
+			float f = d;
+			if (double(f) != d) {
+				flags |= ENCODE_FLAG_64; //always encode real as double
+			}
+		} break;
+	}
+
 	if (buf) {
-		encode_uint32(p_variant.get_type(), buf);
+		encode_uint32(p_variant.get_type() | flags, buf);
 		buf += 4;
 	}
 	r_len += 4;
@@ -791,20 +829,42 @@ Error encode_variant(const Variant &p_variant, uint8_t *r_buffer, int &r_len) {
 		} break;
 		case Variant::INT: {
 
-			if (buf) {
-				encode_uint32(p_variant.operator int(), buf);
-			}
+			int64_t val = p_variant;
+			if (val > 0x7FFFFFFF || val < -0x80000000) {
+				//64 bits
+				if (buf) {
+					encode_uint64(val, buf);
+				}
 
-			r_len += 4;
+				r_len += 8;
+			} else {
+				if (buf) {
+					encode_uint32(int32_t(val), buf);
+				}
+
+				r_len += 4;
+			}
 
 		} break;
 		case Variant::REAL: {
 
-			if (buf) {
-				encode_float(p_variant.operator float(), buf);
-			}
+			double d = p_variant;
+			float f = d;
+			if (double(f) != d) {
+				if (buf) {
+					encode_double(p_variant.operator double(), buf);
+				}
 
-			r_len += 4;
+				r_len += 8;
+
+			} else {
+
+				if (buf) {
+					encode_double(p_variant.operator float(), buf);
+				}
+
+				r_len += 4;
+			}
 
 		} break;
 		case Variant::NODE_PATH: {

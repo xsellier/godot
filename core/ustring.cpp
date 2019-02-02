@@ -1523,6 +1523,52 @@ int String::hex_to_int(bool p_with_prefix) const {
 	return hex * sign;
 }
 
+int64_t String::hex_to_int64(bool p_with_prefix) const {
+
+	int l = length();
+	if (p_with_prefix && l < 3)
+		return 0;
+
+	const CharType *s = ptr();
+
+	int64_t sign = s[0] == '-' ? -1 : 1;
+
+	if (sign < 0) {
+		s++;
+		l--;
+		if (p_with_prefix && l < 2)
+			return 0;
+	}
+
+	if (p_with_prefix) {
+		if (s[0] != '0' || s[1] != 'x')
+			return 0;
+		s += 2;
+		l -= 2;
+	};
+
+	int64_t hex = 0;
+
+	while (*s) {
+
+		CharType c = LOWERCASE(*s);
+		int64_t n;
+		if (c >= '0' && c <= '9') {
+			n = c - '0';
+		} else if (c >= 'a' && c <= 'f') {
+			n = (c - 'a') + 10;
+		} else {
+			return 0;
+		}
+
+		hex *= 16;
+		hex += n;
+		s++;
+	}
+
+	return hex * sign;
+}
+
 int String::to_int() const {
 
 	if (length() == 0)
