@@ -927,11 +927,17 @@ Error encode_variant(const Variant &p_variant, uint8_t *r_buffer, int &r_len) {
 				encode_uint32(utf8.length(), buf);
 				buf += 4;
 				copymem(buf, utf8.get_data(), utf8.length());
+				buf += utf8.length();
 			}
 
 			r_len += 4 + utf8.length();
-			while (r_len % 4)
+			while (r_len % 4) {
 				r_len++; //pad
+
+				if (buf) {
+					buf++;
+				}
+			}
 
 		} break;
 
