@@ -655,9 +655,9 @@ EditorExportPlatformOSX::EditorExportPlatformOSX() {
 	logo = Ref<ImageTexture>(memnew(ImageTexture));
 	logo->create_from_image(img);
 
-	info = "Made with Godot Engine";
-	identifier = "org.godotengine.macgame";
-	signature = "godotmacgame";
+	info = "City Game Studio";
+	identifier = "org.binogurestudio.citygamestudio";
+	signature = "citygamestudio";
 	short_version = "1.0";
 	version = "1.0";
 	bits_mode = BITS_FAT;
