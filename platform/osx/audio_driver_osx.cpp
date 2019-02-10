@@ -29,23 +29,13 @@
 /*************************************************************************/
 #ifdef OSX_ENABLED
 
-#if __has_feature(nullability)
-#define __ASSUME_NONNULL_BEGIN NS_ASSUME_NONNULL_BEGIN
-#define __ASSUME_NONNULL_END NS_ASSUME_NONNULL_END
-#define __NULLABLE nullable
-#else
-#define __ASSUME_NONNULL_BEGIN
-#define __ASSUME_NONNULL_END
-#define __NULLABLE
-#endif
-
 #include "audio_driver_osx.h"
 #include "globals.h"
 #include "os/os.h"
 
 #define kOutputBus 0
 
-static OSStatus outputDeviceAddressCB(AudioObjectID inObjectID, UInt32 inNumberAddresses, const AudioObjectPropertyAddress *inAddresses, void *__NULLABLE inClientData) {
+static OSStatus outputDeviceAddressCB(AudioObjectID inObjectID, UInt32 inNumberAddresses, const AudioObjectPropertyAddress *inAddresses, void *nullable inClientData) {
 	AudioDriverOSX *driver = (AudioDriverOSX *)inClientData;
 
 	driver->reopen();
