@@ -121,7 +121,7 @@ Error AudioDriverRtAudio::init() {
 		print_line("audio buffer size: " + itos(buffer_size));
 	}
 
-	short int tries = 2;
+	short int tries = 4;
 
 	while (true) {
 		while (true) {
