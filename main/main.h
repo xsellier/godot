@@ -59,7 +59,6 @@ public:
 	static bool is_iterating();
 
 	static void cleanup();
-	static void force_redraw();
 };
 
 #endif
