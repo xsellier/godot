@@ -1673,11 +1673,9 @@ void OS_OSX::set_window_size(const Size2 p_size) {
 void OS_OSX::set_window_fullscreen(bool p_enabled) {
 
 	if (zoomed != p_enabled) {
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
+		if (layered_window)
+			set_window_per_pixel_transparency_enabled(false);
 		[window_object toggleFullScreen:nil];
-#else
-		[window_object performZoom:nil];
-#endif /*MAC_OS_X_VERSION_MAX_ALLOWED*/
 	}
 	zoomed = p_enabled;
 };
@@ -1761,6 +1759,39 @@ bool OS_OSX::is_window_always_on_top() const {
 void OS_OSX::request_attention() {
 
 	[NSApp requestUserAttention:NSCriticalRequest];
+}
+
+bool OS_OSX::get_window_per_pixel_transparency_enabled() const {
+
+	if (!is_layered_allowed()) return false;
+	return layered_window;
+}
+
+void OS_OSX::set_window_per_pixel_transparency_enabled(bool p_enabled) {
+
+	if (!is_layered_allowed()) return;
+	if (layered_window != p_enabled) {
+		if (p_enabled) {
+			set_borderless_window(true);
+			GLint opacity = 0;
+			[window_object setBackgroundColor:[NSColor clearColor]];
+			[window_object setOpaque:NO];
+			[window_object setHasShadow:NO];
+			[context setValues:&opacity forParameter:NSOpenGLCPSurfaceOpacity];
+			layered_window = true;
+		} else {
+			GLint opacity = 1;
+			[window_object setBackgroundColor:[NSColor colorWithCalibratedWhite:1 alpha:1]];
+			[window_object setOpaque:YES];
+			[window_object setHasShadow:YES];
+			[context setValues:&opacity forParameter:NSOpenGLCPSurfaceOpacity];
+			layered_window = false;
+		}
+		[context update];
+		NSRect frame = [window_object frame];
+		[window_object setFrame:NSMakeRect(frame.origin.x, frame.origin.y, 1, 1) display:YES];
+		[window_object setFrame:frame display:YES];
+	}
 }
 
 void OS_OSX::set_borderless_window(int p_borderless) {

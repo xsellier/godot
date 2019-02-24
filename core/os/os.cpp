@@ -575,6 +575,7 @@ OS::OS() {
 	_time_scale = 1.0;
 	_pixel_snap = false;
 	_allow_hidpi = true;
+	_allow_layered = true;
 	Math::seed(1234567);
 }
 

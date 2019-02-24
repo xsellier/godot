@@ -360,7 +360,7 @@ Error decode_variant(Variant &r_variant, const uint8_t *p_buffer, int p_len, int
 				len -= 12;
 				buf += 12;
 
-				int total = namecount + subnamecount;
+				uint32_t total = namecount + subnamecount;
 				if (flags & 2)
 					total++;
 
@@ -795,7 +795,7 @@ Error encode_variant(const Variant &p_variant, uint8_t *r_buffer, int &r_len) {
 
 		case Variant::INT: {
 			int64_t val = p_variant;
-			if (val > 0x7FFFFFFF || val < -0x80000000) {
+			if (val > (int64_t)INT_MAX || val < (int64_t)INT_MIN) {
 				flags |= ENCODE_FLAG_64;
 			}
 		} break;
@@ -833,16 +833,16 @@ Error encode_variant(const Variant &p_variant, uint8_t *r_buffer, int &r_len) {
 		case Variant::INT: {
 
 			int64_t val = p_variant;
-			if (val > 0x7FFFFFFF || val < -0x80000000) {
+			if (flags & ENCODE_FLAG_64) {
 				//64 bits
 				if (buf) {
-					encode_uint64(val, buf);
+					encode_uint64(p_variant.operator int64_t(), buf);
 				}
 
 				r_len += 8;
 			} else {
 				if (buf) {
-					encode_uint32(int32_t(val), buf);
+					encode_uint32(p_variant.operator int32_t(), buf);
 				}
 
 				r_len += 4;
@@ -851,9 +851,7 @@ Error encode_variant(const Variant &p_variant, uint8_t *r_buffer, int &r_len) {
 		} break;
 		case Variant::REAL: {
 
-			double d = p_variant;
-			float f = d;
-			if (double(f) != d) {
+			if (flags & ENCODE_FLAG_64) {
 				if (buf) {
 					encode_double(p_variant.operator double(), buf);
 				}
