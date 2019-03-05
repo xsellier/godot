@@ -132,8 +132,8 @@ void image_compress_squish(Image *p_image) {
 		int src_ofs = p_image->get_mipmap_offset(i);
 		squish::CompressImage(&rb[src_ofs], w, h, &wb[dst_ofs], squish_comp);
 		dst_ofs += (MAX(4, w) * MAX(4, h)) >> shift;
-		w >>= 1;
-		h >>= 1;
+		w = MAX(w / 2, 1);
+		h = MAX(h / 2, 1);
 	}
 
 	rb = DVector<uint8_t>::Read();

@@ -831,13 +831,16 @@ template <int CC>
 static void _generate_po2_mipmap(const uint8_t *p_src, uint8_t *p_dst, uint32_t p_width, uint32_t p_height) {
 
 	//fast power of 2 mipmap generation
-	uint32_t dst_w = p_width >> 1;
-	uint32_t dst_h = p_height >> 1;
+	uint32_t dst_w = MAX(p_width >> 1, 1);
+	uint32_t dst_h = MAX(p_height >> 1, 1);
+
+	int right_step = (p_width == 1) ? 0 : CC;
+	int down_step = (p_height == 1) ? 0 : (p_width * CC);
 
 	for (uint32_t i = 0; i < dst_h; i++) {
 
-		const uint8_t *rup_ptr = &p_src[i * 2 * p_width * CC];
-		const uint8_t *rdown_ptr = rup_ptr + p_width * CC;
+		const uint8_t *rup_ptr = &p_src[i * 2 * down_step];
+		const uint8_t *rdown_ptr = rup_ptr + down_step;
 		uint8_t *dst_ptr = &p_dst[i * dst_w * CC];
 		uint32_t count = dst_w;
 
@@ -847,15 +850,15 @@ static void _generate_po2_mipmap(const uint8_t *p_src, uint8_t *p_dst, uint32_t 
 
 				uint16_t val = 0;
 				val += rup_ptr[j];
-				val += rup_ptr[j + CC];
+				val += rup_ptr[j + right_step];
 				val += rdown_ptr[j];
-				val += rdown_ptr[j + CC];
+				val += rdown_ptr[j + right_step];
 				dst_ptr[j] = val >> 2;
 			}
 
 			dst_ptr += CC;
-			rup_ptr += CC * 2;
-			rdown_ptr += CC * 2;
+			rup_ptr += right_step * 2;
+			rdown_ptr += right_step * 2;
 		}
 	}
 }
@@ -968,65 +971,31 @@ Error Image::generate_mipmaps(int p_mipmaps, bool p_keep_existing) {
 
 	DVector<uint8_t>::Write wp = data.write();
 
-	if (next_power_of_2(width) == uint32_t(width) && next_power_of_2(height) == uint32_t(height)) {
-		//use fast code for powers of 2
-		int prev_ofs = 0;
-		int prev_h = height;
-		int prev_w = width;
+	int prev_ofs = 0;
+	int prev_h = height;
+	int prev_w = width;
 
-		for (int i = 1; i < mipmaps; i++) {
+	for (int i = 1; i <= mipmaps; i++) {
 
-			int ofs, w, h;
-			_get_mipmap_offset_and_size(i, ofs, w, h);
+		int ofs, w, h;
+		_get_mipmap_offset_and_size(i, ofs, w, h);
 
-			if (i >= from_mm) {
+		if (i >= from_mm) {
 
-				switch (format) {
+			switch (format) {
 
-					case FORMAT_GRAYSCALE:
-					case FORMAT_INTENSITY: _generate_po2_mipmap<1>(&wp[prev_ofs], &wp[ofs], prev_w, prev_h); break;
-					case FORMAT_GRAYSCALE_ALPHA: _generate_po2_mipmap<2>(&wp[prev_ofs], &wp[ofs], prev_w, prev_h); break;
-					case FORMAT_RGB: _generate_po2_mipmap<3>(&wp[prev_ofs], &wp[ofs], prev_w, prev_h); break;
-					case FORMAT_RGBA: _generate_po2_mipmap<4>(&wp[prev_ofs], &wp[ofs], prev_w, prev_h); break;
-					default: {}
-				}
+				case FORMAT_GRAYSCALE:
+				case FORMAT_INTENSITY: _generate_po2_mipmap<1>(&wp[prev_ofs], &wp[ofs], prev_w, prev_h); break;
+				case FORMAT_GRAYSCALE_ALPHA: _generate_po2_mipmap<2>(&wp[prev_ofs], &wp[ofs], prev_w, prev_h); break;
+				case FORMAT_RGB: _generate_po2_mipmap<3>(&wp[prev_ofs], &wp[ofs], prev_w, prev_h); break;
+				case FORMAT_RGBA: _generate_po2_mipmap<4>(&wp[prev_ofs], &wp[ofs], prev_w, prev_h); break;
+				default: {}
 			}
-
-			prev_ofs = ofs;
-			prev_w = w;
-			prev_h = h;
 		}
 
-	} else {
-		//use slow code..
-
-		//use bilinear filtered code for non powers of 2
-		int prev_ofs = 0;
-		int prev_h = height;
-		int prev_w = width;
-
-		for (int i = 1; i < mipmaps; i++) {
-
-			int ofs, w, h;
-			_get_mipmap_offset_and_size(i, ofs, w, h);
-
-			if (i >= from_mm) {
-
-				switch (format) {
-
-					case FORMAT_GRAYSCALE:
-					case FORMAT_INTENSITY: _scale_bilinear<1>(&wp[prev_ofs], &wp[ofs], prev_w, prev_h, w, h); break;
-					case FORMAT_GRAYSCALE_ALPHA: _scale_bilinear<2>(&wp[prev_ofs], &wp[ofs], prev_w, prev_h, w, h); break;
-					case FORMAT_RGB: _scale_bilinear<3>(&wp[prev_ofs], &wp[ofs], prev_w, prev_h, w, h); break;
-					case FORMAT_RGBA: _scale_bilinear<4>(&wp[prev_ofs], &wp[ofs], prev_w, prev_h, w, h); break;
-					default: {}
-				}
-			}
-
-			prev_ofs = ofs;
-			prev_w = w;
-			prev_h = h;
-		}
+		prev_ofs = ofs;
+		prev_w = w;
+		prev_h = h;
 	}
 
 	return OK;

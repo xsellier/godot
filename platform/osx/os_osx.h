@@ -102,7 +102,6 @@ public:
 	id pixelFormat;
 	id context;
 
-	bool layered_window;
 	CursorShape cursor_shape;
 	NSCursor *cursors[CURSOR_MAX] = { NULL };
 	MouseMode mouse_mode;
@@ -218,9 +217,6 @@ public:
 
 	virtual void set_borderless_window(int p_borderless);
 	virtual bool get_borderless_window();
-
-	virtual bool get_window_per_pixel_transparency_enabled() const;
-	virtual void set_window_per_pixel_transparency_enabled(bool p_enabled);
 
 	virtual void set_use_vsync(bool p_enable);
 	virtual bool is_vsync_enabled() const;

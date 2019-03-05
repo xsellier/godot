@@ -62,7 +62,6 @@ class OS {
 	float _time_scale;
 	bool _pixel_snap;
 	bool _allow_hidpi;
-	bool _allow_layered;
 
 	char *last_error;
 
@@ -437,7 +436,6 @@ public:
 
 	Dictionary get_engine_version() const;
 
-	bool is_layered_allowed() const { return _allow_layered; }
 	bool is_hidpi_allowed() const { return _allow_hidpi; }
 	OS();
 	virtual ~OS();

@@ -1053,8 +1053,8 @@ void CanvasItemEditor::_viewport_input_event(const InputEvent &p_event) {
 				{
 					Point2 ofs(b.x, b.y);
 					ofs = ofs / prev_zoom - ofs / zoom;
-					h_scroll->set_val(h_scroll->get_val() + ofs.x);
-					v_scroll->set_val(v_scroll->get_val() + ofs.y);
+					h_scroll->set_val(Math::round(h_scroll->get_val() + ofs.x));
+					v_scroll->set_val(Math::round(v_scroll->get_val() + ofs.y));
 				}
 			}
 
