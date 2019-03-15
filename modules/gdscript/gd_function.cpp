@@ -12,10 +12,13 @@ Variant *GDFunction::_get_variant(int p_address, GDInstance *p_instance, GDScrip
 
 		case ADDR_TYPE_SELF: {
 
+#ifdef DEBUG_ENABLED
 			if (!p_instance) {
 				r_error = "Cannot access self without instance.";
 				return NULL;
 			}
+#endif
+
 			return &self;
 		} break;
 		case ADDR_TYPE_CLASS: {
@@ -23,18 +26,22 @@ Variant *GDFunction::_get_variant(int p_address, GDInstance *p_instance, GDScrip
 			return &p_script->_static_ref;
 		} break;
 		case ADDR_TYPE_MEMBER: {
+#ifdef DEBUG_ENABLED
 			//member indexing is O(1)
 			if (!p_instance) {
 				r_error = "Cannot access member without instance.";
 				return NULL;
 			}
+#endif
 			return &p_instance->members[address];
 		} break;
 		case ADDR_TYPE_CLASS_CONSTANT: {
 
 			//todo change to index!
 			GDScript *o = p_script;
+#ifdef DEBUG_ENABLED
 			ERR_FAIL_INDEX_V(address, _global_names_count, NULL);
+#endif
 			const StringName *sn = &_global_names_ptr[address];
 
 			while (o) {
@@ -54,18 +61,22 @@ Variant *GDFunction::_get_variant(int p_address, GDInstance *p_instance, GDScrip
 			ERR_FAIL_V(NULL);
 		} break;
 		case ADDR_TYPE_LOCAL_CONSTANT: {
+#ifdef DEBUG_ENABLED
 			ERR_FAIL_INDEX_V(address, _constant_count, NULL);
+#endif
 			return &_constants_ptr[address];
 		} break;
 		case ADDR_TYPE_STACK:
 		case ADDR_TYPE_STACK_VARIABLE: {
+#ifdef DEBUG_ENABLED
 			ERR_FAIL_INDEX_V(address, _stack_size, NULL);
+#endif
 			return &p_stack[address];
 		} break;
 		case ADDR_TYPE_GLOBAL: {
-
+#ifdef DEBUG_ENABLED
 			ERR_FAIL_INDEX_V(address, GDScriptLanguage::get_singleton()->get_global_array_size(), NULL);
-
+#endif
 			return &GDScriptLanguage::get_singleton()->get_global_array()[address];
 		} break;
 		case ADDR_TYPE_NIL: {
@@ -1324,6 +1335,11 @@ Variant GDFunctionState::_signal_callback(const Variant **p_args, int p_argcount
 		ERR_FAIL_V(Variant());
 	}
 #endif
+
+	// Fails gracefully if object for resume no longer exists
+	if (state.instance_id && !ObjectDB::get_instance(state.instance_id) || state.script_id && !ObjectDB::get_instance(state.script_id)) {
+		return Variant();
+	}
 
 	Variant arg;
 	r_error.error = Variant::CallError::CALL_OK;

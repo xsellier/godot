@@ -2595,11 +2595,11 @@ OS_Windows::OS_Windows(HINSTANCE _hInstance) {
 #endif
 	user_proc = NULL;
 
-#ifdef RTAUDIO_ENABLED
-	AudioDriverManagerSW::add_driver(&driver_rtaudio);
-#endif
 #ifdef WASAPI_ENABLED
 	AudioDriverManagerSW::add_driver(&driver_wasapi);
+#endif
+#ifdef RTAUDIO_ENABLED
+	AudioDriverManagerSW::add_driver(&driver_rtaudio);
 #endif
 }
 

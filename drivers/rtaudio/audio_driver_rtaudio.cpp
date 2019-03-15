@@ -101,7 +101,7 @@ Error AudioDriverRtAudio::init() {
 	RtAudio::StreamOptions options;
 
 	// set the desired numberOfBuffers
-	unsigned int target_number_of_buffers = 4;
+	unsigned int target_number_of_buffers = 2;
 	options.numberOfBuffers = target_number_of_buffers;
 
 	//	options.

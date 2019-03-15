@@ -1013,10 +1013,8 @@ void OS_OSX::initialize(const VideoMode &p_desired, int p_video_driver, int p_au
 	[window_object makeKeyAndOrderFront:nil];
 
 	if (p_desired.fullscreen)
-		zoomed = true;
+		set_window_fullscreen(true);
 
-	/*** END OSX INITIALIZATION ***/
-	/*** END OSX INITIALIZATION ***/
 	/*** END OSX INITIALIZATION ***/
 
 	bool use_gl2 = p_video_driver != 1;
