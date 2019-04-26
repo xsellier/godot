@@ -35,6 +35,7 @@ CoreStringNames::CoreStringNames() {
 
 	_free = StaticCString::create("free");
 	changed = StaticCString::create("changed");
+	thread_finished = StaticCString::create("thread_finished");
 	_meta = StaticCString::create("__meta__");
 	_script = StaticCString::create("script/script");
 	script_changed = StaticCString::create("script_changed");
