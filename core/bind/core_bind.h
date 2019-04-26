@@ -30,6 +30,7 @@
 #ifndef CORE_BIND_H
 #define CORE_BIND_H
 
+#include "core_string_names.h"
 #include "io/resource_loader.h"
 #include "io/resource_saver.h"
 #include "os/dir_access.h"

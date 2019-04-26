@@ -52,6 +52,7 @@ public:
 
 	StringName _free;
 	StringName changed;
+	StringName thread_finished;
 	StringName _meta;
 	StringName _script;
 	StringName script_changed;
