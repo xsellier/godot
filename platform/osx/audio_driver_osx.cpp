@@ -35,17 +35,7 @@
 
 #define kOutputBus 0
 
-#if __has_feature(nullability)
-#define __ASSUME_NONNULL_BEGIN NS_ASSUME_NONNULL_BEGIN
-#define __ASSUME_NONNULL_END NS_ASSUME_NONNULL_END
-#define __NULLABLE nullable
-#else
-#define __ASSUME_NONNULL_BEGIN
-#define __ASSUME_NONNULL_END
-#define __NULLABLE
-#endif
-
-static OSStatus outputDeviceAddressCB(AudioObjectID inObjectID, UInt32 inNumberAddresses, const AudioObjectPropertyAddress *inAddresses, void *__NULLABLE inClientData) {
+static OSStatus outputDeviceAddressCB(AudioObjectID inObjectID, UInt32 inNumberAddresses, const AudioObjectPropertyAddress *inAddresses, void *__nullable inClientData) {
 	AudioDriverOSX *driver = (AudioDriverOSX *)inClientData;
 
 	driver->reopen();

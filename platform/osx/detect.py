@@ -68,13 +68,13 @@ def configure(env):
         # osxcross build
         root = os.environ.get("OSXCROSS_ROOT", 0)
         if env["bits"] == "fat":
-            basecmd = root + "/bin/"
+            basecmd = root + "/target/bin/x86_64-apple-" + env["osxcross_sdk"] + "-"
             env.Append(CCFLAGS=['-arch', 'i386', '-arch', 'x86_64'])
             env.Append(LINKFLAGS=['-arch', 'i386', '-arch', 'x86_64'])
         elif env["bits"] == "32":
-            basecmd = root + "/bin/"
+            basecmd = root + "/target/bin/i386-apple-" + env["osxcross_sdk"] + "-"
         else: # 64-bit, default
-            basecmd = root + "/bin/"
+            basecmd = root + "/target/bin/x86_64-apple-" + env["osxcross_sdk"] + "-"
 
         ccache_path = os.environ.get("CCACHE")
         if ccache_path == None:

@@ -1013,7 +1013,7 @@ void OS_OSX::initialize(const VideoMode &p_desired, int p_video_driver, int p_au
 	[window_object makeKeyAndOrderFront:nil];
 
 	if (p_desired.fullscreen)
-		set_window_fullscreen(true);
+		zoomed = true;
 
 	/*** END OSX INITIALIZATION ***/
 
@@ -1743,8 +1743,7 @@ bool OS_OSX::is_window_maximized() const {
 
 void OS_OSX::move_window_to_foreground() {
 
-	[[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
-	[window_object makeKeyAndOrderFront:nil];
+	[window_object orderFrontRegardless];
 }
 
 void OS_OSX::set_window_always_on_top(bool p_enabled) {
