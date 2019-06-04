@@ -47,7 +47,9 @@ public:
 	enum MixChannels {
 
 		MIX_STEREO = 2,
-		MIX_QUAD = 4
+		MIX_QUAD = 4,
+		MIX_SIXTH = 6,
+		MIX_EIGHTH = 8
 	};
 
 	typedef void (*MixStepCallback)(void *);

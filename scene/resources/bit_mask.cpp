@@ -135,14 +135,16 @@ bool BitMap::get_bit(const Point2 &p_pos) const {
 
 	int x = Math::fast_ftoi(p_pos.x);
 	int y = Math::fast_ftoi(p_pos.y);
-	ERR_FAIL_INDEX_V(x, width, false);
-	ERR_FAIL_INDEX_V(y, height, false);
 
-	int ofs = width * y + x;
-	int bbyte = ofs / 8;
-	int bbit = ofs % 8;
+	if (x > -1 && x < width && y > -1 && y < height) {
+		int ofs = width * y + x;
+		int bbyte = ofs / 8;
+		int bbit = ofs % 8;
 
-	return (bitmask[bbyte] & (1 << bbit)) != 0;
+		return (bitmask[bbyte] & (1 << bbit)) != 0;
+	}
+
+	return false;
 }
 
 Size2 BitMap::get_size() const {

@@ -424,7 +424,12 @@ Matrix32 Matrix32::inverse() const {
 void Matrix32::affine_invert() {
 
 	float det = basis_determinant();
-	ERR_FAIL_COND(det == 0);
+
+	// If determinant is null => Matrix is not invertable
+	if (det == 0) {
+		return;
+	}
+
 	float idet = 1.0 / det;
 
 	SWAP(elements[0][0], elements[1][1]);

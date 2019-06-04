@@ -155,9 +155,9 @@ Error AudioDriverWASAPI::init_device(bool reinit) {
 
 	switch (wasapi_channels) {
 		case 2: // Stereo
-			// case 4: // Surrounf 3.1
-			// case 6: // Surround 5.1
-			// case 8: // Surround 7.1
+		case 4: // Surrounf 3.1
+		case 6: // Surround 5.1
+		case 8: // Surround 7.1
 			channels = wasapi_channels;
 			break;
 
@@ -287,7 +287,13 @@ int AudioDriverWASAPI::get_mix_rate() const {
 }
 
 AudioDriverSW::OutputFormat AudioDriverWASAPI::get_output_format() const {
+	switch (channels) {
+		case 4: return OUTPUT_QUAD;
+		case 6: return OUTPUT_5_1;
+		case 8: return OUTPUT_7_1;
+	}
 
+	// Default to STEREO
 	return OUTPUT_STEREO;
 }
 

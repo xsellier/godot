@@ -234,7 +234,8 @@ public:
 		OUTPUT_MONO,
 		OUTPUT_STEREO,
 		OUTPUT_QUAD,
-		OUTPUT_5_1
+		OUTPUT_5_1,
+		OUTPUT_7_1
 	};
 
 	static AudioDriverSW *get_singleton();

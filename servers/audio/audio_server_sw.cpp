@@ -746,8 +746,13 @@ void AudioServerSW::init() {
 			mix_chans = AudioMixerSW::MIX_STEREO;
 			break;
 		case AudioDriverSW::OUTPUT_QUAD:
-		case AudioDriverSW::OUTPUT_5_1:
 			mix_chans = AudioMixerSW::MIX_QUAD;
+			break;
+		case AudioDriverSW::OUTPUT_5_1:
+			mix_chans = AudioMixerSW::MIX_SIXTH;
+			break;
+		case AudioDriverSW::OUTPUT_7_1:
+			mix_chans = AudioMixerSW::MIX_EIGHTH;
 			break;
 	}
 

@@ -427,13 +427,10 @@ Variant GDFunction::call(GDInstance *p_instance, const Variant **p_args, int p_a
 				GET_VARIANT_PTR(dst, 3);
 
 				bool valid;
-#ifdef DEBUG_ENABLED
+
 				//allow better error message in cases where src and dst are the same stack position
 				Variant ret = src->get(*index, &valid);
-#else
-				*dst = src->get(*index, &valid);
 
-#endif
 				if (!valid) {
 					String v = index->operator String();
 					if (v != "") {
@@ -444,9 +441,8 @@ Variant GDFunction::call(GDInstance *p_instance, const Variant **p_args, int p_a
 					err_text = "Invalid get index " + v + " (on base: '" + _get_var_type(src) + "').";
 					break;
 				}
-#ifdef DEBUG_ENABLED
+
 				*dst = ret;
-#endif
 				ip += 4;
 			}
 				continue;

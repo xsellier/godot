@@ -946,7 +946,6 @@ void SpatialSound2DServerSW::update(float p_delta) {
 
 			if (mix_rate <= 0) {
 
-				ERR_PRINT("Invalid mix rate for voice (0) check for invalid pitch_scale param.");
 				to_disable.push_back(ActiveVoice(source, voice)); // oh well..
 				continue; //invalid mix rate, disabling
 			}
