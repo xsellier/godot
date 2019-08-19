@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -223,7 +223,8 @@ void ProjectSettings::_device_input_add() {
 			}
 
 		} break;
-		default: {}
+		default: {
+		}
 	}
 
 	arr.push_back(ie);
@@ -386,7 +387,8 @@ void ProjectSettings::_add_item(int p_item) {
 			device_input->popup_centered_minsize(Size2(350, 95));
 
 		} break;
-		default: {}
+		default: {
+		}
 	}
 }
 

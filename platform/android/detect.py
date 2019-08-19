@@ -91,8 +91,6 @@ def configure(env):
 
         env['SPAWN'] = mySpawn
 
-    ndk_platform = env['ndk_platform']
-
     if env['android_arch'] not in ['armv7', 'armv6', 'arm64v8', 'x86', 'x86_64']:
         env['android_arch'] = 'armv7'
 
@@ -115,9 +113,9 @@ def configure(env):
         arch_subpath = "x86"
         env["x86_libtheora_opt_gcc"] = True
     elif env['android_arch'] == 'x86_64':
-        if get_platform(env["ndk_platform"]) < 21:
+        if get_platform(env['ndk_platform']) < 21:
             print("WARNING: android_arch=x86_64 is not supported by ndk_platform lower than android-21; setting ndk_platform=android-21")
-            env["ndk_platform"] = "android-21"
+            env['ndk_platform'] = "android-21"
         env['ARCH'] = 'arch-x86_64'
         env.extra_suffix = ".x86_64" + env.extra_suffix
         target_subpath = "x86_64-4.9"
@@ -140,9 +138,9 @@ def configure(env):
         else:
             env.extra_suffix = ".armv7" + env.extra_suffix
     elif env["android_arch"] == "arm64v8":
-        if get_platform(ndk_platform) < 21:
+        if get_platform(env['ndk_platform']) < 21:
             print("WARNING: android_arch=arm64v8 is not supported by ndk_platform lower than android-21; setting ndk_platform=android-21")
-            ndk_platform = "android-21"
+            env['ndk_platform'] = "android-21"
         env['ARCH'] = 'arch-arm64'
         target_subpath = "aarch64-linux-android-4.9"
         abi_subpath = "aarch64-linux-android"
@@ -203,7 +201,7 @@ def configure(env):
         env.Append(CPPFLAGS=["-isystem", sysroot + "/usr/include/" + abi_subpath])
         env.Append(CPPFLAGS=["-isystem", env["ANDROID_NDK_ROOT"] + "/sources/android/support/include"])
         # For unified headers this define has to be set manually
-        env.Append(CPPFLAGS=["-D__ANDROID_API__=" + str(get_platform(ndk_platform))])
+        env.Append(CPPFLAGS=["-D__ANDROID_API__=" + str(get_platform(env['ndk_platform']))])
     else:
         print("Using NDK deprecated headers")
         env.Append(CPPFLAGS=["-isystem", lib_sysroot + "/usr/include"])
@@ -257,16 +255,20 @@ def configure(env):
         if env['android_stl'] == 'yes':
             if LooseVersion(ndk_version) >= LooseVersion("17.1.4828580"):
                 env.Append(LINKFLAGS=['-Wl,--exclude-libs,libgcc.a','-Wl,--exclude-libs,libatomic.a','-nostdlib++'])
+            else:
+                env.Append(LINKFLAGS=[env["ANDROID_NDK_ROOT"] +"/sources/cxx-stl/llvm-libc++/libs/"+arch_subpath+"/libandroid_support.a"])
             env.Append(LIBPATH=[env["ANDROID_NDK_ROOT"] + "/sources/cxx-stl/llvm-libc++/libs/"+arch_subpath+"/"])
-            env.Append(LINKFLAGS=[env["ANDROID_NDK_ROOT"] +"/sources/cxx-stl/llvm-libc++/libs/"+arch_subpath+"/libandroid_support.a"])
             env.Append(LINKFLAGS=[env["ANDROID_NDK_ROOT"] +"/sources/cxx-stl/llvm-libc++/libs/"+arch_subpath+"/libc++_shared.so"])
+        else:
+            # This is the legacy and minimal 'System STL' with support for basic features like new and delete
+            env.Append(LINKFLAGS=['-stdlib=libstdc++'])
     else:
         if mt_link:
             env.Append(LINKFLAGS=['-Wl,--threads'])
     env.Append(LINKFLAGS=['-shared', '--sysroot=' + lib_sysroot, '-Wl,--warn-shared-textrel'])
 
     if env["android_arch"] == "armv7":
-        env.Append(LINKFLAGS=string.split('-Wl,--fix-cortex-a8'))
+        env.Append(LINKFLAGS='-Wl,--fix-cortex-a8'.split())
     env.Append(LINKFLAGS='-Wl,--no-undefined -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now'.split())
     env.Append(LINKFLAGS='-Wl,-soname,libgodot_android.so -Wl,--gc-sections'.split())
 
@@ -318,7 +320,7 @@ def get_ndk_version(path):
     try:
         with open(prop_file_path) as prop_file:
             for line in prop_file:
-                key_value = map(lambda x: string.strip(x), line.split("="))
+                key_value = list(map(lambda x: x.strip(), line.split("=")))
                 if key_value[0] == "Pkg.Revision":
                     return key_value[1]
     except:

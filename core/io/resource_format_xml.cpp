@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -2274,7 +2274,8 @@ void ResourceFormatSaverXMLInstance::write_property(const String &p_name, const 
 				case Image::FORMAT_ATC_ALPHA_EXPLICIT: params += " format=\"atcae\""; break;
 				case Image::FORMAT_ATC_ALPHA_INTERPOLATED: params += " format=\"atcai\""; break;
 				case Image::FORMAT_CUSTOM: params += " format=\"custom\" custom_size=\"" + itos(img.get_data().size()) + "\""; break;
-				default: {}
+				default: {
+				}
 			}
 		} break;
 		case Variant::NODE_PATH: type = "node_path"; break;
@@ -2708,7 +2709,8 @@ void ResourceFormatSaverXMLInstance::write_property(const String &p_name, const 
 			}
 
 		} break;
-		default: {}
+		default: {
+		}
 	}
 	if (oneliner)
 		f->store_8(' ');
@@ -2787,7 +2789,8 @@ void ResourceFormatSaverXMLInstance::_find_resources(const Variant &p_variant, b
 				_find_resources(v);
 			}
 		} break;
-		default: {}
+		default: {
+		}
 	}
 }
 

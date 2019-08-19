@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -187,7 +187,8 @@ String Variant::get_type_name(Variant::Type p_type) {
 			return "ColorArray";
 
 		} break;
-		default: {}
+		default: {
+		}
 	}
 
 	return "";
@@ -411,7 +412,8 @@ bool Variant::can_convert(Variant::Type p_type_from, Variant::Type p_type_to) {
 			valid_types = valid;
 
 		} break;
-		default: {}
+		default: {
+		}
 	}
 
 	if (valid_types) {
@@ -656,7 +658,8 @@ bool Variant::can_convert_strict(Variant::Type p_type_from, Variant::Type p_type
 			valid_types = valid;
 
 		} break;
-		default: {}
+		default: {
+		}
 	}
 
 	if (valid_types) {
@@ -858,7 +861,8 @@ bool Variant::is_zero() const {
 			return reinterpret_cast<const DVector<Color> *>(_data._mem)->size() == 0;
 
 		} break;
-		default: {}
+		default: {
+		}
 	}
 
 	return false;
@@ -913,7 +917,9 @@ bool Variant::is_one() const {
 
 		} break;
 
-		default: { return !is_zero(); }
+		default: {
+			return !is_zero();
+		}
 	}
 
 	return false;
@@ -1082,7 +1088,8 @@ void Variant::reference(const Variant &p_variant) {
 			memnew_placement(_data._mem, DVector<Color>(*reinterpret_cast<const DVector<Color> *>(p_variant._data._mem)));
 
 		} break;
-		default: {}
+		default: {
+		}
 	}
 }
 void Variant::zero() {
@@ -1208,7 +1215,8 @@ void Variant::clear() {
 			reinterpret_cast<DVector<Color> *>(_data._mem)->~DVector<Color>();
 
 		} break;
-		default: {} /* not needed */
+		default: {
+		} /* not needed */
 	}
 
 	type = NIL;
@@ -1881,7 +1889,9 @@ inline DA _convert_array_from_variant(const Variant &p_variant) {
 		case Variant::COLOR_ARRAY: {
 			return _convert_array<DA, DVector<Color> >(p_variant.operator DVector<Color>());
 		}
-		default: { return DA(); }
+		default: {
+			return DA();
+		}
 	}
 
 	return DA();
@@ -2828,7 +2838,8 @@ uint32_t Variant::hash() const {
 			return hash;
 
 		} break;
-		default: {}
+		default: {
+		}
 	}
 
 	return 0;
@@ -3076,7 +3087,8 @@ bool Variant::is_shared() const {
 		case OBJECT: return true;
 		case ARRAY: return reinterpret_cast<const Array *>(_data._mem)->is_shared();
 		case DICTIONARY: return reinterpret_cast<const Dictionary *>(_data._mem)->is_shared();
-		default: {}
+		default: {
+		}
 	}
 
 	return false;
@@ -3113,7 +3125,8 @@ Variant Variant::call(const StringName &p_method, VARIANT_ARG_DECLARE) {
 			String err = "Too many arguments for method '" + p_method + "'";
 			ERR_PRINT(err.utf8().get_data());
 		} break;
-		default: {}
+		default: {
+		}
 	}
 
 	return ret;

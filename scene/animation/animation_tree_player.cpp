@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -192,7 +192,8 @@ bool AnimationTreePlayer::_set(const StringName &p_name, const Variant &p_value)
 				}
 
 			} break;
-			default: {};
+			default: {
+			};
 		}
 	}
 
@@ -351,7 +352,8 @@ bool AnimationTreePlayer::_get(const StringName &p_name, Variant &r_ret) const {
 				node["transitions"] = transitions;
 
 			} break;
-			default: {};
+			default: {
+			};
 		}
 
 		nodes.push_back(node);
@@ -768,7 +770,8 @@ float AnimationTreePlayer::_process_node(const StringName &p_node, AnimationNode
 			}
 
 		} break;
-		default: {}
+		default: {
+		}
 	}
 
 	return 0;
@@ -961,7 +964,8 @@ void AnimationTreePlayer::add_node(NodeType p_type, const StringName &p_node) {
 			n = memnew(TransitionNode);
 
 		} break;
-		default: {}
+		default: {
+		}
 	}
 
 	//n->name+=" "+itos(p_node);
