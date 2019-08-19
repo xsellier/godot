@@ -93,6 +93,7 @@ public:
 	static double round(double p_val);
 
 	static double random(double from, double to);
+	static uint32_t randomi(uint32_t from, uint32_t to);
 
 	static _FORCE_INLINE_ real_t abs(real_t g) {
 

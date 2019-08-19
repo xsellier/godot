@@ -79,6 +79,11 @@ void MenuButton::_input_event(InputEvent p_event) {
 	BaseButton::_input_event(p_event);
 }
 
+void MenuButton::open_popup() {
+
+	pressed();
+}
+
 PopupMenu *MenuButton::get_popup() {
 
 	return popup;
@@ -95,6 +100,7 @@ void MenuButton::_set_items(const Array &p_items) {
 
 void MenuButton::_bind_methods() {
 
+	ObjectTypeDB::bind_method(_MD("open_popup"), &MenuButton::open_popup);
 	ObjectTypeDB::bind_method(_MD("get_popup:PopupMenu"), &MenuButton::get_popup);
 	ObjectTypeDB::bind_method(_MD("_unhandled_key_input"), &MenuButton::_unhandled_key_input);
 	ObjectTypeDB::bind_method(_MD("_set_items"), &MenuButton::_set_items);

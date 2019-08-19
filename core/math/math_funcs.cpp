@@ -85,6 +85,11 @@ uint32_t Math::rand() {
 	return rand_from_seed(&default_seed) & 0x7FFFFFFF;
 }
 
+uint32_t Math::randomi(uint32_t from, uint32_t to) {
+
+	return (Math::rand() % (to - from)) + from;
+}
+
 double Math::randf() {
 
 	return (double)rand() / (double)RANDOM_MAX;

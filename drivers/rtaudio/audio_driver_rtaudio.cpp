@@ -112,7 +112,8 @@ Error AudioDriverRtAudio::init() {
 			case OUTPUT_5_1: parameters.nChannels = 6; break;
 			case OUTPUT_7_1: parameters.nChannels = 8; break;
 			default:
-				parameters.nChannels = 2; break;
+				parameters.nChannels = 2;
+				break;
 		};
 
 		try {
@@ -129,7 +130,8 @@ Error AudioDriverRtAudio::init() {
 				case OUTPUT_5_1: output_format = OUTPUT_QUAD; break;
 				case OUTPUT_7_1: output_format = OUTPUT_5_1; break;
 				default:
-					output_format = OUTPUT_STEREO; break;
+					output_format = OUTPUT_STEREO;
+					break;
 			}
 
 			tries--;

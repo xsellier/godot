@@ -155,15 +155,12 @@ Error AudioDriverWASAPI::init_device(bool reinit) {
 
 	switch (wasapi_channels) {
 		case 2: // Stereo
-		case 4: // Surrounf 3.1
-		case 6: // Surround 5.1
-		case 8: // Surround 7.1
 			channels = wasapi_channels;
 			break;
 
 		default:
-			WARN_PRINTS("WASAPI: Unsupported number of channels (" + itos(wasapi_channels) + ")");
-			channels = 2;
+			ERR_PRINT("WASAPI: Number of channel not supported");
+			ERR_FAIL_V(ERR_PARAMETER_RANGE_ERROR);
 	}
 
 	if (format_tag == WAVE_FORMAT_EXTENSIBLE) {
@@ -253,6 +250,7 @@ Error AudioDriverWASAPI::init() {
 	Error err = init_device();
 	if (err != OK) {
 		ERR_PRINT("WASAPI: init_device error");
+		ERR_FAIL_V(err);
 	}
 
 	active = false;
@@ -425,6 +423,9 @@ void AudioDriverWASAPI::thread_func(void *p_udata) {
 			Error err = ad->init_device(true);
 			if (err == OK) {
 				ad->start();
+			} else {
+				ERR_PRINT("WASAPI: init_device error");
+				ad->exit_thread = true;
 			}
 		}
 	}

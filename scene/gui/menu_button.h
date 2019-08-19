@@ -53,6 +53,7 @@ protected:
 	static void _bind_methods();
 
 public:
+	void open_popup();
 	PopupMenu *get_popup();
 	MenuButton();
 	~MenuButton();

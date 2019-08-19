@@ -197,6 +197,8 @@ static bool mouse_down_control = false;
 
 - (void)windowDidExitFullScreen:(NSNotification *)notification {
 	OS_OSX::singleton->zoomed = false;
+	if (!OS_OSX::singleton->resizable)
+		[OS_OSX::singleton->window_object setStyleMask:[OS_OSX::singleton->window_object styleMask] & ~NSResizableWindowMask];
 }
 #endif // MAC_OS_X_VERSION_MAX_ALLOWED
 
@@ -437,8 +439,8 @@ static void _mouseDownEvent(NSEvent *event, int index, int mask, bool pressed) {
 	ev.mouse_motion.y = mouse_y;
 	ev.mouse_motion.global_x = mouse_x;
 	ev.mouse_motion.global_y = mouse_y;
-	ev.mouse_motion.relative_x = [event deltaX] * OS_OSX::singleton->_mouse_scale([[event window] backingScaleFactor]);
-	ev.mouse_motion.relative_y = [event deltaY] * OS_OSX::singleton->_mouse_scale([[event window] backingScaleFactor]);
+	ev.mouse_motion.relative_x = [event deltaX] * OS_OSX::singleton -> _mouse_scale([[event window] backingScaleFactor]);
+	ev.mouse_motion.relative_y = [event deltaY] * OS_OSX::singleton -> _mouse_scale([[event window] backingScaleFactor]);
 	ev.mouse_motion.mod = translateFlags([event modifierFlags]);
 
 	OS_OSX::singleton->input->set_mouse_pos(Point2(mouse_x, mouse_y));
@@ -906,6 +908,7 @@ void OS_OSX::initialize(const VideoMode &p_desired, int p_video_driver, int p_au
 	if (p_desired.borderless_window) {
 		styleMask = NSWindowStyleMaskBorderless;
 	} else {
+		resizable = p_desired.resizable;
 		styleMask = NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | (p_desired.resizable ? NSResizableWindowMask : 0);
 	}
 
@@ -1196,7 +1199,8 @@ void OS_OSX::set_cursor_shape(CursorShape p_shape) {
 			case CURSOR_VSPLIT: [[NSCursor resizeUpDownCursor] set]; break;
 			case CURSOR_HSPLIT: [[NSCursor resizeLeftRightCursor] set]; break;
 			case CURSOR_HELP: [[NSCursor arrowCursor] set]; break;
-			default: {};
+			default: {
+			};
 		}
 	}
 
@@ -1676,6 +1680,8 @@ void OS_OSX::set_window_fullscreen(bool p_enabled) {
 
 	if (zoomed != p_enabled) {
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
+		if (!resizable)
+			[window_object setStyleMask:[window_object styleMask] | NSResizableWindowMask];
 		[window_object toggleFullScreen:nil];
 #else
 		[window_object performZoom:nil];
@@ -1698,8 +1704,10 @@ void OS_OSX::set_window_resizable(bool p_enabled) {
 
 	if (p_enabled)
 		[window_object setStyleMask:[window_object styleMask] | NSResizableWindowMask];
-	else
+	else if (!zoomed)
 		[window_object setStyleMask:[window_object styleMask] & ~NSResizableWindowMask];
+
+	resizable = p_enabled;
 };
 
 bool OS_OSX::is_window_resizable() const {

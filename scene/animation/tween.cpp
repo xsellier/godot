@@ -988,7 +988,15 @@ bool Tween::interpolate_property(Object *p_object, String p_property, Variant p_
 	ERR_FAIL_COND_V(p_object == NULL, false);
 	ERR_FAIL_COND_V(!ObjectDB::instance_validate(p_object), false);
 	ERR_FAIL_COND_V(p_initial_val.get_type() != p_final_val.get_type(), false);
+
+#ifdef DEBUG_ENABLED
 	ERR_FAIL_COND_V(p_times_in_sec <= 0, false);
+#else
+	if (p_times_in_sec <= 0) {
+		return false;
+	}
+#endif
+
 	ERR_FAIL_COND_V(p_trans_type < 0 || p_trans_type >= TRANS_COUNT, false);
 	ERR_FAIL_COND_V(p_ease_type < 0 || p_ease_type >= EASE_COUNT, false);
 	ERR_FAIL_COND_V(p_delay < 0, false);
@@ -1031,7 +1039,15 @@ bool Tween::interpolate_method(Object *p_object, String p_method, Variant p_init
 	ERR_FAIL_COND_V(p_object == NULL, false);
 	ERR_FAIL_COND_V(!ObjectDB::instance_validate(p_object), false);
 	ERR_FAIL_COND_V(p_initial_val.get_type() != p_final_val.get_type(), false);
+
+#ifdef DEBUG_ENABLED
 	ERR_FAIL_COND_V(p_times_in_sec <= 0, false);
+#else
+	if (p_times_in_sec <= 0) {
+		return false;
+	}
+#endif
+
 	ERR_FAIL_COND_V(p_trans_type < 0 || p_trans_type >= TRANS_COUNT, false);
 	ERR_FAIL_COND_V(p_ease_type < 0 || p_ease_type >= EASE_COUNT, false);
 	ERR_FAIL_COND_V(p_delay < 0, false);
@@ -1070,7 +1086,14 @@ bool Tween::interpolate_callback(Object *p_object, real_t p_times_in_sec, String
 
 	ERR_FAIL_COND_V(p_object == NULL, false);
 	ERR_FAIL_COND_V(!ObjectDB::instance_validate(p_object), false);
-	ERR_FAIL_COND_V(p_times_in_sec < 0, false);
+
+#ifdef DEBUG_ENABLED
+	ERR_FAIL_COND_V(p_times_in_sec <= 0, false);
+#else
+	if (p_times_in_sec <= 0) {
+		return false;
+	}
+#endif
 
 	ERR_EXPLAIN("Object has no callback named: %s" + p_callback);
 	ERR_FAIL_COND_V(!p_object->has_method(p_callback), false);
@@ -1122,7 +1145,14 @@ bool Tween::interpolate_deferred_callback(Object *p_object, real_t p_times_in_se
 	}
 	ERR_FAIL_COND_V(p_object == NULL, false);
 	ERR_FAIL_COND_V(!ObjectDB::instance_validate(p_object), false);
-	ERR_FAIL_COND_V(p_times_in_sec < 0, false);
+
+#ifdef DEBUG_ENABLED
+	ERR_FAIL_COND_V(p_times_in_sec <= 0, false);
+#else
+	if (p_times_in_sec <= 0) {
+		return false;
+	}
+#endif
 
 	ERR_EXPLAIN("Object has no callback named: %s" + p_callback);
 	ERR_FAIL_COND_V(!p_object->has_method(p_callback), false);

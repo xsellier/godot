@@ -74,6 +74,7 @@ const char *GDFunctions::get_func_name(Function p_func) {
 		"randi",
 		"randf",
 		"rand_range",
+		"randi_range",
 		"seed",
 		"rand_seed",
 		"deg2rad",
@@ -343,6 +344,12 @@ void GDFunctions::call(Function p_func, const Variant **p_args, int p_arg_count,
 			VALIDATE_ARG_NUM(0);
 			VALIDATE_ARG_NUM(1);
 			r_ret = Math::random(*p_args[0], *p_args[1]);
+		} break;
+		case MATH_RANDOMI: {
+			VALIDATE_ARG_COUNT(2);
+			VALIDATE_ARG_NUM(0);
+			VALIDATE_ARG_NUM(1);
+			r_ret = Math::randomi(*p_args[0], *p_args[1]);
 		} break;
 		case MATH_SEED: {
 			VALIDATE_ARG_COUNT(1);
@@ -1339,6 +1346,11 @@ MethodInfo GDFunctions::get_info(Function p_func) {
 		case MATH_RANDOM: {
 			MethodInfo mi("rand_range", PropertyInfo(Variant::REAL, "from"), PropertyInfo(Variant::REAL, "to"));
 			mi.return_val.type = Variant::REAL;
+			return mi;
+		} break;
+		case MATH_RANDOMI: {
+			MethodInfo mi("randi_range", PropertyInfo(Variant::INT, "from"), PropertyInfo(Variant::INT, "to"));
+			mi.return_val.type = Variant::INT;
 			return mi;
 		} break;
 		case MATH_SEED: {

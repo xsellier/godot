@@ -1363,8 +1363,12 @@ Error Object::connect(const StringName &p_signal, Object *p_to_object, const Str
 
 	Signal::Target target(p_to_object->get_instance_ID(), p_to_method);
 	if (s->slot_map.has(target)) {
+#ifdef DEBUG_ENABLED
 		ERR_EXPLAIN("Signal '" + p_signal + "' is already connected to given method '" + p_to_method + "' in that object.");
 		ERR_FAIL_COND_V(s->slot_map.has(target), ERR_INVALID_PARAMETER);
+#else
+		return ERR_INVALID_PARAMETER;
+#endif
 	}
 
 	Signal::Slot slot;
@@ -1411,8 +1415,12 @@ void Object::disconnect(const StringName &p_signal, Object *p_to_object, const S
 	ERR_FAIL_NULL(p_to_object);
 	Signal *s = signal_map.getptr(p_signal);
 	if (!s) {
+#ifdef DEBUG_ENABLED
 		ERR_EXPLAIN("Nonexistent signal: " + p_signal);
 		ERR_FAIL_COND(!s);
+#else
+		return;
+#endif
 	}
 	if (s->lock > 0) {
 		ERR_EXPLAIN("Attempt to disconnect signal '" + p_signal + "' while emitting (locks: " + itos(s->lock) + ")");
@@ -1422,8 +1430,12 @@ void Object::disconnect(const StringName &p_signal, Object *p_to_object, const S
 	Signal::Target target(p_to_object->get_instance_ID(), p_to_method);
 
 	if (!s->slot_map.has(target)) {
+#ifdef DEBUG_ENABLED
 		ERR_EXPLAIN("Disconnecting nonexistent signal '" + p_signal + "', slot: " + itos(target._id) + ":" + target.method);
 		ERR_FAIL();
+#else
+		return;
+#endif
 	}
 
 	p_to_object->connections.erase(s->slot_map[target].cE);
