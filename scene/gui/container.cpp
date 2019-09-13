@@ -86,15 +86,25 @@ void Container::fit_child_in_rect(Control *p_child, const Rect2 &p_rect) {
 	ERR_FAIL_COND(p_child->get_parent() != this);
 
 	Size2 minsize = p_child->get_combined_minimum_size();
+	Vector2 consolidated_scale = p_child->get_scale();
+
+	if (consolidated_scale.x == 0.0) {
+		consolidated_scale.x = CMP_EPSILON;
+	}
+
+	if (consolidated_scale.y == 0.0) {
+		consolidated_scale.y = CMP_EPSILON;
+	}
+
 	Rect2 r = p_rect;
 
 	if (!(p_child->get_h_size_flags() & SIZE_FILL)) {
-		r.size.x = minsize.x;
+		r.size.x = minsize.x / consolidated_scale.x;
 		r.pos.x += Math::floor((p_rect.size.x - minsize.x) / 2);
 	}
 
 	if (!(p_child->get_v_size_flags() & SIZE_FILL)) {
-		r.size.y = minsize.y;
+		r.size.y = minsize.y / consolidated_scale.y;
 		r.pos.y += Math::floor((p_rect.size.y - minsize.y) / 2);
 	}
 
@@ -104,7 +114,6 @@ void Container::fit_child_in_rect(Control *p_child, const Rect2 &p_rect) {
 	p_child->set_pos(r.pos);
 	p_child->set_size(r.size);
 	p_child->set_rotation(0);
-	p_child->set_scale(Vector2(1, 1));
 }
 
 void Container::queue_sort() {

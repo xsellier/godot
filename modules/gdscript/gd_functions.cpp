@@ -96,6 +96,7 @@ const char *GDFunctions::get_func_name(Function p_func) {
 		"prints",
 		"printerr",
 		"printraw",
+		"uuidv4_text",
 		"var2str",
 		"str2var",
 		"var2bytes",
@@ -555,6 +556,9 @@ void GDFunctions::call(Function p_func, const Variant **p_args, int p_arg_count,
 
 			r_ret = str;
 
+		} break;
+		case TEXT_UUIDV4: {
+			r_ret = String::uuidv4_text();
 		} break;
 		case TEXT_PRINT: {
 
@@ -1444,6 +1448,12 @@ MethodInfo GDFunctions::get_info(Function p_func) {
 		case TEXT_STR: {
 
 			MethodInfo mi("str", PropertyInfo(Variant::NIL, "what"), PropertyInfo(Variant::NIL, "..."));
+			mi.return_val.type = Variant::STRING;
+			return mi;
+
+		} break;
+		case TEXT_UUIDV4: {
+			MethodInfo mi("uuidv4_text");
 			mi.return_val.type = Variant::STRING;
 			return mi;
 

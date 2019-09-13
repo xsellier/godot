@@ -29,6 +29,7 @@
 /*************************************************************************/
 #include "ustring.h"
 #include "color.h"
+#include "core/os/os.h"
 #include "math_funcs.h"
 #include "os/memory.h"
 #include "print_string.h"
@@ -55,6 +56,7 @@
 #endif
 
 /** STRING **/
+char *UUID_DELIMITER = "-";
 
 const char *CharString::get_data() const {
 
@@ -815,6 +817,47 @@ const CharType *String::c_str() const {
 	return size() ? &operator[](0) : &zero;
 }
 
+String String::uuidv4_text() {
+	uint32_t timestamp = OS::get_singleton()->get_unix_time();
+	uint32_t ticks = OS::get_singleton()->get_ticks_msec();
+	uint32_t seed = Math::generate_seed();
+	uint8_t bytes[16]{
+		// time low
+		(uint8_t)((timestamp)&0xff),
+		(uint8_t)((timestamp << 1) & 0xff),
+		(uint8_t)((timestamp << 2) & 0xff),
+		(uint8_t)((timestamp << 3) & 0xff),
+
+		// time mid
+		(uint8_t)((timestamp << 4) & 0xff),
+		(uint8_t)((timestamp << 5) & 0xff),
+
+		// time high
+		(uint8_t)((timestamp << 6) & 0xff),
+		(uint8_t)((timestamp << 7) & 0xff),
+
+		// clock seq hi
+		(uint8_t)((ticks << 1) & 0x0f | 0x40),
+
+		// clock seq low
+		(uint8_t)((ticks)&0xff),
+
+		// node
+		(uint8_t)(Math::rand_from_seed(&seed) & 0x3f | 0x80),
+		(uint8_t)(Math::rand_from_seed(&seed) & 0xff),
+		(uint8_t)(Math::rand_from_seed(&seed) & 0xff),
+		(uint8_t)(Math::rand_from_seed(&seed) & 0xff),
+		(uint8_t)(Math::rand_from_seed(&seed) & 0xff),
+		(uint8_t)(Math::rand_from_seed(&seed) & 0xff)
+	};
+
+	return String::hex_encode_buffer(bytes, 16)
+			.insert(8, UUID_DELIMITER)
+			.insert(13, UUID_DELIMITER)
+			.insert(18, UUID_DELIMITER)
+			.insert(23, UUID_DELIMITER);
+}
+
 String String::md5(const uint8_t *p_md5) {
 	return String::hex_encode_buffer(p_md5, 16);
 }
@@ -1220,8 +1263,11 @@ _FORCE_INLINE static int parse_utf8_char(const char *p_utf8,unsigned int *p_ucs4
 #endif
 bool String::parse_utf8(const char *p_utf8, int p_len) {
 
+#ifdef DEBUG_ENABLED
 #define _UNICERROR(m_err) print_line("unicode error: " + String(m_err));
-
+#else
+#define _UNICERROR(m_err)
+#endif
 	String aux;
 
 	int cstr_size = 0;

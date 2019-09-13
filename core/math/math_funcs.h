@@ -70,6 +70,7 @@ public:
 	static int step_decimals(double p_step);
 	static double stepify(double p_value, double p_step);
 	static void seed(uint32_t x = 0);
+	static uint32_t generate_seed();
 	static void randomize();
 	static uint32_t larger_prime(uint32_t p_val);
 	static double dectime(double p_value, double p_amount, double p_step);

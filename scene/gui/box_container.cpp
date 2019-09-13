@@ -90,7 +90,6 @@ void BoxContainer::_resort() {
 	int stretch_diff = stretch_max - stretch_min;
 	if (stretch_diff < 0) {
 		//avoid negative stretch space
-		stretch_max = stretch_min;
 		stretch_diff = 0;
 	}
 
@@ -99,7 +98,7 @@ void BoxContainer::_resort() {
 		elements exist */
 
 	bool has_stretched = false;
-	while (stretch_ratio_total > 0) { // first of all, dont even be here if no stretchable objects exist
+	while (stretch_ratio_total > 0) { // first of all, don't even be here if no stretchable objects exist
 
 		has_stretched = true;
 		bool refit_successful = true; //assume refit-test will go well
