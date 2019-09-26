@@ -821,7 +821,7 @@ String String::uuidv4_text() {
 	uint32_t timestamp = OS::get_singleton()->get_unix_time();
 	uint32_t ticks = OS::get_singleton()->get_ticks_msec();
 	uint32_t seed = Math::generate_seed();
-	uint8_t bytes[16]{
+	uint8_t bytes[16] = {
 		// time low
 		(uint8_t)((timestamp)&0xff),
 		(uint8_t)((timestamp << 1) & 0xff),

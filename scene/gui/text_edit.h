@@ -317,6 +317,7 @@ class TextEdit : public Control {
 
 	DVector<int> _search_bind(const String &p_key, uint32_t p_search_flags, int p_from_line, int p_from_column) const;
 
+	bool context_menu_enabled;
 	PopupMenu *menu;
 
 	void _clear();
@@ -507,6 +508,8 @@ public:
 	void set_code_hint(const String &p_hint);
 	void query_code_comple();
 
+	bool is_context_menu_enabled();
+	void set_context_menu_enabled(bool p_enable);
 	PopupMenu *get_menu() const;
 
 	String get_text_for_completion();

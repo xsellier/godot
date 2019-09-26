@@ -1570,7 +1570,7 @@ void TextEdit::_input_event(const InputEvent &p_input_event) {
 					update();
 				}
 
-				if (mb.button_index == BUTTON_RIGHT) {
+				if (mb.button_index == BUTTON_RIGHT && context_menu_enabled) {
 
 					menu->set_pos(get_global_transform().xform(get_local_mouse_pos()));
 					menu->set_size(Vector2(1, 1));
@@ -4364,6 +4364,14 @@ void TextEdit::menu_option(int p_option) {
 	};
 }
 
+void TextEdit::set_context_menu_enabled(bool p_enable) {
+	context_menu_enabled = p_enable;
+}
+
+bool TextEdit::is_context_menu_enabled() {
+	return context_menu_enabled;
+}
+
 PopupMenu *TextEdit::get_menu() const {
 	return menu;
 }
@@ -4409,6 +4417,8 @@ void TextEdit::_bind_methods() {
 	ObjectTypeDB::bind_method(_MD("set_readonly", "enable"), &TextEdit::set_readonly);
 	ObjectTypeDB::bind_method(_MD("set_wrap", "enable"), &TextEdit::set_wrap);
 	ObjectTypeDB::bind_method(_MD("set_max_chars", "amount"), &TextEdit::set_max_chars);
+	ObjectTypeDB::bind_method(_MD("set_context_menu_enabled", "enable"), &TextEdit::set_context_menu_enabled);
+	ObjectTypeDB::bind_method(_MD("is_context_menu_enabled"), &TextEdit::is_context_menu_enabled);
 
 	ObjectTypeDB::bind_method(_MD("cut"), &TextEdit::cut);
 	ObjectTypeDB::bind_method(_MD("copy"), &TextEdit::copy);
@@ -4454,6 +4464,7 @@ void TextEdit::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "caret/block_caret"), _SCS("cursor_set_block_mode"), _SCS("cursor_is_block_mode"));
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "caret/caret_blink"), _SCS("cursor_set_blink_enabled"), _SCS("cursor_get_blink_enabled"));
 	ADD_PROPERTYNZ(PropertyInfo(Variant::REAL, "caret/caret_blink_speed", PROPERTY_HINT_RANGE, "0.1,10,0.1"), _SCS("cursor_set_blink_speed"), _SCS("cursor_get_blink_speed"));
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "context_menu_enabled"), "set_context_menu_enabled", "is_context_menu_enabled");
 
 	ADD_SIGNAL(MethodInfo("cursor_changed"));
 	ADD_SIGNAL(MethodInfo("text_changed"));
@@ -4517,6 +4528,7 @@ TextEdit::TextEdit() {
 	selection.active = false;
 	syntax_coloring = false;
 
+	context_menu_enabled = false;
 	block_caret = false;
 	caret_blink_enabled = false;
 	caret_blink_timer = memnew(Timer);

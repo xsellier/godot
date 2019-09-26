@@ -71,6 +71,7 @@ private:
 	String placeholder;
 	float placeholder_alpha;
 
+	bool context_menu_enabled;
 	PopupMenu *menu;
 
 	int cursor_pos;
@@ -132,6 +133,8 @@ public:
 	virtual CursorShape get_cursor_shape(const Point2 &p_pos) const;
 
 	void menu_option(int p_option);
+	void set_context_menu_enabled(bool p_enable);
+	bool is_context_menu_enabled();
 	PopupMenu *get_menu() const;
 
 	void select_all();
