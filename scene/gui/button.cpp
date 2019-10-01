@@ -32,6 +32,17 @@
 #include "servers/visual_server.h"
 #include "translation.h"
 
+void Button::set_autowrap(bool p_autowrap) {
+
+	autowrap = p_autowrap;
+	update();
+	minimum_size_changed();
+}
+bool Button::has_autowrap() const {
+
+	return autowrap;
+}
+
 Size2 Button::get_minimum_size() const {
 
 	Size2 minsize = get_font("font")->get_string_size(text);
@@ -112,27 +123,112 @@ void Button::_notification(int p_what) {
 
 		Point2 icon_ofs = (!_icon.is_null()) ? Point2(_icon->get_width() + get_constant("hseparation"), 0) : Point2();
 		int text_clip = size.width - style->get_minimum_size().width - icon_ofs.width;
-		Point2 text_ofs = (size - style->get_minimum_size() - icon_ofs - font->get_string_size(text)) / 2.0;
 
-		switch (align) {
-			case ALIGN_LEFT: {
-				text_ofs.x = style->get_margin(MARGIN_LEFT) + icon_ofs.x;
-				text_ofs.y += style->get_offset().y;
-			} break;
-			case ALIGN_CENTER: {
-				if (text_ofs.x < 0)
-					text_ofs.x = 0;
-				text_ofs += icon_ofs;
-				text_ofs += style->get_offset();
-			} break;
-			case ALIGN_RIGHT: {
-				text_ofs.x = size.x - style->get_margin(MARGIN_RIGHT) - font->get_string_size(text).x;
-				text_ofs.y += style->get_offset().y;
-			} break;
+		if (autowrap) {
+			float line_y_size = font->get_string_size(text).y;
+			Point2 text_ofs = size - style->get_minimum_size() - icon_ofs;
+			Vector<String> splitted_text = text.split(" ");
+			Size2 global_string_size = Size2(0.0, line_y_size);
+			float text_y_size = line_y_size;
+			Vector<String> lines;
+			String current_line = "";
+			String appended_string = "";
+
+			for (int index = 0; index < splitted_text.size(); index++) {
+				String current_string = appended_string + splitted_text[index];
+				Size2 current_string_size = font->get_string_size(current_string);
+
+				if (ceil(global_string_size.x + current_string_size.x) >= floor(text_ofs.x)) {
+					global_string_size.x = 0;
+
+					if (ceil(global_string_size.y + line_y_size) > floor(text_ofs.y)) {
+						// Cannot fit the rest of the string
+						lines.push_back(current_line + current_string);
+						current_line = "";
+
+						break;
+					} else {
+						lines.push_back(current_line);
+
+						// Line spacing by default: 2 pixels.
+						global_string_size.y += line_y_size + font->get_ascent();
+						text_y_size += line_y_size;
+						current_line = "" + splitted_text[index];
+					}
+				} else {
+					current_line += current_string;
+					global_string_size.x += current_string_size.x;
+
+					appended_string = " ";
+				}
+			}
+
+			// In order to be able to use it to compute the y offset
+			global_string_size.x = 0;
+
+			if (current_line.length() > 0) {
+				lines.push_back(current_line);
+			}
+
+			// Reset the anchor offset point
+			text_ofs = (size - style->get_minimum_size() - icon_ofs) / 2.0;
+			text_ofs.y -= (text_y_size - font->get_ascent()) / 2.0;
+			float origin_x_offset = text_ofs.x;
+
+			for (int index = 0; index < lines.size(); index++) {
+
+				Size2 string_size = font->get_string_size(lines[index]);
+				text_ofs -= string_size / 2.0;
+
+				switch (align) {
+					case ALIGN_LEFT: {
+						text_ofs.x = style->get_margin(MARGIN_LEFT) + icon_ofs.x;
+						text_ofs.y += style->get_offset().y;
+					} break;
+					case ALIGN_CENTER: {
+						if (text_ofs.x < 0)
+							text_ofs.x = 0;
+						text_ofs += icon_ofs;
+						text_ofs += style->get_offset();
+					} break;
+					case ALIGN_RIGHT: {
+						text_ofs.x = MAX(icon_ofs.width + style->get_minimum_size().width, size.x - style->get_margin(MARGIN_RIGHT) - string_size.x);
+						text_ofs.y += style->get_offset().y;
+					} break;
+				}
+
+				text_ofs.y += font->get_ascent();
+				font->draw(ci, text_ofs.floor(), lines[index], color, clip_text ? text_clip : -1);
+
+				text_ofs.x = origin_x_offset;
+				text_ofs.y += line_y_size;
+			}
+
+		} else {
+			Size2 string_size = font->get_string_size(text);
+			Point2 text_ofs = (size - style->get_minimum_size() - icon_ofs - string_size) / 2.0;
+
+			switch (align) {
+				case ALIGN_LEFT: {
+					text_ofs.x = style->get_margin(MARGIN_LEFT) + icon_ofs.x;
+					text_ofs.y += style->get_offset().y;
+				} break;
+				case ALIGN_CENTER: {
+					if (text_ofs.x < 0)
+						text_ofs.x = 0;
+					text_ofs += icon_ofs;
+					text_ofs += style->get_offset();
+				} break;
+				case ALIGN_RIGHT: {
+					text_ofs.x = MAX(icon_ofs.width + style->get_minimum_size().width, size.x - style->get_margin(MARGIN_RIGHT) - string_size.x);
+					text_ofs.y += style->get_offset().y;
+				} break;
+			}
+
+			text_ofs.y += font->get_ascent();
+			font->draw(ci, text_ofs.floor(), text, color, clip_text ? text_clip : -1);
 		}
 
-		text_ofs.y += font->get_ascent();
-		font->draw(ci, text_ofs.floor(), text, color, clip_text ? text_clip : -1);
 		if (!_icon.is_null()) {
 
 			int valign = size.height - style->get_minimum_size().y;
@@ -213,6 +309,8 @@ void Button::_bind_methods() {
 	ObjectTypeDB::bind_method(_MD("set_button_icon", "texture:Texture"), &Button::set_icon);
 	ObjectTypeDB::bind_method(_MD("get_button_icon:Texture"), &Button::get_icon);
 	ObjectTypeDB::bind_method(_MD("set_flat", "enabled"), &Button::set_flat);
+	ObjectTypeDB::bind_method(_MD("set_autowrap", "enable"), &Button::set_autowrap);
+	ObjectTypeDB::bind_method(_MD("has_autowrap"), &Button::has_autowrap);
 	ObjectTypeDB::bind_method(_MD("set_clip_text", "enabled"), &Button::set_clip_text);
 	ObjectTypeDB::bind_method(_MD("get_clip_text"), &Button::get_clip_text);
 	ObjectTypeDB::bind_method(_MD("set_text_align", "align"), &Button::set_text_align);
@@ -226,6 +324,7 @@ void Button::_bind_methods() {
 	ADD_PROPERTYNZ(PropertyInfo(Variant::STRING, "text", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT_INTL), _SCS("set_text"), _SCS("get_text"));
 	ADD_PROPERTYNZ(PropertyInfo(Variant::OBJECT, "icon", PROPERTY_HINT_RESOURCE_TYPE, "Texture"), _SCS("set_button_icon"), _SCS("get_button_icon"));
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "flat"), _SCS("set_flat"), _SCS("is_flat"));
+	ADD_PROPERTYNZ(PropertyInfo(Variant::BOOL, "autowrap"), _SCS("set_autowrap"), _SCS("has_autowrap"));
 	ADD_PROPERTYNZ(PropertyInfo(Variant::BOOL, "clip_text"), _SCS("set_clip_text"), _SCS("get_clip_text"));
 	ADD_PROPERTYNO(PropertyInfo(Variant::INT, "align", PROPERTY_HINT_ENUM, "Left,Center,Right"), _SCS("set_text_align"), _SCS("get_text_align"));
 }
@@ -234,6 +333,7 @@ Button::Button(const String &p_text) {
 
 	flat = false;
 	clip_text = false;
+	autowrap = false;
 	set_stop_mouse(true);
 	set_text(p_text);
 	align = ALIGN_CENTER;

@@ -49,6 +49,7 @@ private:
 	bool flat;
 	String text;
 	Ref<Texture> icon;
+	bool autowrap;
 	bool clip_text;
 	TextAlign align;
 
@@ -62,6 +63,9 @@ public:
 
 	void set_text(const String &p_text);
 	String get_text() const;
+
+	void set_autowrap(bool p_autowrap);
+	bool has_autowrap() const;
 
 	void set_icon(const Ref<Texture> &p_icon);
 	Ref<Texture> get_icon() const;
