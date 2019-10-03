@@ -65,10 +65,23 @@ public:
 		}
 	};
 
+	enum Hinting {
+		HINTING_NONE,
+		HINTING_LIGHT,
+		HINTING_NORMAL
+	};
+
+	bool is_antialiased() const;
+	void set_antialiased(bool p_antialiased);
+	Hinting get_hinting() const;
+	void set_hinting(Hinting p_hinting);
+
 private:
 	const uint8_t *font_mem;
 	int font_mem_size;
+	bool antialiased;
 	bool force_autohinter;
+	Hinting hinting;
 
 	String font_path;
 	Map<CacheID, DynamicFontAtSize *> size_cache;
@@ -91,6 +104,8 @@ public:
 	DynamicFontData();
 	~DynamicFontData();
 };
+
+VARIANT_ENUM_CAST(DynamicFontData::Hinting);
 
 class DynamicFontAtSize : public Reference {
 
@@ -148,8 +163,6 @@ class DynamicFontAtSize : public Reference {
 	};
 
 	const Pair<const Character *, DynamicFontAtSize *> _find_char_with_font(CharType p_char, const Vector<Ref<DynamicFontAtSize> > &p_fallbacks) const;
-	Character _make_outline_char(CharType p_char);
-	float _get_kerning_advance(const DynamicFontAtSize *font, CharType p_char, CharType p_next) const;
 	TexturePosition _find_texture_pos_for_glyph(int p_color_size, Image::Format p_image_format, int p_width, int p_height);
 	Character _bitmap_to_character(FT_Bitmap bitmap, int yofs, int xofs, float advance);
 
@@ -259,7 +272,7 @@ public:
 	SelfList<DynamicFont> font_list;
 
 	static Mutex *dynamic_font_mutex;
-	static SelfList<DynamicFont>::List dynamic_fonts;
+	static SelfList<DynamicFont>::List *dynamic_fonts;
 
 	static void initialize_dynamic_fonts();
 	static void finish_dynamic_fonts();

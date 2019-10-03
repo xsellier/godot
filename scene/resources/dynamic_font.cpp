@@ -81,15 +81,28 @@ void DynamicFontData::set_force_autohinter(bool p_force) {
 }
 
 void DynamicFontData::_bind_methods() {
+
+	ObjectTypeDB::bind_method(_MD("set_antialiased", "antialiased"), &DynamicFontData::set_antialiased);
+	ObjectTypeDB::bind_method(_MD("is_antialiased"), &DynamicFontData::is_antialiased);
 	ObjectTypeDB::bind_method(_MD("set_font_path", "path"), &DynamicFontData::set_font_path);
 	ObjectTypeDB::bind_method(_MD("get_font_path"), &DynamicFontData::get_font_path);
+	ObjectTypeDB::bind_method(_MD("set_hinting", "mode"), &DynamicFontData::set_hinting);
+	ObjectTypeDB::bind_method(_MD("get_hinting"), &DynamicFontData::get_hinting);
 
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "font_path", PROPERTY_HINT_FILE, "*.ttf,*.otf"), _SCS("set_font_path"), _SCS("get_font_path"));
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "antialiased"), _SCS("set_antialiased"), _SCS("is_antialiased"));
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "hinting", PROPERTY_HINT_ENUM, "None,Light,Normal"), _SCS("set_hinting"), _SCS("get_hinting"));
+
+	BIND_CONSTANT(HINTING_NONE);
+	BIND_CONSTANT(HINTING_LIGHT);
+	BIND_CONSTANT(HINTING_NORMAL);
 }
 
 DynamicFontData::DynamicFontData() {
 
+	antialiased = true;
 	force_autohinter = false;
+	hinting = DynamicFontData::HINTING_NORMAL;
 	font_mem = NULL;
 	font_mem_size = 0;
 }
@@ -181,15 +194,7 @@ Error DynamicFontAtSize::_load() {
 
 	ERR_FAIL_COND_V(error, ERR_FILE_CANT_OPEN);
 
-	/*error = FT_Set_Char_Size(face,0,64*size,512,512);
-
-	if ( error ) {
-		FT_Done_FreeType( library );
-		ERR_EXPLAIN(TTR("Invalid font size."));
-		ERR_FAIL_COND_V( error, ERR_INVALID_PARAMETER );
-	}*/
-
-	if (FT_HAS_COLOR(face)) {
+	if (FT_HAS_COLOR(face) && face->num_fixed_sizes > 0) {
 		int best_match = 0;
 		int diff = ABS(id.size - ((int64_t)face->available_sizes[0].width));
 		scale_color_font = float(id.size) / face->available_sizes[0].width;
@@ -283,8 +288,9 @@ Size2 DynamicFontAtSize::get_char_size(CharType p_char, CharType p_next, const V
 		ret.x = ch->advance;
 	}
 
+	// TODO: DECOMMENT IF NEEDED
 	// ensures oversampled glyphs will have enough space when this value is used by clipping/wrapping algorithms
-	ret.x = Math::ceil(ret.x);
+	// ret.x = Math::ceil(ret.x);
 
 	return ret;
 }
@@ -483,7 +489,7 @@ DynamicFontAtSize::Character DynamicFontAtSize::_bitmap_to_character(FT_Bitmap b
 						int byte = i * bitmap.pitch + (j >> 3);
 						int bit = 1 << (7 - (j % 8));
 						wr[ofs + 0] = 255; //grayscale as 1
-						wr[ofs + 1] = bitmap.buffer[byte] & bit ? 255 : 0;
+						wr[ofs + 1] = (bitmap.buffer[byte] & bit) ? 255 : 0;
 					} break;
 					case FT_PIXEL_MODE_GRAY:
 						wr[ofs + 0] = 255; //grayscale as 1
@@ -554,13 +560,27 @@ void DynamicFontAtSize::_update_char(CharType p_char) {
 		return;
 	}
 
-	int error = FT_Load_Char(face, p_char, FT_HAS_COLOR(face) ? FT_LOAD_COLOR : FT_LOAD_DEFAULT | (font->force_autohinter ? FT_LOAD_FORCE_AUTOHINT : 0) | FT_LOAD_TARGET_NORMAL);
+	int ft_hinting;
+
+	switch (font->hinting) {
+		case DynamicFontData::HINTING_NONE:
+			ft_hinting = FT_LOAD_NO_HINTING;
+			break;
+		case DynamicFontData::HINTING_LIGHT:
+			ft_hinting = FT_LOAD_TARGET_LIGHT;
+			break;
+		default:
+			ft_hinting = FT_LOAD_TARGET_NORMAL;
+			break;
+	}
+
+	int error = FT_Load_Char(face, p_char, FT_HAS_COLOR(face) ? FT_LOAD_COLOR : FT_LOAD_DEFAULT | (font->force_autohinter ? FT_LOAD_FORCE_AUTOHINT : 0) | ft_hinting);
 	if (error) {
 		char_map[p_char] = character;
 		return;
 	}
 
-	error = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL);
+	error = FT_Render_Glyph(face->glyph, font->antialiased ? FT_RENDER_MODE_NORMAL : FT_RENDER_MODE_MONO);
 	if (!error)
 		character = _bitmap_to_character(slot->bitmap, slot->bitmap_top, slot->bitmap_left, slot->advance.x / 64.0);
 
@@ -572,8 +592,9 @@ void DynamicFontAtSize::update_oversampling() {
 		return;
 
 	FT_Done_FreeType(library);
+	// TODO: UNCOMMENT IF NEEDED
 	// Do not clear it fucks up the cache
-	// textures.clear();
+	textures.clear();
 	char_map.clear();
 	oversampling = font_oversampling;
 	valid = false;
@@ -673,6 +694,30 @@ void DynamicFont::set_use_filter(bool p_enable) {
 		return;
 	cache_id.filter = p_enable;
 	_reload_cache();
+}
+
+bool DynamicFontData::is_antialiased() const {
+
+	return antialiased;
+}
+
+void DynamicFontData::set_antialiased(bool p_antialiased) {
+
+	if (antialiased == p_antialiased)
+		return;
+	antialiased = p_antialiased;
+}
+
+DynamicFontData::Hinting DynamicFontData::get_hinting() const {
+
+	return hinting;
+}
+
+void DynamicFontData::set_hinting(Hinting p_hinting) {
+
+	if (hinting == p_hinting)
+		return;
+	hinting = p_hinting;
 }
 
 int DynamicFont::get_spacing(int p_type) const {
@@ -888,7 +933,7 @@ void DynamicFont::_bind_methods() {
 
 Mutex *DynamicFont::dynamic_font_mutex = NULL;
 
-SelfList<DynamicFont>::List DynamicFont::dynamic_fonts;
+SelfList<DynamicFont>::List *DynamicFont::dynamic_fonts = NULL;
 
 DynamicFont::DynamicFont() :
 		font_list(this) {
@@ -898,29 +943,36 @@ DynamicFont::DynamicFont() :
 	spacing_bottom = 0;
 	spacing_char = 0;
 	spacing_space = 0;
-	if (dynamic_font_mutex)
+
+	if (dynamic_font_mutex) {
+
 		dynamic_font_mutex->lock();
-	dynamic_fonts.add(&font_list);
-	if (dynamic_font_mutex)
+		dynamic_fonts->add(&font_list);
 		dynamic_font_mutex->unlock();
+	}
 }
 
 DynamicFont::~DynamicFont() {
 
-	if (dynamic_font_mutex)
+	if (dynamic_font_mutex) {
+
 		dynamic_font_mutex->lock();
-	dynamic_fonts.remove(&font_list);
-	if (dynamic_font_mutex)
+		dynamic_fonts->remove(&font_list);
 		dynamic_font_mutex->unlock();
+	}
 }
 
 void DynamicFont::initialize_dynamic_fonts() {
+	dynamic_fonts = memnew(SelfList<DynamicFont>::List());
 	dynamic_font_mutex = Mutex::create();
 }
 
 void DynamicFont::finish_dynamic_fonts() {
 	memdelete(dynamic_font_mutex);
 	dynamic_font_mutex = NULL;
+
+	memdelete(dynamic_fonts);
+	dynamic_fonts = NULL;
 }
 
 void DynamicFont::update_oversampling() {
@@ -930,7 +982,7 @@ void DynamicFont::update_oversampling() {
 	if (dynamic_font_mutex)
 		dynamic_font_mutex->lock();
 
-	SelfList<DynamicFont> *E = dynamic_fonts.first();
+	SelfList<DynamicFont> *E = dynamic_fonts->first();
 	while (E) {
 
 		if (E->self()->data_at_size.is_valid()) {

@@ -575,6 +575,8 @@ void register_scene_types() {
 	ObjectTypeDB::register_type<DynamicFontData>();
 	ObjectTypeDB::register_type<DynamicFont>();
 
+	DynamicFont::initialize_dynamic_fonts();
+
 	ObjectTypeDB::register_type<StyleBoxEmpty>();
 	ObjectTypeDB::register_type<StyleBoxTexture>();
 	ObjectTypeDB::register_type<StyleBoxFlat>();
@@ -639,6 +641,8 @@ void unregister_scene_types() {
 	memdelete(resource_loader_image);
 	memdelete(resource_loader_wav);
 	memdelete(resource_loader_dynamic_font);
+
+	DynamicFont::finish_dynamic_fonts();
 
 #ifdef TOOLS_ENABLED
 
