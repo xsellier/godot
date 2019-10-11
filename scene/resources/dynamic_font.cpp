@@ -288,9 +288,8 @@ Size2 DynamicFontAtSize::get_char_size(CharType p_char, CharType p_next, const V
 		ret.x = ch->advance;
 	}
 
-	// TODO: DECOMMENT IF NEEDED
 	// ensures oversampled glyphs will have enough space when this value is used by clipping/wrapping algorithms
-	// ret.x = Math::ceil(ret.x);
+	ret.x = Math::ceil(ret.x);
 
 	return ret;
 }
@@ -592,8 +591,7 @@ void DynamicFontAtSize::update_oversampling() {
 		return;
 
 	FT_Done_FreeType(library);
-	// TODO: UNCOMMENT IF NEEDED
-	// Do not clear it fucks up the cache
+
 	textures.clear();
 	char_map.clear();
 	oversampling = font_oversampling;
