@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -79,6 +79,11 @@ void MenuButton::_input_event(InputEvent p_event) {
 	BaseButton::_input_event(p_event);
 }
 
+void MenuButton::open_popup() {
+
+	pressed();
+}
+
 PopupMenu *MenuButton::get_popup() {
 
 	return popup;
@@ -95,6 +100,7 @@ void MenuButton::_set_items(const Array &p_items) {
 
 void MenuButton::_bind_methods() {
 
+	ObjectTypeDB::bind_method(_MD("open_popup"), &MenuButton::open_popup);
 	ObjectTypeDB::bind_method(_MD("get_popup:PopupMenu"), &MenuButton::get_popup);
 	ObjectTypeDB::bind_method(_MD("_unhandled_key_input"), &MenuButton::_unhandled_key_input);
 	ObjectTypeDB::bind_method(_MD("_set_items"), &MenuButton::_set_items);

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -36,53 +36,43 @@ uint32_t Math::default_seed = 1;
 
 #define PHI 0x9e3779b9
 
-#if 0
-static uint32_t Q[4096];
-#endif
-
 uint32_t Math::rand_from_seed(uint32_t *seed) {
 
-#if 1
 	uint32_t k;
 	uint32_t s = (*seed);
 	if (s == 0)
 		s = 0x12345987;
 	k = s / 127773;
 	s = 16807 * (s - k * 127773) - 2836 * k;
-	//	if (s < 0)
-	//		s += 2147483647;
+
 	(*seed) = s;
-	return (s & Math::RANDOM_MAX);
-#else
-	*seed = *seed * 1103515245 + 12345;
-	return (*seed % ((unsigned int)RANDOM_MAX + 1));
-#endif
+	return (uint32_t)(s & Math::RANDOM_MAX);
 }
 
 void Math::seed(uint32_t x) {
-#if 0
-	int i;
 
-	Q[0] = x;
-	Q[1] = x + PHI;
-	Q[2] = x + PHI + PHI;
-
-	for (i = 3; i < 4096; i++)
-		Q[i] = Q[i - 3] ^ Q[i - 2] ^ PHI ^ i;
-#else
 	default_seed = x;
-#endif
+}
+
+uint32_t Math::generate_seed() {
+	uint32_t timestamp = OS::get_singleton()->get_unix_time() + rand();
+
+	return timestamp;
 }
 
 void Math::randomize() {
 
-	OS::Time time = OS::get_singleton()->get_time();
-	seed(OS::get_singleton()->get_ticks_usec() * (time.hour + 1) * (time.min + 1) * (time.sec + 1) * rand()); /* *OS::get_singleton()->get_time().sec); // windows doesn't have get_time(), returns always 0 */
+	seed(generate_seed());
 }
 
 uint32_t Math::rand() {
 
 	return rand_from_seed(&default_seed) & 0x7FFFFFFF;
+}
+
+uint32_t Math::randomi(uint32_t from, uint32_t to) {
+
+	return (Math::rand() % (to - from)) + from;
 }
 
 double Math::randf() {

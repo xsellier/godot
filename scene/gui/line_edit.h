@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -71,6 +71,7 @@ private:
 	String placeholder;
 	float placeholder_alpha;
 
+	bool context_menu_enabled;
 	PopupMenu *menu;
 
 	int cursor_pos;
@@ -132,6 +133,8 @@ public:
 	virtual CursorShape get_cursor_shape(const Point2 &p_pos) const;
 
 	void menu_option(int p_option);
+	void set_context_menu_enabled(bool p_enable);
+	bool is_context_menu_enabled();
 	PopupMenu *get_menu() const;
 
 	void select_all();

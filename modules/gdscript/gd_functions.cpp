@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -74,6 +74,7 @@ const char *GDFunctions::get_func_name(Function p_func) {
 		"randi",
 		"randf",
 		"rand_range",
+		"randi_range",
 		"seed",
 		"rand_seed",
 		"deg2rad",
@@ -95,6 +96,7 @@ const char *GDFunctions::get_func_name(Function p_func) {
 		"prints",
 		"printerr",
 		"printraw",
+		"uuidv4_text",
 		"var2str",
 		"str2var",
 		"var2bytes",
@@ -107,6 +109,7 @@ const char *GDFunctions::get_func_name(Function p_func) {
 		"Color8",
 		"ColorN",
 		"print_stack",
+		"get_stack",
 		"instance_from_id",
 	};
 
@@ -343,6 +346,12 @@ void GDFunctions::call(Function p_func, const Variant **p_args, int p_arg_count,
 			VALIDATE_ARG_NUM(1);
 			r_ret = Math::random(*p_args[0], *p_args[1]);
 		} break;
+		case MATH_RANDOMI: {
+			VALIDATE_ARG_COUNT(2);
+			VALIDATE_ARG_NUM(0);
+			VALIDATE_ARG_NUM(1);
+			r_ret = Math::randomi(*p_args[0], *p_args[1]);
+		} break;
 		case MATH_SEED: {
 			VALIDATE_ARG_COUNT(1);
 			VALIDATE_ARG_NUM(0);
@@ -547,6 +556,9 @@ void GDFunctions::call(Function p_func, const Variant **p_args, int p_arg_count,
 
 			r_ret = str;
 
+		} break;
+		case TEXT_UUIDV4: {
+			r_ret = String::uuidv4_text();
 		} break;
 		case TEXT_PRINT: {
 
@@ -1068,12 +1080,29 @@ void GDFunctions::call(Function p_func, const Variant **p_args, int p_arg_count,
 		} break;
 
 		case PRINT_STACK: {
+			VALIDATE_ARG_COUNT(0);
 
 			ScriptLanguage *script = GDScriptLanguage::get_singleton();
 			for (int i = 0; i < script->debug_get_stack_level_count(); i++) {
 
 				print_line("Frame " + itos(i) + " - " + script->debug_get_stack_level_source(i) + ":" + itos(script->debug_get_stack_level_line(i)) + " in function '" + script->debug_get_stack_level_function(i) + "'");
 			};
+		} break;
+
+		case GET_STACK: {
+			VALIDATE_ARG_COUNT(0);
+
+			ScriptLanguage *script = GDScriptLanguage::get_singleton();
+			Array ret;
+			for (int i = 0; i < script->debug_get_stack_level_count(); i++) {
+
+				Dictionary frame;
+				frame["source"] = script->debug_get_stack_level_source(i);
+				frame["function"] = script->debug_get_stack_level_function(i);
+				frame["line"] = script->debug_get_stack_level_line(i);
+				ret.push_back(frame);
+			};
+			r_ret = ret;
 		} break;
 
 		case INSTANCE_FROM_ID: {
@@ -1323,6 +1352,11 @@ MethodInfo GDFunctions::get_info(Function p_func) {
 			mi.return_val.type = Variant::REAL;
 			return mi;
 		} break;
+		case MATH_RANDOMI: {
+			MethodInfo mi("randi_range", PropertyInfo(Variant::INT, "from"), PropertyInfo(Variant::INT, "to"));
+			mi.return_val.type = Variant::INT;
+			return mi;
+		} break;
 		case MATH_SEED: {
 			MethodInfo mi("seed", PropertyInfo(Variant::INT, "seed"));
 			mi.return_val.type = Variant::NIL;
@@ -1414,6 +1448,12 @@ MethodInfo GDFunctions::get_info(Function p_func) {
 		case TEXT_STR: {
 
 			MethodInfo mi("str", PropertyInfo(Variant::NIL, "what"), PropertyInfo(Variant::NIL, "..."));
+			mi.return_val.type = Variant::STRING;
+			return mi;
+
+		} break;
+		case TEXT_UUIDV4: {
+			MethodInfo mi("uuidv4_text");
 			mi.return_val.type = Variant::STRING;
 			return mi;
 
@@ -1523,6 +1563,12 @@ MethodInfo GDFunctions::get_info(Function p_func) {
 
 		case PRINT_STACK: {
 			MethodInfo mi("print_stack");
+			mi.return_val.type = Variant::NIL;
+			return mi;
+		} break;
+
+		case GET_STACK: {
+			MethodInfo mi("get_stack");
 			mi.return_val.type = Variant::NIL;
 			return mi;
 		} break;

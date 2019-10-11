@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -67,6 +67,7 @@ public:
 		MATH_RAND,
 		MATH_RANDF,
 		MATH_RANDOM,
+		MATH_RANDOMI,
 		MATH_SEED,
 		MATH_RANDSEED,
 		MATH_DEG2RAD,
@@ -88,6 +89,7 @@ public:
 		TEXT_PRINT_SPACED,
 		TEXT_PRINTERR,
 		TEXT_PRINTRAW,
+		TEXT_UUIDV4,
 		VAR_TO_STR,
 		STR_TO_VAR,
 		VAR_TO_BYTES,
@@ -100,6 +102,7 @@ public:
 		COLOR8,
 		COLORN,
 		PRINT_STACK,
+		GET_STACK,
 		INSTANCE_FROM_ID,
 		FUNC_MAX
 

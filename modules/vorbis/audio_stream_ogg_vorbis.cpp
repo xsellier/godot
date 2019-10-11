@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -47,7 +47,7 @@ size_t AudioStreamPlaybackOGGVorbis::_ov_read_func(void *p_dst, size_t p_data, s
 
 int AudioStreamPlaybackOGGVorbis::_ov_seek_func(void *_f, ogg_int64_t offs, int whence) {
 
-//printf("seek to %p, offs %i, whence %i\n",_f,(int)offs,whence);
+	//printf("seek to %p, offs %i, whence %i\n",_f,(int)offs,whence);
 
 #ifdef SEEK_SET
 	//printf("seek set defined\n");
@@ -106,7 +106,7 @@ int AudioStreamPlaybackOGGVorbis::mix(int16_t *p_bufer, int p_frames) {
 			break;
 		}
 
-			//printf("to mix %i - mix me %i bytes\n",to_mix,to_mix*stream_channels*sizeof(int16_t));
+		//printf("to mix %i - mix me %i bytes\n",to_mix,to_mix*stream_channels*sizeof(int16_t));
 
 #ifdef BIG_ENDIAN_ENABLED
 		long ret = ov_read(&vf, (char *)p_bufer, todo * stream_channels * sizeof(int16_t), 1, 2, 1, &current_section);
@@ -117,8 +117,7 @@ int AudioStreamPlaybackOGGVorbis::mix(int16_t *p_bufer, int p_frames) {
 		if (ret < 0) {
 
 			playing = false;
-			ERR_EXPLAIN("Error reading OGG Vorbis File: " + file);
-			ERR_BREAK(ret < 0);
+			break;
 		} else if (ret == 0) { // end of song, reload?
 
 			ov_clear(&vf);

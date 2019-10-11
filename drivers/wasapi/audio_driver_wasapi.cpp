@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -150,20 +150,17 @@ Error AudioDriverWASAPI::init_device(bool reinit) {
 
 	// Since we're using WASAPI Shared Mode we can't control any of these, we just tag along
 	wasapi_channels = pwfex->nChannels;
-	mix_rate = pwfex->nSamplesPerSec;
 	format_tag = pwfex->wFormatTag;
 	bits_per_sample = pwfex->wBitsPerSample;
 
 	switch (wasapi_channels) {
 		case 2: // Stereo
-			//case 6: // Surround 5.1
-			//case 8: // Surround 7.1
 			channels = wasapi_channels;
 			break;
 
 		default:
-			WARN_PRINTS("WASAPI: Unsupported number of channels (" + itos(wasapi_channels) + ")");
-			channels = 2;
+			ERR_PRINT("WASAPI: Number of channel not supported");
+			ERR_FAIL_V(ERR_PARAMETER_RANGE_ERROR);
 	}
 
 	if (format_tag == WAVE_FORMAT_EXTENSIBLE) {
@@ -184,7 +181,14 @@ Error AudioDriverWASAPI::init_device(bool reinit) {
 		}
 	}
 
-	hr = audio_client->Initialize(AUDCLNT_SHAREMODE_SHARED, AUDCLNT_STREAMFLAGS_EVENTCALLBACK, 0, 0, pwfex, NULL);
+	DWORD streamflags = AUDCLNT_STREAMFLAGS_EVENTCALLBACK;
+	if (mix_rate != pwfex->nSamplesPerSec) {
+		streamflags |= AUDCLNT_STREAMFLAGS_RATEADJUST;
+		pwfex->nSamplesPerSec = mix_rate;
+		pwfex->nAvgBytesPerSec = pwfex->nSamplesPerSec * pwfex->nChannels * (pwfex->wBitsPerSample / 8);
+	}
+
+	hr = audio_client->Initialize(AUDCLNT_SHAREMODE_SHARED, streamflags, 0, 0, pwfex, NULL);
 	ERR_FAIL_COND_V(hr != S_OK, ERR_CANT_OPEN);
 
 	event = CreateEvent(NULL, FALSE, FALSE, NULL);
@@ -219,10 +223,11 @@ Error AudioDriverWASAPI::finish_device() {
 	if (audio_client) {
 		if (active) {
 			audio_client->Stop();
-			audio_client->Release();
-			audio_client = NULL;
 			active = false;
 		}
+
+		audio_client->Release();
+		audio_client = NULL;
 	}
 
 	if (render_client) {
@@ -240,9 +245,12 @@ Error AudioDriverWASAPI::finish_device() {
 
 Error AudioDriverWASAPI::init() {
 
+	mix_rate = GLOBAL_DEF("audio/mix_rate", 44100);
+
 	Error err = init_device();
 	if (err != OK) {
 		ERR_PRINT("WASAPI: init_device error");
+		ERR_FAIL_V(err);
 	}
 
 	active = false;
@@ -277,7 +285,13 @@ int AudioDriverWASAPI::get_mix_rate() const {
 }
 
 AudioDriverSW::OutputFormat AudioDriverWASAPI::get_output_format() const {
+	switch (channels) {
+		case 4: return OUTPUT_QUAD;
+		case 6: return OUTPUT_5_1;
+		case 8: return OUTPUT_7_1;
+	}
 
+	// Default to STEREO
 	return OUTPUT_STEREO;
 }
 
@@ -409,6 +423,9 @@ void AudioDriverWASAPI::thread_func(void *p_udata) {
 			Error err = ad->init_device(true);
 			if (err == OK) {
 				ad->start();
+			} else {
+				ERR_PRINT("WASAPI: init_device error");
+				ad->exit_thread = true;
 			}
 		}
 	}

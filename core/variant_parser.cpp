@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -1937,7 +1937,8 @@ Error VariantWriter::write(const Variant &p_variant, StoreStringFunc p_store_str
 				case Image::FORMAT_ATC_ALPHA_EXPLICIT: imgstr += "ATC_ALPHA_EXPLICIT"; break;
 				case Image::FORMAT_ATC_ALPHA_INTERPOLATED: imgstr += "ATC_ALPHA_INTERPOLATED"; break;
 				case Image::FORMAT_CUSTOM: imgstr += "CUSTOM"; break;
-				default: {}
+				default: {
+				}
 			}
 
 			String s;
@@ -2031,7 +2032,8 @@ Error VariantWriter::write(const Variant &p_variant, StoreStringFunc p_store_str
 				case InputEvent::NONE: {
 					str += "NONE";
 				} break;
-				default: {}
+				default: {
+				}
 			}
 
 			str += ")";
@@ -2209,7 +2211,8 @@ Error VariantWriter::write(const Variant &p_variant, StoreStringFunc p_store_str
 			p_store_string_func(p_store_string_ud, " )");
 
 		} break;
-		default: {}
+		default: {
+		}
 	}
 
 	return OK;

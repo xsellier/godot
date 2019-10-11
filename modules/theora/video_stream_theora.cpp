@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -661,7 +661,7 @@ void VideoStreamPlaybackTheora::update(float p_delta) {
 			}
 		}
 
-			//print_line("no theora: "+itos(no_theora)+" theora eos: "+itos(theora_eos)+" frame done "+itos(frame_done));
+		//print_line("no theora: "+itos(no_theora)+" theora eos: "+itos(theora_eos)+" frame done "+itos(frame_done));
 
 #ifdef THEORA_USE_THREAD_STREAMING
 		if (file && thread_eof && no_theora && theora_eos && ring_buffer.data_left() == 0) {

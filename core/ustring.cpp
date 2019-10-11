@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -29,6 +29,7 @@
 /*************************************************************************/
 #include "ustring.h"
 #include "color.h"
+#include "core/os/os.h"
 #include "math_funcs.h"
 #include "os/memory.h"
 #include "print_string.h"
@@ -55,6 +56,7 @@
 #endif
 
 /** STRING **/
+char *UUID_DELIMITER = "-";
 
 const char *CharString::get_data() const {
 
@@ -815,6 +817,47 @@ const CharType *String::c_str() const {
 	return size() ? &operator[](0) : &zero;
 }
 
+String String::uuidv4_text() {
+	uint32_t timestamp = OS::get_singleton()->get_unix_time();
+	uint32_t ticks = OS::get_singleton()->get_ticks_msec();
+	uint32_t seed = Math::generate_seed();
+	uint8_t bytes[16] = {
+		// time low
+		(uint8_t)((timestamp)&0xff),
+		(uint8_t)((timestamp << 1) & 0xff),
+		(uint8_t)((timestamp << 2) & 0xff),
+		(uint8_t)((timestamp << 3) & 0xff),
+
+		// time mid
+		(uint8_t)((timestamp << 4) & 0xff),
+		(uint8_t)((timestamp << 5) & 0xff),
+
+		// time high
+		(uint8_t)((timestamp << 6) & 0xff),
+		(uint8_t)((timestamp << 7) & 0xff),
+
+		// clock seq hi
+		(uint8_t)((ticks << 1) & 0x0f | 0x40),
+
+		// clock seq low
+		(uint8_t)((ticks)&0xff),
+
+		// node
+		(uint8_t)(Math::rand_from_seed(&seed) & 0x3f | 0x80),
+		(uint8_t)(Math::rand_from_seed(&seed) & 0xff),
+		(uint8_t)(Math::rand_from_seed(&seed) & 0xff),
+		(uint8_t)(Math::rand_from_seed(&seed) & 0xff),
+		(uint8_t)(Math::rand_from_seed(&seed) & 0xff),
+		(uint8_t)(Math::rand_from_seed(&seed) & 0xff)
+	};
+
+	return String::hex_encode_buffer(bytes, 16)
+			.insert(8, UUID_DELIMITER)
+			.insert(13, UUID_DELIMITER)
+			.insert(18, UUID_DELIMITER)
+			.insert(23, UUID_DELIMITER);
+}
+
 String String::md5(const uint8_t *p_md5) {
 	return String::hex_encode_buffer(p_md5, 16);
 }
@@ -1220,8 +1263,11 @@ _FORCE_INLINE static int parse_utf8_char(const char *p_utf8,unsigned int *p_ucs4
 #endif
 bool String::parse_utf8(const char *p_utf8, int p_len) {
 
+#ifdef DEBUG_ENABLED
 #define _UNICERROR(m_err) print_line("unicode error: " + String(m_err));
-
+#else
+#define _UNICERROR(m_err)
+#endif
 	String aux;
 
 	int cstr_size = 0;
@@ -1507,6 +1553,52 @@ int String::hex_to_int(bool p_with_prefix) const {
 
 		CharType c = LOWERCASE(*s);
 		int n;
+		if (c >= '0' && c <= '9') {
+			n = c - '0';
+		} else if (c >= 'a' && c <= 'f') {
+			n = (c - 'a') + 10;
+		} else {
+			return 0;
+		}
+
+		hex *= 16;
+		hex += n;
+		s++;
+	}
+
+	return hex * sign;
+}
+
+int64_t String::hex_to_int64(bool p_with_prefix) const {
+
+	int l = length();
+	if (p_with_prefix && l < 3)
+		return 0;
+
+	const CharType *s = ptr();
+
+	int64_t sign = s[0] == '-' ? -1 : 1;
+
+	if (sign < 0) {
+		s++;
+		l--;
+		if (p_with_prefix && l < 2)
+			return 0;
+	}
+
+	if (p_with_prefix) {
+		if (s[0] != '0' || s[1] != 'x')
+			return 0;
+		s += 2;
+		l -= 2;
+	};
+
+	int64_t hex = 0;
+
+	while (*s) {
+
+		CharType c = LOWERCASE(*s);
+		int64_t n;
 		if (c >= '0' && c <= '9') {
 			n = c - '0';
 		} else if (c >= 'a' && c <= 'f') {

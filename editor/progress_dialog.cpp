@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -161,6 +161,11 @@ void ProgressDialog::_popup() {
 }
 
 void ProgressDialog::add_task(const String &p_task, const String &p_label, int p_steps) {
+
+	if (MessageQueue::get_singleton()->is_flushing()) {
+		ERR_PRINT("Do not use progress dialog (task) while flushing the message queue or using call_deferred()!");
+		return;
+	}
 
 	ERR_FAIL_COND(tasks.has(p_task));
 	Task t;

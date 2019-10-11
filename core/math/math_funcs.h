@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -70,6 +70,7 @@ public:
 	static int step_decimals(double p_step);
 	static double stepify(double p_value, double p_step);
 	static void seed(uint32_t x = 0);
+	static uint32_t generate_seed();
 	static void randomize();
 	static uint32_t larger_prime(uint32_t p_val);
 	static double dectime(double p_value, double p_amount, double p_step);
@@ -93,6 +94,7 @@ public:
 	static double round(double p_val);
 
 	static double random(double from, double to);
+	static uint32_t randomi(uint32_t from, uint32_t to);
 
 	static _FORCE_INLINE_ real_t abs(real_t g) {
 

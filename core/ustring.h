@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -67,7 +67,7 @@ class String : public Vector<CharType> {
 
 public:
 	enum {
-
+		UUIDV4_RANGE = 16,
 		npos = -1 ///<for "some" compatibility with std::string (npos is a huge value in std::string)
 	};
 
@@ -135,12 +135,14 @@ public:
 	static String num_real(double p_num);
 	static String num_int64(int64_t p_num, int base = 10, bool capitalize_hex = false);
 	static String chr(CharType p_char);
+	static String uuidv4_text();
 	static String md5(const uint8_t *p_md5);
 	static String hex_encode_buffer(const uint8_t *p_buffer, int p_len);
 	bool is_numeric() const;
 	double to_double() const;
 	float to_float() const;
 	int hex_to_int(bool p_with_prefix = true) const;
+	int64_t hex_to_int64(bool p_with_prefix = true) const;
 	int to_int() const;
 
 	int64_t to_int64() const;

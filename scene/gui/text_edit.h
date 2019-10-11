@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -317,6 +317,7 @@ class TextEdit : public Control {
 
 	DVector<int> _search_bind(const String &p_key, uint32_t p_search_flags, int p_from_line, int p_from_column) const;
 
+	bool context_menu_enabled;
 	PopupMenu *menu;
 
 	void _clear();
@@ -507,6 +508,8 @@ public:
 	void set_code_hint(const String &p_hint);
 	void query_code_comple();
 
+	bool is_context_menu_enabled();
+	void set_context_menu_enabled(bool p_enable);
 	PopupMenu *get_menu() const;
 
 	String get_text_for_completion();

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -314,6 +314,8 @@ void MessageQueue::flush() {
 	//using reverse locking strategy
 	_THREAD_SAFE_LOCK_
 
+	flushing = true;
+
 	while (read_pos < buffer_end) {
 
 		//lock on each interation, so a call can re-add itself to the message queue
@@ -370,13 +372,20 @@ void MessageQueue::flush() {
 	}
 
 	buffer_end = 0; // reset buffer
+	flushing = false;
 	_THREAD_SAFE_UNLOCK_
+}
+
+bool MessageQueue::is_flushing() const {
+
+	return flushing;
 }
 
 MessageQueue::MessageQueue() {
 
 	ERR_FAIL_COND(singleton != NULL);
 	singleton = this;
+	flushing = false;
 
 	buffer_end = 0;
 	buffer_max_used = 0;

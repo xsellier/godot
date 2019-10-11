@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -127,8 +127,8 @@ static String unescape_cmdline(const String &p_str) {
 void Main::print_help(const char *p_binary) {
 
 	OS::get_singleton()->print(VERSION_FULL_NAME " - https://godotengine.org\n");
-	OS::get_singleton()->print("(c) 2007-2018 Juan Linietsky, Ariel Manzur.\n");
-	OS::get_singleton()->print("(c) 2014-2018 Godot Engine contributors.\n");
+	OS::get_singleton()->print("(c) 2007-2019 Juan Linietsky, Ariel Manzur.\n");
+	OS::get_singleton()->print("(c) 2014-2019 Godot Engine contributors.\n");
 	OS::get_singleton()->print("\n");
 	OS::get_singleton()->print("Usage: %s [options] [path to scene or 'engine.cfg' file]\n", p_binary);
 	OS::get_singleton()->print("\n");
@@ -1477,12 +1477,20 @@ float Main::time_accum = 0;
 uint32_t Main::frames = 0;
 uint32_t Main::frame = 0;
 bool Main::force_redraw_requested = false;
+bool Main::iterating = false;
+bool Main::is_iterating() {
+	return iterating;
+}
 
 //for performance metrics
 static uint64_t fixed_process_max = 0;
 static uint64_t idle_process_max = 0;
 
 bool Main::iteration() {
+
+	// ERR_FAIL_COND_V(iterating, false);
+
+	iterating = true;
 
 	uint64_t ticks = OS::get_singleton()->get_ticks_usec();
 	uint64_t ticks_elapsed = ticks - last_ticks;
@@ -1610,6 +1618,8 @@ bool Main::iteration() {
 		frame %= 1000000;
 		frames = 0;
 	}
+
+	iterating = false;
 
 	if (OS::get_singleton()->is_in_low_processor_usage_mode() || !OS::get_singleton()->can_draw())
 		OS::get_singleton()->delay_usec(16600); //apply some delay to force idle time (results in about 60 FPS max)

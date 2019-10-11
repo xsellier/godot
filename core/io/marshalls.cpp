@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,15 +27,20 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #include "marshalls.h"
 #include "os/keyboard.h"
 #include "print_string.h"
+#include "reference.h"
 #include <limits.h>
 #include <stdio.h>
 
 #define _S(a) ((int32_t)a)
 #define ERR_FAIL_ADD_OF(a, b, err) ERR_FAIL_COND_V(_S(b) < 0 || _S(a) < 0 || _S(a) > INT_MAX - _S(b), err)
 #define ERR_FAIL_MUL_OF(a, b, err) ERR_FAIL_COND_V(_S(a) < 0 || _S(b) <= 0 || _S(a) > INT_MAX / _S(b), err)
+
+#define ENCODE_MASK 0xFF
+#define ENCODE_FLAG_64 1 << 16
 
 static Error _decode_string(const uint8_t *&buf, int &len, int *r_len, String &r_string) {
 	ERR_FAIL_COND_V(len < 4, ERR_INVALID_DATA);
@@ -65,7 +70,6 @@ static Error _decode_string(const uint8_t *&buf, int &len, int *r_len, String &r
 	// Update buffer pos, left data count, and return size
 	buf += strlen;
 	len -= strlen;
-
 	if (r_len) {
 		(*r_len) += 4 + strlen;
 	}
@@ -85,14 +89,14 @@ Error decode_variant(Variant &r_variant, const uint8_t *p_buffer, int p_len, int
 
 	uint32_t type = decode_uint32(buf);
 
-	ERR_FAIL_COND_V(type >= Variant::VARIANT_MAX, ERR_INVALID_DATA);
+	ERR_FAIL_COND_V((type & ENCODE_MASK) >= Variant::VARIANT_MAX, ERR_INVALID_DATA);
 
 	buf += 4;
 	len -= 4;
 	if (r_len)
 		*r_len = 4;
 
-	switch (type) {
+	switch (type & ENCODE_MASK) {
 
 		case Variant::NIL: {
 
@@ -108,20 +112,37 @@ Error decode_variant(Variant &r_variant, const uint8_t *p_buffer, int p_len, int
 		} break;
 		case Variant::INT: {
 
-			ERR_FAIL_COND_V(len < 4, ERR_INVALID_DATA);
-			int32_t val = decode_uint32(buf);
-			r_variant = val;
-			if (r_len)
-				(*r_len) += 4;
+			if (type & ENCODE_FLAG_64) {
+				ERR_FAIL_COND_V(len < 8, ERR_INVALID_DATA);
+				int64_t val = decode_uint64(buf);
+				r_variant = val;
+				if (r_len)
+					(*r_len) += 8;
+
+			} else {
+				ERR_FAIL_COND_V(len < 4, ERR_INVALID_DATA);
+				int32_t val = decode_uint32(buf);
+				r_variant = val;
+				if (r_len)
+					(*r_len) += 4;
+			}
 
 		} break;
 		case Variant::REAL: {
 
-			ERR_FAIL_COND_V(len < 4, ERR_INVALID_DATA);
-			float val = decode_float(buf);
-			r_variant = val;
-			if (r_len)
-				(*r_len) += 4;
+			if (type & ENCODE_FLAG_64) {
+				ERR_FAIL_COND_V(len < 8, ERR_INVALID_DATA);
+				double val = decode_double(buf);
+				r_variant = val;
+				if (r_len)
+					(*r_len) += 8;
+			} else {
+				ERR_FAIL_COND_V(len < 4, ERR_INVALID_DATA);
+				float val = decode_float(buf);
+				r_variant = val;
+				if (r_len)
+					(*r_len) += 4;
+			}
 
 		} break;
 		case Variant::STRING: {
@@ -339,7 +360,7 @@ Error decode_variant(Variant &r_variant, const uint8_t *p_buffer, int p_len, int
 				len -= 12;
 				buf += 12;
 
-				int total = namecount + subnamecount;
+				uint32_t total = namecount + subnamecount;
 				if (flags & 2)
 					total++;
 
@@ -756,7 +777,9 @@ Error decode_variant(Variant &r_variant, const uint8_t *p_buffer, int p_len, int
 			r_variant = carray;
 
 		} break;
-		default: { ERR_FAIL_V(ERR_BUG); }
+		default: {
+			ERR_FAIL_V(ERR_BUG);
+		}
 	}
 
 	return OK;
@@ -768,8 +791,28 @@ Error encode_variant(const Variant &p_variant, uint8_t *r_buffer, int &r_len) {
 
 	r_len = 0;
 
+	uint32_t flags = 0;
+
+	switch (p_variant.get_type()) {
+
+		case Variant::INT: {
+			int64_t val = p_variant;
+			if (val > (int64_t)INT_MAX || val < (int64_t)INT_MIN) {
+				flags |= ENCODE_FLAG_64;
+			}
+		} break;
+		case Variant::REAL: {
+
+			double d = p_variant;
+			float f = d;
+			if (double(f) != d) {
+				flags |= ENCODE_FLAG_64; //always encode real as double
+			}
+		} break;
+	}
+
 	if (buf) {
-		encode_uint32(p_variant.get_type(), buf);
+		encode_uint32(p_variant.get_type() | flags, buf);
 		buf += 4;
 	}
 	r_len += 4;
@@ -791,20 +834,40 @@ Error encode_variant(const Variant &p_variant, uint8_t *r_buffer, int &r_len) {
 		} break;
 		case Variant::INT: {
 
-			if (buf) {
-				encode_uint32(p_variant.operator int(), buf);
-			}
+			int64_t val = p_variant;
+			if (flags & ENCODE_FLAG_64) {
+				//64 bits
+				if (buf) {
+					encode_uint64(p_variant.operator int64_t(), buf);
+				}
 
-			r_len += 4;
+				r_len += 8;
+			} else {
+				if (buf) {
+					encode_uint32(p_variant.operator int32_t(), buf);
+				}
+
+				r_len += 4;
+			}
 
 		} break;
 		case Variant::REAL: {
 
-			if (buf) {
-				encode_float(p_variant.operator float(), buf);
-			}
+			if (flags & ENCODE_FLAG_64) {
+				if (buf) {
+					encode_double(p_variant.operator double(), buf);
+				}
 
-			r_len += 4;
+				r_len += 8;
+
+			} else {
+
+				if (buf) {
+					encode_float(p_variant.operator float(), buf);
+				}
+
+				r_len += 4;
+			}
 
 		} break;
 		case Variant::NODE_PATH: {
@@ -867,11 +930,17 @@ Error encode_variant(const Variant &p_variant, uint8_t *r_buffer, int &r_len) {
 				encode_uint32(utf8.length(), buf);
 				buf += 4;
 				copymem(buf, utf8.get_data(), utf8.length());
+				buf += utf8.length();
 			}
 
 			r_len += 4 + utf8.length();
-			while (r_len % 4)
+			while (r_len % 4) {
 				r_len++; //pad
+
+				if (buf) {
+					buf++;
+				}
+			}
 
 		} break;
 
@@ -1359,7 +1428,9 @@ Error encode_variant(const Variant &p_variant, uint8_t *r_buffer, int &r_len) {
 			r_len += 4 * 4 * len;
 
 		} break;
-		default: { ERR_FAIL_V(ERR_BUG); }
+		default: {
+			ERR_FAIL_V(ERR_BUG);
+		}
 	}
 
 	return OK;

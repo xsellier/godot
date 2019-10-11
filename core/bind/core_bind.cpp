@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -2224,6 +2224,7 @@ void _Thread::_start_func(void *ud) {
 	Thread::set_name(t->target_method);
 
 	t->ret = t->target_instance->call(t->target_method, arg, 1, ce);
+	t->emit_signal(CoreStringNames::get_singleton()->thread_finished);
 	if (ce.error != Variant::CallError::CALL_OK) {
 
 		String reason;
@@ -2244,7 +2245,8 @@ void _Thread::_start_func(void *ud) {
 
 				reason = "Method Not Found";
 			} break;
-			default: {}
+			default: {
+			}
 		}
 
 		ERR_EXPLAIN("Could not call function '" + t->target_method.operator String() + "'' starting thread ID: " + t->get_id() + " Reason: " + reason);
@@ -2314,6 +2316,8 @@ void _Thread::_bind_methods() {
 	ObjectTypeDB::bind_method(_MD("get_id"), &_Thread::get_id);
 	ObjectTypeDB::bind_method(_MD("is_active"), &_Thread::is_active);
 	ObjectTypeDB::bind_method(_MD("wait_to_finish:Variant"), &_Thread::wait_to_finish);
+
+	ADD_SIGNAL(MethodInfo("thread_finished"));
 
 	BIND_CONSTANT(PRIORITY_LOW);
 	BIND_CONSTANT(PRIORITY_NORMAL);

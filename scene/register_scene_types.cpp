@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -575,6 +575,8 @@ void register_scene_types() {
 	ObjectTypeDB::register_type<DynamicFontData>();
 	ObjectTypeDB::register_type<DynamicFont>();
 
+	DynamicFont::initialize_dynamic_fonts();
+
 	ObjectTypeDB::register_type<StyleBoxEmpty>();
 	ObjectTypeDB::register_type<StyleBoxTexture>();
 	ObjectTypeDB::register_type<StyleBoxFlat>();
@@ -639,6 +641,8 @@ void unregister_scene_types() {
 	memdelete(resource_loader_image);
 	memdelete(resource_loader_wav);
 	memdelete(resource_loader_dynamic_font);
+
+	DynamicFont::finish_dynamic_fonts();
 
 #ifdef TOOLS_ENABLED
 

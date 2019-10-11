@@ -568,7 +568,9 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 					mb.pressed=true;
 					mb.button_index=(HIWORD(wParam)==XBUTTON1)?6:7;
 				} break;*/
-					default: { return 0; }
+					default: {
+						return 0;
+					}
 				}
 
 				mb.mod.control = (wParam & MK_CONTROL) != 0;
@@ -650,7 +652,9 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 		case WM_TIMER: {
 			if (wParam == move_timer_id) {
 				process_key_events();
-				Main::iteration();
+				if (!Main::is_iterating()) {
+					Main::iteration();
+				}
 			}
 		} break;
 
@@ -937,12 +941,33 @@ static int QueryDpiForMonitor(HMONITOR hmon, _MonitorDpiType dpiType = MDT_Defau
 	return (dpiX + dpiY) / 2;
 }
 
+typedef enum _SHC_PROCESS_DPI_AWARENESS {
+	SHC_PROCESS_DPI_UNAWARE = 0,
+	SHC_PROCESS_SYSTEM_DPI_AWARE = 1,
+	SHC_PROCESS_PER_MONITOR_DPI_AWARE = 2
+} SHC_PROCESS_DPI_AWARENESS;
+
 void OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int p_audio_driver) {
 
 	main_loop = NULL;
 	outside = true;
 
 	WNDCLASSEXW wc;
+
+	if (is_hidpi_allowed()) {
+		HMODULE Shcore = LoadLibraryW(L"Shcore.dll");
+		;
+
+		if (Shcore != NULL) {
+			typedef HRESULT(WINAPI * SetProcessDpiAwareness_t)(SHC_PROCESS_DPI_AWARENESS);
+
+			SetProcessDpiAwareness_t SetProcessDpiAwareness = (SetProcessDpiAwareness_t)GetProcAddress(Shcore, "SetProcessDpiAwareness");
+
+			if (SetProcessDpiAwareness) {
+				SetProcessDpiAwareness(SHC_PROCESS_SYSTEM_DPI_AWARE);
+			}
+		}
+	}
 
 	video_mode = p_desired;
 	//printf("**************** desired %s, mode %s\n", p_desired.fullscreen?"true":"false", video_mode.fullscreen?"true":"false");
@@ -1104,11 +1129,17 @@ void OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int 
 	input = memnew(InputDefault);
 	joystick = memnew(joystick_windows(input, &hWnd));
 
-	AudioDriverManagerSW::get_driver(p_audio_driver)->set_singleton();
+	int audio_driver_next = p_audio_driver;
 
-	if (AudioDriverManagerSW::get_driver(p_audio_driver)->init() != OK) {
+	while (audio_driver_next < AudioDriverManagerSW::get_driver_count()) {
+		AudioDriverManagerSW::get_driver(audio_driver_next)->set_singleton();
 
-		ERR_PRINT("Initializing audio failed.");
+		if (AudioDriverManagerSW::get_driver(audio_driver_next)->init() == OK) {
+			break;
+		} else {
+			AudioDriverManagerSW::get_driver(audio_driver_next)->finish();
+			audio_driver_next++;
+		}
 	}
 
 	sample_manager = memnew(SampleManagerMallocSW);

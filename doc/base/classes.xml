@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<doc version="2.1.5.rc.custom_build" name="Engine Types">
+<doc version="2.1.6.stable.official" name="Engine Types">
 <class name="@GDScript" category="Core">
 	<brief_description>
 		Built-in GDScript functions.
@@ -19925,6 +19925,13 @@
 				Return the text in the [LineEdit].
 			</description>
 		</method>
+		<method name="is_context_menu_enabled" qualifiers="const">
+			<return type="bool">
+			</return>
+			<description>
+				Returns true if the context menu is enabled.
+			</description>
+		</method>
 		<method name="is_editable" qualifiers="const">
 			<return type="bool">
 			</return>
@@ -19962,6 +19969,15 @@
 			<argument index="0" name="align" type="int">
 			</argument>
 			<description>
+			</description>
+		</method>
+		<method name="set_context_menu_enabled">
+			<return type="void">
+			</return>
+			<argument index="0" name="enabled" type="bool">
+			</argument>
+			<description>
+				Set the status of the context menu. When enabled, the context menu will appear when the [code]LineEdit[/code] is right clicked.
 			</description>
 		</method>
 		<method name="set_cursor_pos">
@@ -41026,6 +41042,13 @@
 				Insert a given text at the cursor position.
 			</description>
 		</method>
+		<method name="is_context_menu_enabled" qualifiers="const">
+			<return type="bool">
+			</return>
+			<description>
+				Returns true if the context menu is enabled.
+			</description>
+		</method>
 		<method name="is_highlight_all_occurrences_enabled" qualifiers="const">
 			<return type="bool">
 			</return>
@@ -41108,6 +41131,15 @@
 			</argument>
 			<description>
 				Set a custom background color. A background color with alpha==0 disables this.
+			</description>
+		</method>
+		<method name="set_context_menu_enabled">
+			<return type="void">
+			</return>
+			<argument index="0" name="enabled" type="bool">
+			</argument>
+			<description>
+				Set the status of the context menu. When enabled, the context menu will appear when the [code]TextEdit[/code] is right clicked.
 			</description>
 		</method>
 		<method name="set_highlight_all_occurrences">
@@ -42019,6 +42051,13 @@
 	<description>
 		A unit of execution in a process. Can run methods on [Object]\ s simultaneously. The use of synchronization via [Mutex], [Semaphore] is advised if working with shared objects.
 	</description>
+	<signals>
+		<signal name="thread_finished">
+			<description>
+				Emitted when thread has finished.
+			</description>
+		</signal>
+	</signals>
 	<methods>
 		<method name="get_id" qualifiers="const">
 			<return type="String">

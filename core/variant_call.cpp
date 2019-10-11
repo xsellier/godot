@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -290,6 +290,8 @@ struct _VariantCall {
 	VCALL_LOCALMEM0R(String, hex_to_int);
 	VCALL_LOCALMEM1R(String, pad_decimals);
 	VCALL_LOCALMEM1R(String, pad_zeros);
+	VCALL_LOCALMEM2R(String, rpad);
+	VCALL_LOCALMEM2R(String, lpad);
 
 	static void _call_String_to_ascii(Variant &r_ret, Variant &p_self, const Variant **p_args) {
 
@@ -1164,7 +1166,7 @@ Variant Variant::construct(const Variant::Type p_type, const Variant **p_args, i
 				return Variant(bool(*p_args[0]));
 			}
 			case INT: {
-				return (int(*p_args[0]));
+				return (int64_t(*p_args[0]));
 			}
 			case REAL: {
 				return real_t(*p_args[0]);
@@ -1429,6 +1431,8 @@ void register_variant_methods() {
 	ADDFUNC0(STRING, INT, String, hex_to_int, varray());
 	ADDFUNC1(STRING, STRING, String, pad_decimals, INT, "digits", varray());
 	ADDFUNC1(STRING, STRING, String, pad_zeros, INT, "digits", varray());
+	ADDFUNC2(STRING, STRING, String, rpad, INT, "digits", STRING, "padding", varray());
+	ADDFUNC2(STRING, STRING, String, lpad, INT, "digits", STRING, "padding", varray());
 
 	ADDFUNC0(STRING, RAW_ARRAY, String, to_ascii, varray());
 	ADDFUNC0(STRING, RAW_ARRAY, String, to_utf8, varray());

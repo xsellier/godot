@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -941,7 +941,9 @@ Error RasterizerIPhone::mesh_surface_set_array(RID p_mesh, int p_surface, VS::Ar
 			if (surface->array_local == 0)
 				glBindBuffer(GL_ARRAY_BUFFER, 0);
 		} break;
-		default: { ERR_FAIL_V(ERR_INVALID_PARAMETER); }
+		default: {
+			ERR_FAIL_V(ERR_INVALID_PARAMETER);
+		}
 	}
 
 	a.configured = true;
@@ -1424,7 +1426,8 @@ AABB RasterizerIPhone::light_get_aabb(RID p_light) const {
 
 			return AABB();
 		} break;
-		default: {}
+		default: {
+		}
 	}
 
 	ERR_FAIL_V(AABB());

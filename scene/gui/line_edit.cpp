@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -50,7 +50,7 @@ void LineEdit::_input_event(InputEvent p_event) {
 
 			const InputEventMouseButton &b = p_event.mouse_button;
 
-			if (b.pressed && b.button_index == BUTTON_RIGHT) {
+			if (b.pressed && b.button_index == BUTTON_RIGHT && context_menu_enabled) {
 				menu->set_pos(get_global_transform().xform(get_local_mouse_pos()));
 				menu->set_size(Vector2(1, 1));
 				menu->popup();
@@ -219,7 +219,9 @@ void LineEdit::_input_event(InputEvent p_event) {
 					case (KEY_A): { //Select All
 						select();
 					} break;
-					default: { handled = false; }
+					default: {
+						handled = false;
+					}
 				}
 
 				if (handled) {
@@ -1196,6 +1198,14 @@ void LineEdit::menu_option(int p_option) {
 	}
 }
 
+void LineEdit::set_context_menu_enabled(bool p_enable) {
+	context_menu_enabled = p_enable;
+}
+
+bool LineEdit::is_context_menu_enabled() {
+	return context_menu_enabled;
+}
+
 PopupMenu *LineEdit::get_menu() const {
 	return menu;
 }
@@ -1243,6 +1253,8 @@ void LineEdit::_bind_methods() {
 	ObjectTypeDB::bind_method(_MD("select", "from", "to"), &LineEdit::select, DEFVAL(0), DEFVAL(-1));
 	ObjectTypeDB::bind_method(_MD("menu_option", "option"), &LineEdit::menu_option);
 	ObjectTypeDB::bind_method(_MD("get_menu:PopupMenu"), &LineEdit::get_menu);
+	ObjectTypeDB::bind_method(_MD("set_context_menu_enabled", "enable"), &LineEdit::set_context_menu_enabled);
+	ObjectTypeDB::bind_method(_MD("is_context_menu_enabled"), &LineEdit::is_context_menu_enabled);
 
 	ADD_SIGNAL(MethodInfo("text_changed", PropertyInfo(Variant::STRING, "text")));
 	ADD_SIGNAL(MethodInfo("text_entered", PropertyInfo(Variant::STRING, "text")));
@@ -1270,6 +1282,7 @@ void LineEdit::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "focus_mode", PROPERTY_HINT_ENUM, "None,Click,All"), _SCS("set_focus_mode"), _SCS("get_focus_mode"));
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "caret/caret_blink"), _SCS("cursor_set_blink_enabled"), _SCS("cursor_get_blink_enabled"));
 	ADD_PROPERTYNZ(PropertyInfo(Variant::REAL, "caret/caret_blink_speed", PROPERTY_HINT_RANGE, "0.1,10,0.1"), _SCS("cursor_set_blink_speed"), _SCS("cursor_get_blink_speed"));
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "context_menu_enabled"), "set_context_menu_enabled", "is_context_menu_enabled");
 }
 
 LineEdit::LineEdit() {
@@ -1297,6 +1310,7 @@ LineEdit::LineEdit() {
 	caret_blink_timer->connect("timeout", this, "_toggle_draw_caret");
 	cursor_set_blink_enabled(false);
 
+	context_menu_enabled = false;
 	menu = memnew(PopupMenu);
 	add_child(menu);
 	menu->add_item(TTR("Cut"), MENU_CUT, KEY_MASK_CMD | KEY_X);

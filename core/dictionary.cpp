@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -212,8 +212,12 @@ Error Dictionary::parse_json(const String &p_json) {
 	if (p_json != "") {
 		Error err = JSON::parse(p_json, *this, errstr, errline);
 		if (err != OK) {
+#ifdef DEBUG_ENABLED
 			ERR_EXPLAIN("Error parsing JSON: " + errstr + " at line: " + itos(errline));
 			ERR_FAIL_COND_V(err != OK, err);
+#else
+			return err;
+#endif
 		}
 	}
 

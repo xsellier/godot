@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -717,14 +717,14 @@ void GDTokenizerText::_advance() {
 
 					INCPOS(str.length());
 					if (hexa_found) {
-						int val = str.hex_to_int();
+						int64_t val = str.hex_to_int64();
 						_make_constant(val);
 					} else if (period_found || exponent_found) {
-						real_t val = str.to_double();
+						double val = str.to_double();
 						//print_line("*%*%*%*% to convert: "+str+" result: "+rtos(val));
 						_make_constant(val);
 					} else {
-						int val = str.to_int();
+						int64_t val = str.to_int64();
 						_make_constant(val);
 					}
 
@@ -1026,7 +1026,7 @@ void GDTokenizerText::advance(int p_amount) {
 		_advance();
 }
 
-	//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define BYTECODE_VERSION 10
 
@@ -1178,7 +1178,8 @@ Vector<uint8_t> GDTokenizerBuffer::parse_code_string(const String &p_code) {
 
 				ERR_FAIL_V(Vector<uint8_t>());
 			} break;
-			default: {}
+			default: {
+			}
 		};
 
 		token_array.push_back(token);

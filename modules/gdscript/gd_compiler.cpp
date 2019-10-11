@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -771,7 +771,7 @@ int GDCompiler::_parse_expression(CodeGen &codegen, const GDParser::Node *p_expr
 					ERR_FAIL_COND_V(on->arguments.size() != 2, -1);
 
 					if (on->arguments[0]->type == GDParser::Node::TYPE_OPERATOR && (static_cast<GDParser::OperatorNode *>(on->arguments[0])->op == GDParser::OperatorNode::OP_INDEX || static_cast<GDParser::OperatorNode *>(on->arguments[0])->op == GDParser::OperatorNode::OP_INDEX_NAMED)) {
-					//SET (chained) MODE!!
+						//SET (chained) MODE!!
 
 #ifdef DEBUG_ENABLED
 						if (static_cast<GDParser::OperatorNode *>(on->arguments[0])->op == GDParser::OperatorNode::OP_INDEX_NAMED) {
