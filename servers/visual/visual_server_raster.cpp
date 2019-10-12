@@ -3485,9 +3485,12 @@ void VisualServerRaster::canvas_item_add_polygon(RID p_item, const Vector<Point2
 	Vector<int> indices = Geometry::triangulate_polygon(p_points);
 
 	if (indices.empty()) {
-
+#ifdef DEBUG_ENABLED
 		ERR_EXPLAIN("Bad Polygon!");
 		ERR_FAIL_V();
+#else
+		return;
+#endif
 	}
 
 	CanvasItem::CommandPolygon *polygon = memnew(CanvasItem::CommandPolygon);

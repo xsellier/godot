@@ -321,7 +321,12 @@ void SpatialSound2DServerSW::source_set_polyphony(RID p_source, int p_voice_coun
 		p_voice_count = 32;
 	}
 	Source *source = source_owner.get(p_source);
+#ifdef DEBUG_ENABLED
 	ERR_FAIL_COND(!source);
+#else
+	if (!source)
+		return;
+#endif
 
 	if (p_voice_count < source->voices.size()) {
 
@@ -342,7 +347,12 @@ int SpatialSound2DServerSW::source_get_polyphony(RID p_source) const {
 void SpatialSound2DServerSW::source_set_transform(RID p_source, const Matrix32 &p_transform) {
 
 	Source *source = source_owner.get(p_source);
+#ifdef DEBUG_ENABLED
 	ERR_FAIL_COND(!source);
+#else
+	if (!source)
+		return;
+#endif
 	source->transform = p_transform;
 	source->transform.orthonormalize();
 }
@@ -357,7 +367,12 @@ void SpatialSound2DServerSW::source_set_param(RID p_source, SourceParam p_param,
 
 	ERR_FAIL_INDEX(p_param, SOURCE_PARAM_MAX);
 	Source *source = source_owner.get(p_source);
+#ifdef DEBUG_ENABLED
 	ERR_FAIL_COND(!source);
+#else
+	if (!source)
+		return;
+#endif
 	source->params[p_param] = p_value;
 }
 float SpatialSound2DServerSW::source_get_param(RID p_source, SourceParam p_param) const {
@@ -370,7 +385,12 @@ float SpatialSound2DServerSW::source_get_param(RID p_source, SourceParam p_param
 void SpatialSound2DServerSW::source_set_audio_stream(RID p_source, AudioServer::AudioStream *p_stream) {
 
 	Source *source = source_owner.get(p_source);
+#ifdef DEBUG_ENABLED
 	ERR_FAIL_COND(!source);
+#else
+	if (!source)
+		return;
+#endif
 	AudioServer::get_singleton()->lock();
 	source->stream = p_stream;
 	_THREAD_SAFE_METHOD_
@@ -392,7 +412,14 @@ void SpatialSound2DServerSW::source_set_audio_stream(RID p_source, AudioServer::
 SpatialSound2DServer::SourceVoiceID SpatialSound2DServerSW::source_play_sample(RID p_source, RID p_sample, int p_mix_rate, int p_voice, int p_priority) {
 
 	Source *source = source_owner.get(p_source);
-	ERR_FAIL_COND_V(!source, SOURCE_INVALID_VOICE);
+
+	if (!source) {
+#ifdef DEBUG_ENABLED
+		ERR_FAIL_V(SOURCE_INVALID_VOICE);
+#else
+		return;
+#endif
+	}
 
 	int to_play = 0;
 
@@ -439,14 +466,24 @@ SpatialSound2DServer::SourceVoiceID SpatialSound2DServerSW::source_play_sample(R
 void SpatialSound2DServerSW::source_voice_set_pitch_scale(RID p_source, SourceVoiceID p_voice, float p_pitch_scale) {
 
 	Source *source = source_owner.get(p_source);
+#ifdef DEBUG_ENABLED
 	ERR_FAIL_COND(!source);
+#else
+	if (!source)
+		return;
+#endif
 	ERR_FAIL_INDEX(p_voice, source->voices.size());
 	source->voices[p_voice].pitch_scale = p_pitch_scale;
 }
 void SpatialSound2DServerSW::source_voice_set_volume_scale_db(RID p_source, SourceVoiceID p_voice, float p_db) {
 
 	Source *source = source_owner.get(p_source);
+#ifdef DEBUG_ENABLED
 	ERR_FAIL_COND(!source);
+#else
+	if (!source)
+		return;
+#endif
 	ERR_FAIL_INDEX(p_voice, source->voices.size());
 	source->voices[p_voice].volume_scale = p_db;
 }
@@ -461,7 +498,14 @@ bool SpatialSound2DServerSW::source_is_voice_active(RID p_source, SourceVoiceID 
 void SpatialSound2DServerSW::source_stop_voice(RID p_source, SourceVoiceID p_voice) {
 
 	Source *source = source_owner.get(p_source);
+
+#ifdef DEBUG_ENABLED
 	ERR_FAIL_COND(!source);
+#else
+	if (!source)
+		return;
+#endif
+
 	ERR_FAIL_INDEX(p_voice, source->voices.size());
 	if (source->voices[p_voice].active) {
 		AudioServer::get_singleton()->voice_stop(source->voices[p_voice].voice_rid);
@@ -979,6 +1023,9 @@ void SpatialSound2DServerSW::update(float p_delta) {
 	while (to_disable.size()) {
 
 		ActiveVoice av = to_disable.front()->get();
+		if (av.source->voices[av.voice].active) {
+			AudioServer::get_singleton()->voice_stop(av.source->voices[av.voice].voice_rid);
+		}
 		av.source->voices[av.voice].active = false;
 		av.source->voices[av.voice].restart = false;
 		active_voices.erase(av);
