@@ -135,8 +135,6 @@ void Viewport::_update_stretch_transform() {
 
 	if (size_override_stretch && size_override) {
 
-		//print_line("sive override size "+size_override_size);
-		//print_line("rect size "+rect.size);
 		stretch_transform = Matrix32();
 		Size2 scale = rect.size / (size_override_size + size_override_margin * 2);
 		stretch_transform.scale(scale);
@@ -1443,6 +1441,9 @@ void Viewport::_gui_cancel_tooltip() {
 
 void Viewport::_gui_show_tooltip() {
 
+	// Ensure that this function won't be triggered twice
+	gui.tooltip_timer = -1;
+
 	if (!gui.tooltip) {
 		return;
 	}
@@ -1589,10 +1590,6 @@ Control *Viewport::_gui_find_control_at_pos(CanvasItem *p_node, const Point2 &p_
 
 	Control *c = p_node->cast_to<Control>();
 
-	if (c) {
-		//	print_line("at "+String(c->get_path())+" POS "+c->get_pos()+" bt "+p_xform);
-	}
-
 	//subwindows first!!
 
 	if (p_node->is_hidden()) {
@@ -1689,7 +1686,6 @@ void Viewport::_gui_input_event(InputEvent p_event) {
 					//	parent_xform=data.parent_canvas_item->get_global_transform();
 
 					gui.mouse_focus = _gui_find_control(pos);
-					//print_line("has mf "+itos(gui.mouse_focus!=NULL));
 					gui.mouse_focus_button = p_event.mouse_button.button_index;
 
 					if (!gui.mouse_focus) {
@@ -1708,21 +1704,6 @@ void Viewport::_gui_input_event(InputEvent p_event) {
 				pos = gui.focus_inv_xform.xform(pos);
 				p_event.mouse_button.x = pos.x;
 				p_event.mouse_button.y = pos.y;
-
-#ifdef DEBUG_ENABLED
-				if (ScriptDebugger::get_singleton()) {
-
-					Array arr;
-					arr.push_back(gui.mouse_focus->get_path());
-					arr.push_back(gui.mouse_focus->get_type());
-					ScriptDebugger::get_singleton()->send_message("click_ctrl", arr);
-				}
-
-/*if (bool(GLOBAL_DEF("debug/print_clicked_control",false))) {
-
-						print_line(String(gui.mouse_focus->get_path())+" - "+pos);
-					}*/
-#endif
 
 				if (gui.mouse_focus->get_focus_mode() != Control::FOCUS_NONE && gui.mouse_focus != gui.key_focus && p_event.mouse_button.button_index == BUTTON_LEFT) {
 					// also get keyboard focus
@@ -1754,7 +1735,6 @@ void Viewport::_gui_input_event(InputEvent p_event) {
 				}
 
 				_gui_cancel_tooltip();
-				//gui.tooltip_popup->hide();
 
 			} else {
 
@@ -1893,9 +1873,8 @@ void Viewport::_gui_input_event(InputEvent p_event) {
 
 				bool can_tooltip = true;
 
-				if (!gui.modal_stack.empty()) {
-					if (gui.modal_stack.back()->get() != over && !gui.modal_stack.back()->get()->is_a_parent_of(over))
-						can_tooltip = false;
+				if (!gui.modal_stack.empty() && gui.modal_stack.back()->get() != over && !gui.modal_stack.back()->get()->is_a_parent_of(over)) {
+					can_tooltip = false;
 				}
 
 				bool is_tooltip_shown = false;
@@ -1904,12 +1883,14 @@ void Viewport::_gui_input_event(InputEvent p_event) {
 					if (can_tooltip) {
 						String tooltip = over->get_tooltip(gui.tooltip->get_global_transform().xform_inv(mpos));
 
-						if (tooltip.length() == 0)
+						if (tooltip.length() == 0) {
 							_gui_cancel_tooltip();
-						else if (tooltip == gui.tooltip_label->get_text())
-							is_tooltip_shown = true;
-					} else
+						} else {
+							is_tooltip_shown = RTR(tooltip) == RTR(gui.tooltip_label->get_text());
+						}
+					} else {
 						_gui_cancel_tooltip();
+					}
 				}
 
 				if (can_tooltip && !is_tooltip_shown) {
@@ -2159,22 +2140,10 @@ void Viewport::_gui_hid_control(Control *p_control) {
 		gui.mouse_focus = NULL;
 	}
 
-	/* ???
-	if (data.window==p_control) {
-		window->drag_data=Variant();
-		if (window->drag_preview) {
-			memdelete( window->drag_preview);
-			window->drag_preview=NULL;
-		}
-	}
-	*/
-
 	if (gui.key_focus == p_control)
 		gui.key_focus = NULL;
 	if (gui.mouse_over == p_control)
 		gui.mouse_over = NULL;
-	if (gui.tooltip == p_control)
-		gui.tooltip = NULL;
 	if (gui.tooltip == p_control) {
 		gui.tooltip = NULL;
 		_gui_cancel_tooltip();

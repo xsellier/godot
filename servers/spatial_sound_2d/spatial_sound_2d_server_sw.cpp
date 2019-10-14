@@ -417,7 +417,7 @@ SpatialSound2DServer::SourceVoiceID SpatialSound2DServerSW::source_play_sample(R
 #ifdef DEBUG_ENABLED
 		ERR_FAIL_V(SOURCE_INVALID_VOICE);
 #else
-		return;
+		return SOURCE_INVALID_VOICE;
 #endif
 	}
 
@@ -989,9 +989,9 @@ void SpatialSound2DServerSW::update(float p_delta) {
 			int mix_rate = v.sample_mix_rate * v.pitch_scale * pitch_scale * source->params[SOURCE_PARAM_PITCH_SCALE];
 
 			if (mix_rate <= 0) {
-
-				to_disable.push_back(ActiveVoice(source, voice)); // oh well..
-				continue; //invalid mix rate, disabling
+				// Mute the sound nothing else
+				AudioServer::get_singleton()->voice_set_volume(v.voice_rid, 0.0);
+				continue;
 			}
 			if (v.restart || v.last_volume != volume)
 				AudioServer::get_singleton()->voice_set_volume(v.voice_rid, volume);
