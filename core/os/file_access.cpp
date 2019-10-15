@@ -29,6 +29,7 @@
 /*************************************************************************/
 #include "file_access.h"
 
+#include "core/io/file_access_memory.h"
 #include "core/io/file_access_pack.h"
 #include "core/io/marshalls.h"
 #include "globals.h"
@@ -95,7 +96,15 @@ Error FileAccess::reopen(const String &p_path, int p_mode_flags) {
 
 FileAccess *FileAccess::open(const String &p_path, int p_mode_flags, Error *r_error) {
 
-	//try packed data first
+	// try memory first
+	if (!(p_mode_flags & WRITE) && PackedData::get_singleton() && FileAccessMemory::has_file(p_path)) {
+
+		ret = memnew(FileAccessMemory);
+		Error err = ret->_open(p_path, p_mode_flags);
+		if (r_error)
+			*r_error = err;
+		return ret;
+	};
 
 	FileAccess *ret = NULL;
 	if (!(p_mode_flags & WRITE) && PackedData::get_singleton() && !PackedData::get_singleton()->is_disabled()) {

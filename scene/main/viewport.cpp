@@ -1479,15 +1479,16 @@ void Viewport::_gui_show_tooltip() {
 	gui.tooltip_label->set_text(tooltip);
 	Rect2 r(gui.tooltip_pos + Point2(10, 10), gui.tooltip_label->get_combined_minimum_size() + ttp->get_minimum_size());
 	Rect2 vr = gui.tooltip_label->get_viewport_rect();
-	if (r.size.x + r.pos.x > vr.size.x)
-		r.pos.x = vr.size.x - r.size.x;
-	else if (r.pos.x < 0)
-		r.pos.x = 0;
+	if (r.size.x + r.pos.x > vr.size.x) {
+		r.pos.x = gui.tooltip_pos.x - r.size.x - 10;
+	}
 
-	if (r.size.y + r.pos.y > vr.size.y)
-		r.pos.y = vr.size.y - r.size.y;
-	else if (r.pos.y < 0)
-		r.pos.y = 0;
+	if (r.size.y + r.pos.y > vr.size.y) {
+		r.pos.y = gui.tooltip_pos.y - r.size.y - 10;
+	}
+
+	r.pos.x = MAX(0, r.pos.x);
+	r.pos.y = MAX(0, r.pos.y);
 
 	gui.tooltip_popup->set_global_pos(r.pos);
 	gui.tooltip_popup->set_size(r.size);
