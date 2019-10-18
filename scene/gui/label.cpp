@@ -65,7 +65,7 @@ void Label::_notification(int p_what) {
 
 	if (p_what == NOTIFICATION_DRAW) {
 
-		if (clip || autowrap)
+		if (clip)
 			VisualServer::get_singleton()->canvas_item_set_clip(get_canvas_item(), true);
 
 		if (word_cache_dirty)
@@ -230,7 +230,7 @@ void Label::_notification(int p_what) {
 							CharType n = text[i + pos + 1];
 							if (uppercase) {
 								c = String::char_uppercase(c);
-								n = String::char_uppercase(c);
+								n = String::char_uppercase(n);
 							}
 
 							float move = font->draw_char(ci, Point2(x_ofs_shadow, y_ofs) + shadow_ofs, c, n, font_color_shadow);
@@ -251,7 +251,7 @@ void Label::_notification(int p_what) {
 						CharType n = text[i + pos + 1];
 						if (uppercase) {
 							c = String::char_uppercase(c);
-							n = String::char_uppercase(c);
+							n = String::char_uppercase(n);
 						}
 
 						x_ofs += font->draw_char(ci, Point2(x_ofs, y_ofs), c, n, font_color);
@@ -280,7 +280,7 @@ void Label::_notification(int p_what) {
 Size2 Label::get_minimum_size() const {
 
 	if (autowrap)
-		return Size2(1, 1);
+		return Size2(1, clip ? 1 : minsize.height);
 	else {
 
 		// don't want to mutable everything
@@ -379,7 +379,7 @@ void Label::regenerate_word_cache() {
 
 	for (int i = 0; i < text.size() + 1; i++) {
 
-		CharType current = i < text.length() ? text[i] : ' '; //always a space at the end, so the algo works
+		CharType current = i < text.length() ? text[i] : L' '; //always a space at the end, so the algo works
 
 		if (uppercase)
 			current = String::char_uppercase(current);
@@ -390,7 +390,7 @@ void Label::regenerate_word_cache() {
 		bool separatable = (current >= 0x2E08 && current <= 0xFAFF) || (current >= 0xFE30 && current <= 0xFE4F);
 		//current>=33 && (current < 65||current >90) && (current<97||current>122) && (current<48||current>57);
 		bool insert_newline = false;
-		int char_width;
+		int char_width = 0;
 
 		if (current < 33) {
 
@@ -413,12 +413,11 @@ void Label::regenerate_word_cache() {
 
 			if (current == '\n') {
 				insert_newline = true;
-			} else {
+			} else if (current != ' ') {
 				total_char_cache++;
 			}
 
 			if (i < text.length() && text[i] == ' ') {
-				total_char_cache--; // do not count spaces
 				if (line_width > 0 || last == NULL || last->char_pos != WordCache::CHAR_WRAPLINE) {
 					space_count++;
 					line_width += space_width;
@@ -478,13 +477,18 @@ void Label::regenerate_word_cache() {
 		}
 	}
 
-	if (!autowrap) {
+	if (!autowrap)
 		minsize.width = width;
-		if (max_lines_visible > 0 && line_count > max_lines_visible) {
-			minsize.height = (font->get_height() * max_lines_visible) + (line_spacing * (max_lines_visible - 1));
-		} else {
-			minsize.height = (font->get_height() * line_count) + (line_spacing * (line_count - 1));
-		}
+
+	if (max_lines_visible > 0 && line_count > max_lines_visible) {
+		minsize.height = (font->get_height() * max_lines_visible) + (line_spacing * (max_lines_visible - 1));
+	} else {
+		minsize.height = (font->get_height() * line_count) + (line_spacing * (line_count - 1));
+	}
+
+	if (!autowrap || !clip) {
+		// helps speed up some labels that may change a lot, as no resizing is requested. Do not change.
+		minimum_size_changed();
 	}
 
 	word_cache_dirty = false;
