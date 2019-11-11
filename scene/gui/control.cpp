@@ -213,7 +213,10 @@ void Control::_update_minimum_size() {
 		_size_changed();
 	}
 
-	emit_signal(SceneStringNames::get_singleton()->minimum_size_changed);
+	if (minsize != data.last_minimum_size) {
+		data.last_minimum_size = minsize;
+		emit_signal(SceneStringNames::get_singleton()->minimum_size_changed);
+	}
 }
 
 bool Control::_get(const StringName &p_name, Variant &r_ret) const {
@@ -562,6 +565,7 @@ void Control::_notification(int p_notification) {
 		} break;
 		case NOTIFICATION_THEME_CHANGED: {
 
+			minimum_size_changed();
 			update();
 		} break;
 		case NOTIFICATION_MODAL_CLOSE: {

@@ -204,8 +204,10 @@ float Slider::get_custom_step() const {
 
 void Slider::set_ticks(int p_count) {
 
-	ticks = p_count;
-	update();
+	if (ticks != p_count) {
+		ticks = p_count;
+		update();
+	}
 }
 
 int Slider::get_ticks() const {
@@ -218,8 +220,11 @@ bool Slider::get_ticks_on_borders() const {
 }
 
 void Slider::set_ticks_on_borders(bool _tob) {
-	ticks_on_borders = _tob;
-	update();
+
+	if (ticks_on_borders != _tob) {
+		ticks_on_borders = _tob;
+		update();
+	}
 }
 
 void Slider::_bind_methods() {

@@ -36,7 +36,6 @@ void Label::set_autowrap(bool p_autowrap) {
 
 	autowrap = p_autowrap;
 	word_cache_dirty = true;
-	minimum_size_changed();
 	update();
 }
 bool Label::has_autowrap() const {
@@ -48,7 +47,6 @@ void Label::set_uppercase(bool p_uppercase) {
 
 	uppercase = p_uppercase;
 	word_cache_dirty = true;
-	minimum_size_changed();
 	update();
 }
 bool Label::is_uppercase() const {
@@ -65,11 +63,13 @@ void Label::_notification(int p_what) {
 
 	if (p_what == NOTIFICATION_DRAW) {
 
-		if (clip)
+		if (clip) {
 			VisualServer::get_singleton()->canvas_item_set_clip(get_canvas_item(), true);
+		}
 
-		if (word_cache_dirty)
+		if (word_cache_dirty) {
 			regenerate_word_cache();
+		}
 
 		RID ci = get_canvas_item();
 
@@ -455,7 +455,6 @@ void Label::regenerate_word_cache() {
 					wc->word_len = i - word_pos;
 					wc->space_count = space_count;
 					current_word_size = char_width;
-					space_count = 0;
 					word_pos = i;
 				}
 			}
@@ -530,9 +529,6 @@ void Label::set_text(const String &p_string) {
 	if (percent_visible < 1)
 		visible_chars = get_total_character_count() * percent_visible;
 	update();
-	if (!autowrap) {
-		minimum_size_changed();
-	}
 }
 
 void Label::set_clip_text(bool p_clip) {

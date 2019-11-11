@@ -389,8 +389,10 @@ void ScrollContainer::_scroll_moved(float) {
 
 void ScrollContainer::set_enable_h_scroll(bool p_enable) {
 
-	scroll_h = p_enable;
-	queue_sort();
+	if (scroll_h != p_enable) {
+		scroll_h = p_enable;
+		queue_sort();
+	}
 }
 
 bool ScrollContainer::is_h_scroll_enabled() const {
@@ -400,8 +402,10 @@ bool ScrollContainer::is_h_scroll_enabled() const {
 
 void ScrollContainer::set_enable_v_scroll(bool p_enable) {
 
-	scroll_v = p_enable;
-	queue_sort();
+	if (scroll_v != p_enable) {
+		scroll_v = p_enable;
+		queue_sort();
+	}
 }
 
 bool ScrollContainer::is_v_scroll_enabled() const {

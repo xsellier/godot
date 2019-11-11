@@ -68,8 +68,10 @@ void ProgressBar::_notification(int p_what) {
 
 void ProgressBar::set_percent_visible(bool p_visible) {
 
-	percent_visible = p_visible;
-	update();
+	if (percent_visible != p_visible) {
+		percent_visible = p_visible;
+		update();
+	}
 }
 
 bool ProgressBar::is_percent_visible() const {

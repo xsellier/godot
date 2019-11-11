@@ -129,11 +129,11 @@ void TextureFrame::_bind_methods() {
 
 void TextureFrame::set_texture(const Ref<Texture> &p_tex) {
 
-	texture = p_tex;
-	update();
-	//if (texture.is_valid())
-	//	texture->set_flags(texture->get_flags()&(~Texture::FLAG_REPEAT)); //remove repeat from texture, it looks bad in sprites
-	minimum_size_changed();
+	if (texture != p_tex) {
+		texture = p_tex;
+		update();
+		minimum_size_changed();
+	}
 }
 
 Ref<Texture> TextureFrame::get_texture() const {
@@ -143,8 +143,10 @@ Ref<Texture> TextureFrame::get_texture() const {
 
 void TextureFrame::set_modulate(const Color &p_tex) {
 
-	modulate = p_tex;
-	update();
+	if (modulate != p_tex) {
+		modulate = p_tex;
+		update();
+	}
 }
 
 Color TextureFrame::get_modulate() const {
@@ -154,9 +156,11 @@ Color TextureFrame::get_modulate() const {
 
 void TextureFrame::set_expand(bool p_expand) {
 
-	expand = p_expand;
-	update();
-	minimum_size_changed();
+	if (expand != p_expand) {
+		expand = p_expand;
+		update();
+		minimum_size_changed();
+	}
 }
 bool TextureFrame::has_expand() const {
 
@@ -165,8 +169,10 @@ bool TextureFrame::has_expand() const {
 
 void TextureFrame::set_stretch_mode(StretchMode p_mode) {
 
-	stretch_mode = p_mode;
-	update();
+	if (stretch_mode != p_mode) {
+		stretch_mode = p_mode;
+		update();
+	}
 }
 
 TextureFrame::StretchMode TextureFrame::get_stretch_mode() const {

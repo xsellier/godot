@@ -154,7 +154,7 @@ public:
 		T **elem = id_map.getptr(p_rid.get_id());
 
 		if (thread_safe) {
-			mutex->lock();
+			mutex->unlock();
 		}
 
 		return elem != NULL;
@@ -167,6 +167,10 @@ public:
 		}
 		ERR_FAIL_COND(!owns(p_rid));
 		id_map.erase(p_rid.get_id());
+
+		if (thread_safe) {
+			mutex->unlock();
+		}
 	}
 	virtual void get_owned_list(List<RID> *p_owned) const {
 
@@ -184,7 +188,7 @@ public:
 		}
 
 		if (thread_safe) {
-			mutex->lock();
+			mutex->unlock();
 		}
 	}
 	RID_Owner() {

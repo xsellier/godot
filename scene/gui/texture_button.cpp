@@ -232,30 +232,40 @@ void TextureButton::_bind_methods() {
 
 void TextureButton::set_normal_texture(const Ref<Texture> &p_normal) {
 
-	normal = p_normal;
-	update();
-	minimum_size_changed();
+	if (normal != p_normal) {
+		normal = p_normal;
+		update();
+		minimum_size_changed();
+	}
 }
 
 void TextureButton::set_pressed_texture(const Ref<Texture> &p_pressed) {
 
-	pressed = p_pressed;
-	update();
+	if (pressed != p_pressed) {
+		pressed = p_pressed;
+		update();
+	}
 }
 void TextureButton::set_hover_texture(const Ref<Texture> &p_hover) {
 
-	hover = p_hover;
-	update();
+	if (hover != p_hover) {
+		hover = p_hover;
+		update();
+	}
 }
 void TextureButton::set_disabled_texture(const Ref<Texture> &p_disabled) {
 
-	disabled = p_disabled;
-	update();
+	if (disabled != p_disabled) {
+		disabled = p_disabled;
+		update();
+	}
 }
 void TextureButton::set_click_mask(const Ref<BitMap> &p_click_mask) {
 
-	click_mask = p_click_mask;
-	update();
+	if (click_mask != p_click_mask) {
+		click_mask = p_click_mask;
+		update();
+	}
 }
 
 Ref<Texture> TextureButton::get_normal_texture() const {
@@ -290,8 +300,10 @@ void TextureButton::set_focused_texture(const Ref<Texture> &p_focused) {
 };
 
 void TextureButton::set_modulate(const Color &p_modulate) {
-	modulate = p_modulate;
-	update();
+	if (modulate != p_modulate) {
+		modulate = p_modulate;
+		update();
+	}
 }
 
 Color TextureButton::get_modulate() const {
@@ -303,15 +315,19 @@ TextureButton::ResizeMode TextureButton::get_resize_mode() const {
 }
 
 void TextureButton::set_resize_mode(TextureButton::ResizeMode p_mode) {
-	resize_mode = p_mode;
-	minimum_size_changed();
-	update();
+	if (resize_mode != p_mode) {
+		resize_mode = p_mode;
+		minimum_size_changed();
+		update();
+	}
 }
 
 void TextureButton::set_texture_scale(Size2 p_scale) {
-	scale = p_scale;
-	minimum_size_changed();
-	update();
+	if (scale != p_scale) {
+		scale = p_scale;
+		minimum_size_changed();
+		update();
+	}
 }
 
 Size2 TextureButton::get_texture_scale() const {
@@ -319,8 +335,10 @@ Size2 TextureButton::get_texture_scale() const {
 }
 
 void TextureButton::set_stretch_mode(TextureButton::StretchMode p_mode) {
-	stretch_mode = p_mode;
-	update();
+	if (stretch_mode != p_mode) {
+		stretch_mode = p_mode;
+		update();
+	}
 }
 
 TextureButton::StretchMode TextureButton::get_stretch_mode() const {

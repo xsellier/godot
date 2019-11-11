@@ -31,9 +31,11 @@
 
 void TextureProgress::set_under_texture(const Ref<Texture> &p_texture) {
 
-	under = p_texture;
-	update();
-	minimum_size_changed();
+	if (under != p_texture) {
+		under = p_texture;
+		update();
+		minimum_size_changed();
+	}
 }
 
 Ref<Texture> TextureProgress::get_under_texture() const {
@@ -43,9 +45,11 @@ Ref<Texture> TextureProgress::get_under_texture() const {
 
 void TextureProgress::set_over_texture(const Ref<Texture> &p_texture) {
 
-	over = p_texture;
-	update();
-	minimum_size_changed();
+	if (over != p_texture) {
+		over = p_texture;
+		update();
+		minimum_size_changed();
+	}
 }
 
 Ref<Texture> TextureProgress::get_over_texture() const {
@@ -67,9 +71,11 @@ Size2 TextureProgress::get_minimum_size() const {
 
 void TextureProgress::set_progress_texture(const Ref<Texture> &p_texture) {
 
-	progress = p_texture;
-	update();
-	minimum_size_changed();
+	if (progress != p_texture) {
+		progress = p_texture;
+		update();
+		minimum_size_changed();
+	}
 }
 
 Ref<Texture> TextureProgress::get_progress_texture() const {
@@ -212,8 +218,11 @@ void TextureProgress::set_radial_initial_angle(float p_angle) {
 		p_angle -= 360;
 	while (p_angle < 0)
 		p_angle += 360;
-	rad_init_angle = p_angle;
-	update();
+
+	if (rad_init_angle != p_angle) {
+		rad_init_angle = p_angle;
+		update();
+	}
 }
 
 float TextureProgress::get_radial_initial_angle() {
@@ -230,8 +239,10 @@ float TextureProgress::get_fill_degrees() {
 }
 
 void TextureProgress::set_radial_center_offset(const Point2 &p_off) {
-	rad_center_off = p_off;
-	update();
+	if (rad_center_off != p_off) {
+		rad_center_off = p_off;
+		update();
+	}
 }
 
 Point2 TextureProgress::get_radial_center_offset() {

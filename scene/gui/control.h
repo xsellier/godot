@@ -123,6 +123,7 @@ private:
 		float expand;
 		bool pending_min_size_update;
 		Point2 custom_minimum_size;
+		Size2 last_minimum_size;
 
 		bool ignore_mouse;
 		bool stop_mouse;

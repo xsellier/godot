@@ -34,9 +34,11 @@
 
 void Button::set_autowrap(bool p_autowrap) {
 
-	autowrap = p_autowrap;
-	update();
-	minimum_size_changed();
+	if (autowrap != p_autowrap) {
+		autowrap = p_autowrap;
+		update();
+		minimum_size_changed();
+	}
 }
 bool Button::has_autowrap() const {
 
@@ -269,9 +271,11 @@ Ref<Texture> Button::get_icon() const {
 
 void Button::set_flat(bool p_flat) {
 
-	flat = p_flat;
-	update();
-	_change_notify("flat");
+	if (flat != p_flat) {
+		flat = p_flat;
+		update();
+		_change_notify("flat");
+	}
 }
 
 bool Button::is_flat() const {
@@ -281,9 +285,11 @@ bool Button::is_flat() const {
 
 void Button::set_clip_text(bool p_clip_text) {
 
-	clip_text = p_clip_text;
-	update();
-	minimum_size_changed();
+	if (clip_text != p_clip_text) {
+		clip_text = p_clip_text;
+		update();
+		minimum_size_changed();
+	}
 }
 
 bool Button::get_clip_text() const {
@@ -293,8 +299,10 @@ bool Button::get_clip_text() const {
 
 void Button::set_text_align(TextAlign p_align) {
 
-	align = p_align;
-	update();
+	if (align != p_align) {
+		align = p_align;
+		update();
+	}
 }
 
 Button::TextAlign Button::get_text_align() const {

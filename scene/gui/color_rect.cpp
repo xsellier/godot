@@ -2,8 +2,10 @@
 
 void ColorFrame::set_frame_color(const Color &p_color) {
 
-	color = p_color;
-	update();
+	if (color != p_color) {
+		color = p_color;
+		update();
+	}
 }
 
 Color ColorFrame::get_frame_color() const {
