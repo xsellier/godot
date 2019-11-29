@@ -54,6 +54,7 @@
 #include "os/main_loop.h"
 #include "packed_data_container.h"
 #include "path_remap.h"
+#include "range_iterator.h"
 #include "translation.h"
 #include "undo_redo.h"
 
@@ -122,6 +123,7 @@ void register_core_types() {
 	ObjectTypeDB::register_type<PacketPeerStream>();
 	ObjectTypeDB::register_type<MainLoop>();
 	//	ObjectTypeDB::register_type<OptimizedSaver>();
+	ObjectTypeDB::register_type<RangeIterator>();
 	ObjectTypeDB::register_type<Translation>();
 	ObjectTypeDB::register_type<PHashTranslation>();
 	ObjectTypeDB::register_type<UndoRedo>();

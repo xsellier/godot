@@ -34,6 +34,7 @@
 #include "math_funcs.h"
 #include "object_type_db.h"
 #include "os/os.h"
+#include "range_iterator.h"
 #include "reference.h"
 #include "variant_parser.h"
 
@@ -724,23 +725,11 @@ void GDFunctions::call(Function p_func, const Variant **p_args, int p_arg_count,
 
 					VALIDATE_ARG_NUM(0);
 					int count = *p_args[0];
-					Array arr(true);
-					if (count <= 0) {
-						r_ret = arr;
-						return;
-					}
-					Error err = arr.resize(count);
-					if (err != OK) {
-						r_error.error = Variant::CallError::CALL_ERROR_INVALID_METHOD;
-						r_ret = Variant();
-						return;
-					}
 
-					for (int i = 0; i < count; i++) {
-						arr[i] = i;
-					}
+					Ref<RangeIterator> itr = memnew(RangeIterator);
 
-					r_ret = arr;
+					itr->set_range(count);
+					r_ret = Variant(itr);
 				} break;
 				case 2: {
 
@@ -750,20 +739,11 @@ void GDFunctions::call(Function p_func, const Variant **p_args, int p_arg_count,
 					int from = *p_args[0];
 					int to = *p_args[1];
 
-					Array arr(true);
-					if (from >= to) {
-						r_ret = arr;
-						return;
-					}
-					Error err = arr.resize(to - from);
-					if (err != OK) {
-						r_error.error = Variant::CallError::CALL_ERROR_INVALID_METHOD;
-						r_ret = Variant();
-						return;
-					}
-					for (int i = from; i < to; i++)
-						arr[i - from] = i;
-					r_ret = arr;
+					Ref<RangeIterator> itr = memnew(RangeIterator);
+
+					itr->set_range(from, to);
+					r_ret = Variant(itr);
+					return;
 				} break;
 				case 3: {
 
@@ -774,55 +754,18 @@ void GDFunctions::call(Function p_func, const Variant **p_args, int p_arg_count,
 					int from = *p_args[0];
 					int to = *p_args[1];
 					int incr = *p_args[2];
+
 					if (incr == 0) {
-
-						r_ret = RTR("step argument is zero!");
+						ERR_EXPLAIN("step argument is zero!");
 						r_error.error = Variant::CallError::CALL_ERROR_INVALID_METHOD;
-						return;
+						ERR_FAIL();
 					}
 
-					Array arr(true);
-					if (from >= to && incr > 0) {
-						r_ret = arr;
-						return;
-					}
-					if (from <= to && incr < 0) {
-						r_ret = arr;
-						return;
-					}
+					Ref<RangeIterator> itr = memnew(RangeIterator);
 
-					//calculate how many
-					int count = 0;
-					if (incr > 0) {
-
-						count = ((to - from - 1) / incr) + 1;
-					} else {
-
-						count = ((from - to - 1) / -incr) + 1;
-					}
-
-					Error err = arr.resize(count);
-
-					if (err != OK) {
-						r_error.error = Variant::CallError::CALL_ERROR_INVALID_METHOD;
-						r_ret = Variant();
-						return;
-					}
-
-					if (incr > 0) {
-						int idx = 0;
-						for (int i = from; i < to; i += incr) {
-							arr[idx++] = i;
-						}
-					} else {
-
-						int idx = 0;
-						for (int i = from; i > to; i += incr) {
-							arr[idx++] = i;
-						}
-					}
-
-					r_ret = arr;
+					itr->set_range(from, to, incr);
+					r_ret = Variant(itr);
+					return;
 				} break;
 				default: {
 
