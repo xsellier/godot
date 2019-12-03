@@ -51,6 +51,7 @@ private:
 	Ref<Texture> icon;
 	bool autowrap;
 	bool clip_text;
+	bool icon_scale;
 	TextAlign align;
 
 protected:
@@ -66,6 +67,9 @@ public:
 
 	void set_autowrap(bool p_autowrap);
 	bool has_autowrap() const;
+
+	void set_icon_scale(bool p_icon_scale);
+	bool is_icon_scaling() const;
 
 	void set_icon(const Ref<Texture> &p_icon);
 	Ref<Texture> get_icon() const;
