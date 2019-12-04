@@ -529,17 +529,19 @@ DynamicFontAtSize::Character DynamicFontAtSize::_bitmap_to_character(FT_Bitmap b
 		tex.offsets[k] = tex_pos.y + mh;
 	}
 
+	float scale_ratio = scale_color_font / oversampling;
+
 	Character chr;
-	chr.h_align = xofs * scale_color_font / oversampling;
-	chr.v_align = ascent - (yofs * scale_color_font / oversampling); // + ascent - descent;
-	chr.advance = advance * scale_color_font / oversampling;
+	chr.h_align = xofs * scale_ratio;
+	chr.v_align = ascent - (yofs * scale_ratio); // + ascent - descent;
+	chr.advance = advance * scale_ratio;
 	chr.texture_idx = tex_pos.index;
 	chr.found = true;
 
 	chr.rect_uv = Rect2(tex_pos.x + rect_margin, tex_pos.y + rect_margin, w, h);
 	chr.rect = chr.rect_uv;
 	chr.rect.pos /= oversampling;
-	chr.rect.size = chr.rect.size * scale_color_font / oversampling;
+	chr.rect.size *= scale_ratio;
 	return chr;
 }
 
