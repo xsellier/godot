@@ -604,7 +604,7 @@ void LineEdit::_notification(int p_what) {
 				get_stylebox("focus")->draw(ci, Rect2(Point2(), size));
 			}
 
-			int x_ofs = 0;
+			float x_ofs = 0;
 
 			switch (align) {
 
@@ -627,7 +627,7 @@ void LineEdit::_notification(int p_what) {
 			int char_ofs = window_pos;
 
 			int y_area = height - style->get_minimum_size().height;
-			int y_ofs = style->get_offset().y;
+			float y_ofs = style->get_offset().y;
 
 			int font_ascent = font->get_ascent();
 
@@ -661,7 +661,7 @@ void LineEdit::_notification(int p_what) {
 				if (selected)
 					VisualServer::get_singleton()->canvas_item_add_rect(ci, Rect2(Point2(x_ofs, y_ofs), Size2(char_width, caret_height)), selection_color);
 
-				font->draw_char(ci, Point2(x_ofs, y_ofs + font_ascent), cchar, next, selected ? font_color_selected : font_color);
+				font->draw_char(ci, Point2(x_ofs, y_ofs + font_ascent).floor(), cchar, next, selected ? font_color_selected : font_color);
 
 				if (char_ofs == cursor_pos && draw_caret) {
 					VisualServer::get_singleton()->canvas_item_add_rect(ci, Rect2(Point2(x_ofs, y_ofs), Size2(1, caret_height)),

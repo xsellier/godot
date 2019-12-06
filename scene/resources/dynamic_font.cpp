@@ -541,6 +541,8 @@ DynamicFontAtSize::Character DynamicFontAtSize::_bitmap_to_character(FT_Bitmap b
 	chr.rect_uv = Rect2(tex_pos.x + rect_margin, tex_pos.y + rect_margin, w, h);
 	chr.rect = chr.rect_uv;
 	chr.rect.pos /= oversampling;
+	chr.rect.size.x += 0.1;
+	chr.rect.size.y += 0.05;
 	chr.rect.size *= scale_ratio;
 	return chr;
 }
