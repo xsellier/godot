@@ -1129,18 +1129,7 @@ void OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int 
 	input = memnew(InputDefault);
 	joystick = memnew(joystick_windows(input, &hWnd));
 
-	int audio_driver_next = p_audio_driver;
-
-	while (audio_driver_next < AudioDriverManagerSW::get_driver_count()) {
-		AudioDriverManagerSW::get_driver(audio_driver_next)->set_singleton();
-
-		if (AudioDriverManagerSW::get_driver(audio_driver_next)->init() == OK) {
-			break;
-		} else {
-			AudioDriverManagerSW::get_driver(audio_driver_next)->finish();
-			audio_driver_next++;
-		}
-	}
+	AudioDriverManagerSW::initialize(p_audio_driver);
 
 	sample_manager = memnew(SampleManagerMallocSW);
 	audio_server = memnew(AudioServerSW(sample_manager));
@@ -2630,7 +2619,6 @@ OS_Windows::OS_Windows(HINSTANCE _hInstance) {
 #ifdef RTAUDIO_ENABLED
 	AudioDriverManagerSW::add_driver(&driver_rtaudio);
 #endif
-	AudioDriverManagerSW::add_driver(&driver_dummy);
 }
 
 OS_Windows::~OS_Windows() {
