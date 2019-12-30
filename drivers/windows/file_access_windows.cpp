@@ -171,7 +171,7 @@ size_t FileAccessWindows::get_len() const {
 
 	size_t pos = get_pos();
 	fseek(f, 0, SEEK_END);
-	int size = get_pos();
+	long size = get_pos();
 	fseek(f, pos, SEEK_SET);
 
 	return size;

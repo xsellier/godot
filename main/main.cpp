@@ -1691,6 +1691,7 @@ void Main::cleanup() {
 	if (globals)
 		memdelete(globals);
 
+	message_queue->flush();
 	memdelete(message_queue);
 
 	unregister_core_driver_types();

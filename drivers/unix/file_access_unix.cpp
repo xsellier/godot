@@ -162,9 +162,9 @@ size_t FileAccessUnix::get_len() const {
 	ERR_FAIL_COND_V(!f, 0);
 
 	FileAccessUnix *fau = const_cast<FileAccessUnix *>(this);
-	int pos = fau->get_pos();
+	long pos = fau->get_pos();
 	fau->seek_end();
-	int size = fau->get_pos();
+	long size = fau->get_pos();
 	fau->seek(pos);
 
 	return size;

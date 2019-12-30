@@ -3929,13 +3929,15 @@ void VisualServerRaster::canvas_light_occluder_set_polygon(RID p_occluder, RID p
 
 	if (occluder->polygon.is_valid()) {
 		CanvasLightOccluderPolygon *occluder_poly = canvas_light_occluder_polygon_owner.get(p_polygon);
-		if (!occluder_poly)
+		if (!occluder_poly) {
 			occluder->polygon = RID();
-		ERR_FAIL_COND(!occluder_poly);
-		occluder_poly->owners.insert(occluder);
-		occluder->polygon_buffer = occluder_poly->occluder;
-		occluder->aabb_cache = occluder_poly->aabb;
-		occluder->cull_cache = occluder_poly->cull_mode;
+			ERR_FAIL_COND(!occluder_poly);
+		} else {
+			occluder_poly->owners.insert(occluder);
+			occluder->polygon_buffer = occluder_poly->occluder;
+			occluder->aabb_cache = occluder_poly->aabb;
+			occluder->cull_cache = occluder_poly->cull_mode;
+		}
 	}
 }
 
