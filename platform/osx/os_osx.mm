@@ -1022,8 +1022,6 @@ void OS_OSX::initialize(const VideoMode &p_desired, int p_video_driver, int p_au
 
 	bool use_gl2 = p_video_driver != 1;
 
-	AudioDriverManagerSW::add_driver(&audio_driver_osx);
-
 	rasterizer = instance_RasterizerGLES2();
 
 	visual_server = memnew(VisualServerRaster(rasterizer));
@@ -2104,6 +2102,8 @@ OS_OSX::OS_OSX() {
 	window_size = Vector2(1024, 600);
 	zoomed = false;
 	display_scale = 1.0;
+
+	AudioDriverManagerSW::add_driver(&audio_driver_osx);
 }
 
 void OS_OSX::disable_crash_handler() {
