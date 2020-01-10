@@ -930,7 +930,15 @@ void Variant::reference(const Variant &p_variant) {
 	if (this == &p_variant)
 		return;
 
-	clear();
+	switch (type) {
+		case NIL:
+		case BOOL:
+		case INT:
+		case REAL:
+			break;
+		default:
+			clear();
+	}
 
 	type = p_variant.type;
 

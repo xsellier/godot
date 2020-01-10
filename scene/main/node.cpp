@@ -135,6 +135,20 @@ void Node::_notification(int p_notification) {
 	}
 }
 
+void Node::_propagate_update_group() {
+
+	for (const Map<StringName, GroupData>::Element *E = data.grouped.front(); E; E = E->next()) {
+		if (E->get().group) {
+			E->get().group->changed = true;
+		}
+	}
+
+	for (int i = 0; i < data.children.size(); i++) {
+
+		data.children[i]->_propagate_update_group();
+	}
+}
+
 void Node::_propagate_ready() {
 
 	data.ready_notified = true;
@@ -276,8 +290,8 @@ void Node::move_child(Node *p_child, int p_pos) {
 
 	// Specifying one place beyond the end
 	// means the same as moving to the last position
-	if (p_pos == data.children.size())
-		p_pos--;
+	if (p_pos >= data.children.size())
+		p_pos = data.children.size() - 1;
 
 	data.children.remove(p_child->data.pos);
 	data.children.insert(p_pos, p_child);
@@ -296,13 +310,10 @@ void Node::move_child(Node *p_child, int p_pos) {
 	move_child_notify(p_child);
 	for (int i = 0; i < data.children.size(); i++) {
 		data.children[i]->notification(NOTIFICATION_MOVED_IN_PARENT);
-	}
-	for (const Map<StringName, GroupData>::Element *E = p_child->data.grouped.front(); E; E = E->next()) {
-		if (E->get().group) {
-			E->get().group->changed = true;
-		}
+		data.children[i]->_propagate_update_group();
 	}
 
+	p_child->_propagate_update_group();
 	data.blocked--;
 }
 
@@ -805,6 +816,7 @@ void Node::remove_child(Node *p_child) {
 	for (int i = idx; i < data.children.size(); i++) {
 
 		data.children[i]->data.pos = i;
+		data.children[i]->notification(NOTIFICATION_MOVED_IN_PARENT);
 	}
 
 	p_child->data.parent = NULL;

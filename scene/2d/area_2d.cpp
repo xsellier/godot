@@ -490,6 +490,12 @@ Array Area2D::get_overlapping_areas() const {
 	return ret;
 }
 
+uint32_t Area2D::get_amount_of_overlapping_areas() const {
+	ERR_FAIL_COND_V(!monitoring, 0);
+
+	return area_map.size();
+}
+
 bool Area2D::overlaps_area(Node *p_area) const {
 
 	ERR_FAIL_NULL_V(p_area, false);
@@ -612,6 +618,7 @@ void Area2D::_bind_methods() {
 
 	ObjectTypeDB::bind_method(_MD("get_overlapping_bodies"), &Area2D::get_overlapping_bodies);
 	ObjectTypeDB::bind_method(_MD("get_overlapping_areas"), &Area2D::get_overlapping_areas);
+	ObjectTypeDB::bind_method(_MD("get_amount_of_overlapping_areas"), &Area2D::get_amount_of_overlapping_areas);
 
 	ObjectTypeDB::bind_method(_MD("overlaps_body", "body"), &Area2D::overlaps_body);
 	ObjectTypeDB::bind_method(_MD("overlaps_area", "area"), &Area2D::overlaps_area);

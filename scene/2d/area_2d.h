@@ -176,6 +176,7 @@ public:
 
 	Array get_overlapping_bodies() const; //function for script
 	Array get_overlapping_areas() const; //function for script
+	uint32_t get_amount_of_overlapping_areas() const; //function for script
 
 	bool overlaps_area(Node *p_area) const;
 	bool overlaps_body(Node *p_body) const;
