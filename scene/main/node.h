@@ -129,7 +129,6 @@ private:
 
 	void _validate_child_name(Node *p_name, bool p_force_human_readable = false);
 
-	void _propagate_update_group();
 	void _propagate_reverse_notification(int p_notification);
 	void _propagate_deferred_notification(int p_notification, bool p_reverse);
 	void _propagate_enter_tree();
