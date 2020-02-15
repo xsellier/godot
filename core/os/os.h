@@ -285,6 +285,8 @@ public:
 	void set_frame_delay(uint32_t p_msec);
 	uint32_t get_frame_delay() const;
 
+	void set_print_line(bool value) const;
+
 	virtual bool can_draw() const = 0;
 
 	uint64_t get_frames_drawn();
@@ -440,5 +442,8 @@ public:
 	OS();
 	virtual ~OS();
 };
+
+extern bool _print_line_enabled;
+extern bool _print_error_enabled;
 
 #endif

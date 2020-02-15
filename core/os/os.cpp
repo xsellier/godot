@@ -160,6 +160,12 @@ bool OS::is_stdout_verbose() const {
 	return _verbose_stdout;
 }
 
+void OS::set_print_line(bool value) const {
+
+	_print_line_enabled = value;
+	_print_error_enabled = value;
+}
+
 void OS::set_last_error(const char *p_error) {
 
 	GLOBAL_LOCK_FUNCTION

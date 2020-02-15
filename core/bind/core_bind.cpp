@@ -788,6 +788,11 @@ bool _OS::can_use_threads() const {
 	return OS::get_singleton()->can_use_threads();
 }
 
+void _OS::set_print_line(bool value) const {
+
+	OS::get_singleton()->set_print_line(value);
+}
+
 bool _OS::can_draw() const {
 
 	return OS::get_singleton()->can_draw();
@@ -1131,6 +1136,7 @@ void _OS::_bind_methods() {
 	ObjectTypeDB::bind_method(_MD("get_frames_drawn"), &_OS::get_frames_drawn);
 	ObjectTypeDB::bind_method(_MD("is_stdout_verbose"), &_OS::is_stdout_verbose);
 
+	ObjectTypeDB::bind_method(_MD("set_print_line"), &_OS::set_print_line);
 	ObjectTypeDB::bind_method(_MD("can_use_threads"), &_OS::can_use_threads);
 
 	ObjectTypeDB::bind_method(_MD("is_debug_build"), &_OS::is_debug_build);

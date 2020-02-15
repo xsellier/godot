@@ -360,6 +360,8 @@ public:
 
 	bool gui_has_modal_stack() const;
 
+	void refresh_tooltip();
+
 	Variant gui_get_drag_data() const;
 	Control *get_modal_stack_top() const;
 

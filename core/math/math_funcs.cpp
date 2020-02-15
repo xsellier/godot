@@ -72,7 +72,7 @@ uint32_t Math::rand() {
 
 uint32_t Math::randomi(uint32_t from, uint32_t to) {
 
-	return (Math::rand() % (to - from)) + from;
+	return to > from ? (Math::rand() % (to - from)) + from : from;
 }
 
 double Math::randf() {

@@ -292,9 +292,9 @@ bool StreamPlayer::has_autoplay() const {
 
 void StreamPlayer::set_paused(bool p_paused) {
 
-	paused = p_paused;
-	//if (stream.is_valid())
-	//	stream->set_paused(p_paused);
+	if (paused != p_paused) {
+		paused = p_paused;
+	}
 }
 
 bool StreamPlayer::is_paused() const {

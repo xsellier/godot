@@ -279,6 +279,9 @@ void Node::move_child(Node *p_child, int p_pos) {
 	if (p_pos >= data.children.size())
 		p_pos = data.children.size() - 1;
 
+	int motion_from = MIN(p_pos, p_child->data.pos);
+	int motion_to = MAX(p_pos, p_child->data.pos);
+
 	data.children.remove(p_child->data.pos);
 	data.children.insert(p_pos, p_child);
 
@@ -288,13 +291,13 @@ void Node::move_child(Node *p_child, int p_pos) {
 
 	data.blocked++;
 	//new pos first
-	for (int i = 0; i < data.children.size(); i++) {
+	for (int i = motion_from; i <= motion_to; i++) {
 
 		data.children[i]->data.pos = i;
 	}
 	// notification second
 	move_child_notify(p_child);
-	for (int i = 0; i < data.children.size(); i++) {
+	for (int i = motion_from; i <= motion_to; i++) {
 		data.children[i]->notification(NOTIFICATION_MOVED_IN_PARENT);
 	}
 
@@ -401,7 +404,11 @@ void Node::_propagate_pause_owner(Node *p_owner) {
 
 bool Node::can_process() const {
 
-	ERR_FAIL_COND_V(!is_inside_tree(), false);
+	if (!is_inside_tree()) {
+		ERR_PRINTS("can_process() failed, node '" + get_name() + "' is not in the tree (" + get_filename() + ").");
+
+		return false;
+	}
 
 	if (get_tree()->is_paused()) {
 
@@ -959,8 +966,18 @@ bool Node::is_a_parent_of(const Node *p_node) const {
 bool Node::is_greater_than(const Node *p_node) const {
 
 	ERR_FAIL_NULL_V(p_node, false);
-	ERR_FAIL_COND_V(!data.inside_tree, false);
-	ERR_FAIL_COND_V(!p_node->data.inside_tree, false);
+
+	if (!data.inside_tree) {
+		ERR_PRINTS("is_greater_than() failed, node '" + get_name() + "' is not in the tree (" + get_filename() + ").");
+
+		return false;
+	}
+
+	if (!p_node->data.inside_tree) {
+		ERR_PRINTS("is_greater_than() failed, node '" + p_node->get_name() + "' is not in the tree (" + p_node->get_filename() + ").");
+
+		return false;
+	}
 
 	ERR_FAIL_COND_V(data.depth < 0, false);
 	ERR_FAIL_COND_V(p_node->data.depth < 0, false);

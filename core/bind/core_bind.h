@@ -266,6 +266,7 @@ public:
 	uint32_t get_splash_tick_msec() const;
 
 	bool can_use_threads() const;
+	void set_print_line(bool value) const;
 
 	bool can_draw() const;
 

@@ -118,15 +118,15 @@ public:
 	CrashHandler crash_handler;
 
 	float _mouse_scale(float p_scale) {
-		if (display_scale > 1.0)
+		if (_display_scale() > 1.0)
 			return p_scale;
 		else
 			return 1.0;
 	}
 
+	float _display_scale() const;
+	float _display_scale(id screen) const;
 	void _update_window();
-
-	float display_scale;
 
 protected:
 	virtual int get_video_driver_count() const;

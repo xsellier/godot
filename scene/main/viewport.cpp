@@ -1439,6 +1439,42 @@ void Viewport::_gui_cancel_tooltip() {
 	}
 }
 
+void Viewport::refresh_tooltip() {
+
+	if (!gui.tooltip || !gui.tooltip_popup || !gui.tooltip_label) {
+		return;
+	}
+
+	String tooltip = gui.tooltip->get_tooltip(gui.tooltip->get_global_transform().xform_inv(gui.tooltip_pos));
+	if (tooltip.length() == 0)
+		return; // bye
+
+	String last_tooltip = gui.tooltip_label->get_text();
+
+	// If the tooltip has not changed
+	if (last_tooltip == tooltip) {
+		return;
+	}
+
+	gui.tooltip_label->set_text(tooltip);
+	Ref<StyleBox> ttp = gui.tooltip_label->get_stylebox("panel", "TooltipPanel");
+	Rect2 r(gui.tooltip_pos + Point2(10, 10), gui.tooltip_label->get_combined_minimum_size() + ttp->get_minimum_size());
+	Rect2 vr = gui.tooltip_label->get_viewport_rect();
+	if (r.size.x + r.pos.x > vr.size.x) {
+		r.pos.x = gui.tooltip_pos.x - r.size.x - 10;
+	}
+
+	if (r.size.y + r.pos.y > vr.size.y) {
+		r.pos.y = gui.tooltip_pos.y - r.size.y - 10;
+	}
+
+	r.pos.x = MAX(0, r.pos.x);
+	r.pos.y = MAX(0, r.pos.y);
+
+	gui.tooltip_popup->set_global_pos(r.pos);
+	gui.tooltip_popup->set_size(r.size);
+}
+
 void Viewport::_gui_show_tooltip() {
 
 	// Ensure that this function won't be triggered twice
@@ -2433,6 +2469,7 @@ void Viewport::_bind_methods() {
 	ObjectTypeDB::bind_method(_MD("get_render_target_clear_on_new_frame"), &Viewport::get_render_target_clear_on_new_frame);
 
 	ObjectTypeDB::bind_method(_MD("render_target_clear"), &Viewport::render_target_clear);
+	ObjectTypeDB::bind_method(_MD("refresh_tooltip"), &Viewport::refresh_tooltip);
 
 	ObjectTypeDB::bind_method(_MD("set_render_target_filter", "enable"), &Viewport::set_render_target_filter);
 	ObjectTypeDB::bind_method(_MD("get_render_target_filter"), &Viewport::get_render_target_filter);

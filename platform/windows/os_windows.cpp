@@ -2078,7 +2078,7 @@ void OS_Windows::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shap
 
 		cursors[p_shape] = CreateIconIndirect(&iconinfo);
 
-		if (p_shape == CURSOR_ARROW) {
+		if (p_shape == cursor_shape) {
 			if (mouse_mode == MOUSE_MODE_VISIBLE) {
 				SetCursor(cursors[p_shape]);
 			}

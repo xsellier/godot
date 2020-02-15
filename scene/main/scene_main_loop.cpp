@@ -71,12 +71,14 @@ SceneTree::Group *SceneTree::add_to_group(const StringName &p_group, Node *p_nod
 	}
 
 	if (E->get().nodes.find(p_node) != -1) {
-		ERR_EXPLAIN("Already in group: " + p_group);
-		ERR_FAIL_V(&E->get());
+#ifdef DEBUG_ENABLED
+		ERR_PRINTS("Already in group: " + p_group);
+#endif
+	} else {
+		E->get().nodes.push_back(p_node);
+		E->get().changed = true;
 	}
-	E->get().nodes.push_back(p_node);
-	//E->get().last_tree_version=0;
-	E->get().changed = true;
+
 	return &E->get();
 }
 
@@ -460,11 +462,7 @@ void SceneTree::input_event(const InputEvent &p_event) {
 
 void SceneTree::init() {
 
-	//_quit=false;
 	initialized = true;
-	input_handled = false;
-
-	pause = false;
 
 	root->_set_tree(this);
 	MainLoop::init();
@@ -1668,6 +1666,8 @@ SceneTree::SceneTree() {
 	idle_process_time = 1;
 	last_id = 1;
 	root = NULL;
+	input_handled = false;
+	pause = false;
 	current_frame = 0;
 	tree_changed_name = "tree_changed";
 	node_removed_name = "node_removed";

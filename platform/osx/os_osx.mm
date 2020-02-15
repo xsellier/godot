@@ -58,37 +58,26 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-//uses portions of glfw
-
-//========================================================================
-// GLFW 3.0 - www.glfw.org
-//------------------------------------------------------------------------
-// Copyright (c) 2002-2006 Marcus Geelnard
-// Copyright (c) 2006-2010 Camilla Berglund <elmindreda@elmindreda.org>
-//
-// This software is provided 'as-is', without any express or implied
-// warranty. In no event will the authors be held liable for any damages
-// arising from the use of this software.
-//
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-//
-// 1. The origin of this software must not be misrepresented; you must not
-//    claim that you wrote the original software. If you use this software
-//    in a product, an acknowledgment in the product documentation would
-//    be appreciated but is not required.
-//
-// 2. Altered source versions must be plainly marked as such, and must not
-//    be misrepresented as being the original software.
-//
-// 3. This notice may not be removed or altered from any source
-//    distribution.
-//
-//========================================================================
-
 #if MAC_OS_X_VERSION_MAX_ALLOWED < 101200
+#define NSEventMaskAny NSAnyEventMask
+#define NSEventTypeKeyDown NSKeyDown
+#define NSEventTypeKeyUp NSKeyUp
+#define NSEventModifierFlagShift NSShiftKeyMask
+#define NSEventModifierFlagCommand NSCommandKeyMask
+#define NSEventModifierFlagControl NSControlKeyMask
+#define NSEventModifierFlagOption NSAlternateKeyMask
+#define NSWindowStyleMaskTitled NSTitledWindowMask
+#define NSWindowStyleMaskResizable NSResizableWindowMask
+#define NSWindowStyleMaskMiniaturizable NSMiniaturizableWindowMask
+#define NSWindowStyleMaskClosable NSClosableWindowMask
 #define NSWindowStyleMaskBorderless NSBorderlessWindowMask
+#endif
+
+#ifndef NSAppKitVersionNumber10_12
+#define NSAppKitVersionNumber10_12 1504
+#endif
+#ifndef NSAppKitVersionNumber10_14
+#define NSAppKitVersionNumber10_14 1671
 #endif
 
 static NSRect convertRectToBacking(NSRect contentRect) {
@@ -161,8 +150,7 @@ static bool mouse_down_control = false;
 	/*
 	_Godotwindow* window;
 
-	for (window = _Godot.windowListHead;  window;  window = window->next)
-	{
+	for (window = _Godot.windowListHead;  window;  window = window->next) {
 		if ([window_object isVisible])
 			_GodotInputWindowVisibility(window, GL_TRUE);
 	}
@@ -190,7 +178,6 @@ static bool mouse_down_control = false;
 	return NO;
 }
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
 - (void)windowDidEnterFullScreen:(NSNotification *)notification {
 	OS_OSX::singleton->zoomed = true;
 }
@@ -198,9 +185,8 @@ static bool mouse_down_control = false;
 - (void)windowDidExitFullScreen:(NSNotification *)notification {
 	OS_OSX::singleton->zoomed = false;
 	if (!OS_OSX::singleton->resizable)
-		[OS_OSX::singleton->window_object setStyleMask:[OS_OSX::singleton->window_object styleMask] & ~NSResizableWindowMask];
+		[OS_OSX::singleton->window_object setStyleMask:[OS_OSX::singleton->window_object styleMask] & ~NSWindowStyleMaskResizable];
 }
-#endif // MAC_OS_X_VERSION_MAX_ALLOWED
 
 - (void)windowDidChangeBackingProperties:(NSNotification *)notification {
 	if (!OS_OSX::singleton)
@@ -210,15 +196,21 @@ static bool mouse_down_control = false;
 	CGFloat newBackingScaleFactor = [window backingScaleFactor];
 	CGFloat oldBackingScaleFactor = [[[notification userInfo] objectForKey:@"NSBackingPropertyOldScaleFactorKey"] doubleValue];
 
+	if (OS_OSX::singleton->is_hidpi_allowed()) {
+		[OS_OSX::singleton->window_view setWantsBestResolutionOpenGLSurface:YES];
+	} else {
+		[OS_OSX::singleton->window_view setWantsBestResolutionOpenGLSurface:NO];
+	}
+
 	if (newBackingScaleFactor != oldBackingScaleFactor) {
 		//Set new display scale and window size
-		OS_OSX::singleton->display_scale = newBackingScaleFactor;
+		float newDisplayScale = OS_OSX::singleton->is_hidpi_allowed() ? newBackingScaleFactor : 1.0;
 
 		const NSRect contentRect = [OS_OSX::singleton->window_view frame];
-		const NSRect fbRect = contentRect; //convertRectToBacking(contentRect);
+		const NSRect fbRect = contentRect;
 
-		OS_OSX::singleton->window_size.width = fbRect.size.width * OS_OSX::singleton->display_scale;
-		OS_OSX::singleton->window_size.height = fbRect.size.height * OS_OSX::singleton->display_scale;
+		OS_OSX::singleton->window_size.width = fbRect.size.width * newDisplayScale;
+		OS_OSX::singleton->window_size.height = fbRect.size.height * newDisplayScale;
 
 		//Update context
 		if (OS_OSX::singleton->main_loop) {
@@ -236,10 +228,11 @@ static bool mouse_down_control = false;
 	[OS_OSX::singleton->context update];
 
 	const NSRect contentRect = [OS_OSX::singleton->window_view frame];
-	const NSRect fbRect = contentRect; //convertRectToBacking(contentRect);
+	const NSRect fbRect = contentRect;
 
-	OS_OSX::singleton->window_size.width = fbRect.size.width * OS_OSX::singleton->display_scale;
-	OS_OSX::singleton->window_size.height = fbRect.size.height * OS_OSX::singleton->display_scale;
+	float displayScale = OS_OSX::singleton->_display_scale();
+	OS_OSX::singleton->window_size.width = fbRect.size.width * displayScale;
+	OS_OSX::singleton->window_size.height = fbRect.size.height * displayScale;
 
 	if (OS_OSX::singleton->main_loop) {
 		Main::force_redraw();
@@ -248,36 +241,19 @@ static bool mouse_down_control = false;
 			Main::iteration();
 		}
 	}
-
-	//_GodotInputFramebufferSize(window, fbRect.size.width, fbRect.size.height);
-	//_GodotInputWindowSize(window, contentRect.size.width, contentRect.size.height);
-	//_GodotInputWindowDamage(window);
-
-	//if (window->cursorMode == Godot_CURSOR_DISABLED)
-	//	centerCursor(window);
 }
 
 - (void)windowDidMove:(NSNotification *)notification {
-	//[window->nsgl.context update];
-
-	//int x, y;
-	//_GodotPlatformGetWindowPos(window, &x, &y);
-	//_GodotInputWindowPos(window, x, y);
-
-	//if (window->cursorMode == Godot_CURSOR_DISABLED)
-	//	centerCursor(window);
 }
 
 - (void)windowDidBecomeKey:(NSNotification *)notification {
-	//_GodotInputWindowFocus(window, GL_TRUE);
-	//_GodotPlatformSetCursorMode(window, window->cursorMode);
+
 	if (OS_OSX::singleton->get_main_loop())
 		OS_OSX::singleton->get_main_loop()->notification(MainLoop::NOTIFICATION_WM_FOCUS_IN);
 }
 
 - (void)windowDidResignKey:(NSNotification *)notification {
-	//_GodotInputWindowFocus(window, GL_FALSE);
-	//_GodotPlatformSetCursorMode(window, Godot_CURSOR_NORMAL);
+
 	if (OS_OSX::singleton->get_main_loop())
 		OS_OSX::singleton->get_main_loop()->notification(MainLoop::NOTIFICATION_WM_FOCUS_OUT);
 }
@@ -306,13 +282,7 @@ static bool mouse_down_control = false;
 
 + (void)initialize {
 	if (self == [GodotContentView class]) {
-		/*
-		if (_glfw.ns.cursor == nil) {
-			NSImage* data = [[NSImage alloc] initWithSize:NSMakeSize(1, 1)];
-			_glfw.ns.cursor = [[NSCursor alloc] initWithImage:data hotSpot:NSZeroPoint];
-			[data release];
-		}
-*/
+		// nothing left to do here at the moment..
 	}
 }
 
@@ -889,15 +859,6 @@ void OS_OSX::initialize(const VideoMode &p_desired, int p_video_driver, int p_au
 	// Register to be notified on displays arrangement changes
 	CGDisplayRegisterReconfigurationCallback(displays_arrangement_changed, NULL);
 
-	if (is_hidpi_allowed() && [[NSScreen mainScreen] respondsToSelector:@selector(backingScaleFactor)]) {
-		for (NSScreen *screen in [NSScreen screens]) {
-			float s = [screen backingScaleFactor];
-			if (s > display_scale) {
-				display_scale = s;
-			}
-		}
-	}
-
 	window_delegate = [[GodotWindowDelegate alloc] init];
 
 	// Don't use accumulation buffer support; it's not accelerated
@@ -909,7 +870,7 @@ void OS_OSX::initialize(const VideoMode &p_desired, int p_video_driver, int p_au
 		styleMask = NSWindowStyleMaskBorderless;
 	} else {
 		resizable = p_desired.resizable;
-		styleMask = NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | (p_desired.resizable ? NSResizableWindowMask : 0);
+		styleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable | (p_desired.resizable ? NSWindowStyleMaskResizable : 0);
 	}
 
 	window_object = [[GodotWindow alloc]
@@ -921,17 +882,29 @@ void OS_OSX::initialize(const VideoMode &p_desired, int p_video_driver, int p_au
 	ERR_FAIL_COND(window_object == nil);
 
 	window_view = [[GodotContentView alloc] init];
+	if (NSAppKitVersionNumber >= NSAppKitVersionNumber10_14) {
+		[window_view setWantsLayer:TRUE];
+	}
 
-	window_size.width = p_desired.width * display_scale;
-	window_size.height = p_desired.height * display_scale;
+	float displayScale = 1.0;
+	if (is_hidpi_allowed()) {
+		// note that mainScreen is not screen #0 but the one with the keyboard focus.
+		NSScreen *screen = [NSScreen mainScreen];
+		if ([screen respondsToSelector:@selector(backingScaleFactor)]) {
+			displayScale = fmax(displayScale, [screen backingScaleFactor]);
+		}
+	}
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
-	if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_6 && display_scale > 1) {
+	window_size.width = p_desired.width * displayScale;
+	window_size.height = p_desired.height * displayScale;
+
+	if (displayScale > 1.0) {
 		[window_view setWantsBestResolutionOpenGLSurface:YES];
 		//if (current_videomode.resizable)
 		[window_object setCollectionBehavior:NSWindowCollectionBehaviorFullScreenPrimary];
+	} else {
+		[window_view setWantsBestResolutionOpenGLSurface:NO];
 	}
-#endif /*MAC_OS_X_VERSION_MAX_ALLOWED*/
 
 	//[window_object setTitle:[NSString stringWithUTF8String:"GodotEnginies"]];
 	[window_object setContentView:window_view];
@@ -939,10 +912,7 @@ void OS_OSX::initialize(const VideoMode &p_desired, int p_video_driver, int p_au
 	[window_object setAcceptsMouseMovedEvents:YES];
 	[window_object center];
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
-	if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_6)
-		[window_object setRestorable:NO];
-#endif /*MAC_OS_X_VERSION_MAX_ALLOWED*/
+	[window_object setRestorable:NO];
 
 	unsigned int attributeCount = 0;
 
@@ -963,11 +933,6 @@ void OS_OSX::initialize(const VideoMode &p_desired, int p_video_driver, int p_au
 
 	ADD_ATTR(NSOpenGLPFADoubleBuffer);
 	ADD_ATTR(NSOpenGLPFAClosestPolicy);
-
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
-	if (false /* use gl3*/)
-		ADD_ATTR2(NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion3_2Core);
-#endif /*MAC_OS_X_VERSION_MAX_ALLOWED*/
 
 	ADD_ATTR2(NSOpenGLPFAColorSize, colorBits);
 
@@ -1272,7 +1237,7 @@ void OS_OSX::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shape, c
 
 		cursors[p_shape] = cursor;
 
-		if (p_shape == CURSOR_ARROW) {
+		if (p_shape == cursor_shape) {
 			if (mouse_mode == MOUSE_MODE_VISIBLE) {
 				[cursor set];
 			}
@@ -1305,7 +1270,8 @@ void OS_OSX::warp_mouse_pos(const Point2 &p_to) {
 
 		//local point in window coords
 		const NSRect contentRect = [window_view frame];
-		NSRect pointInWindowRect = NSMakeRect(p_to.x / display_scale, contentRect.size.height - (p_to.y / display_scale) - 1, 0, 0);
+		float displayScale = _display_scale();
+		NSRect pointInWindowRect = NSMakeRect(p_to.x / displayScale, contentRect.size.height - (p_to.y / displayScale) - 1, 0, 0);
 		NSPoint pointOnScreen = [[window_view window] convertRectToScreen:pointInWindowRect].origin;
 
 		//point in scren coords
@@ -1510,14 +1476,13 @@ void OS_OSX::set_current_screen(int p_screen) {
 };
 
 Point2 OS_OSX::get_native_screen_position(int p_screen) const {
+	if (p_screen == -1) {
+		p_screen = get_current_screen();
+	}
+
 	NSArray *screenArray = [NSScreen screens];
 	if (p_screen < [screenArray count]) {
-		float displayScale = 1.0;
-
-		if (display_scale > 1.0 && [[screenArray objectAtIndex:p_screen] respondsToSelector:@selector(backingScaleFactor)]) {
-			displayScale = [[screenArray objectAtIndex:p_screen] backingScaleFactor];
-		}
-
+		float displayScale = _display_scale([screenArray objectAtIndex:p_screen]);
 		NSRect nsrect = [[screenArray objectAtIndex:p_screen] frame];
 		// Return the top-left corner of the screen, for OS X the y starts at the bottom
 		return Point2(nsrect.origin.x, nsrect.origin.y + nsrect.size.height) * displayScale;
@@ -1535,14 +1500,13 @@ Point2 OS_OSX::get_screen_position(int p_screen) const {
 }
 
 int OS_OSX::get_screen_dpi(int p_screen) const {
+	if (p_screen == -1) {
+		p_screen = get_current_screen();
+	}
+
 	NSArray *screenArray = [NSScreen screens];
 	if (p_screen < [screenArray count]) {
-		float displayScale = 1.0;
-
-		if (display_scale > 1.0 && [[screenArray objectAtIndex:p_screen] respondsToSelector:@selector(backingScaleFactor)]) {
-			displayScale = [[screenArray objectAtIndex:p_screen] backingScaleFactor];
-		}
-
+		float displayScale = _display_scale([screenArray objectAtIndex:p_screen]);
 		NSDictionary *description = [[screenArray objectAtIndex:p_screen] deviceDescription];
 		NSSize displayPixelSize = [[description objectForKey:NSDeviceSize] sizeValue];
 		CGSize displayPhysicalSize = CGDisplayScreenSize(
@@ -1555,40 +1519,19 @@ int OS_OSX::get_screen_dpi(int p_screen) const {
 }
 
 Size2 OS_OSX::get_screen_size(int p_screen) const {
+	if (p_screen == -1) {
+		p_screen = get_current_screen();
+	}
+
 	NSArray *screenArray = [NSScreen screens];
 	if (p_screen < [screenArray count]) {
-		float displayScale = 1.0;
-
-		if (display_scale > 1.0 && [[screenArray objectAtIndex:p_screen] respondsToSelector:@selector(backingScaleFactor)]) {
-			displayScale = [[screenArray objectAtIndex:p_screen] backingScaleFactor];
-		}
-
+		float displayScale = _display_scale([screenArray objectAtIndex:p_screen]);
 		// Note: Use frame to get the whole screen size
 		NSRect nsrect = [[screenArray objectAtIndex:p_screen] frame];
 		return Size2(nsrect.size.width, nsrect.size.height) * displayScale;
 	}
 
 	return Size2();
-}
-
-Point2 OS_OSX::get_native_window_position() const {
-	NSRect nsrect = [window_object frame];
-
-	Point2 pos;
-
-	// Return the position of the top-left corner, for OS X the y starts at the bottom
-	pos.x = nsrect.origin.x * display_scale;
-	pos.y = (nsrect.origin.y + nsrect.size.height) * display_scale;
-
-	return pos;
-};
-
-Point2 OS_OSX::get_window_position() const {
-	Point2 position = get_native_window_position() - get_screens_origin();
-	// OS X native y-coordinate relative to get_screens_origin() is negative,
-	// Godot expects a positive value
-	position.y *= -1;
-	return position;
 }
 
 void OS_OSX::_update_window() {
@@ -1616,12 +1559,51 @@ void OS_OSX::_update_window() {
 	}
 }
 
+float OS_OSX::_display_scale() const {
+	if (window_object) {
+		return _display_scale([window_object screen]);
+	} else {
+		return _display_scale([NSScreen mainScreen]);
+	}
+}
+
+float OS_OSX::_display_scale(id screen) const {
+	if (is_hidpi_allowed()) {
+		if ([screen respondsToSelector:@selector(backingScaleFactor)]) {
+			return fmax(1.0, [screen backingScaleFactor]);
+		}
+	}
+	return 1.0;
+}
+
+Point2 OS_OSX::get_native_window_position() const {
+
+	NSRect nsrect = [window_object frame];
+	Point2 pos;
+	float displayScale = _display_scale();
+
+	// Return the position of the top-left corner, for OS X the y starts at the bottom
+	pos.x = nsrect.origin.x * displayScale;
+	pos.y = (nsrect.origin.y + nsrect.size.height) * displayScale;
+
+	return pos;
+};
+
+Point2 OS_OSX::get_window_position() const {
+	Point2 position = get_native_window_position() - get_screens_origin();
+	// OS X native y-coordinate relative to get_screens_origin() is negative,
+	// Godot expects a positive value
+	position.y *= -1;
+	return position;
+}
+
 void OS_OSX::set_native_window_position(const Point2 &p_position) {
 
 	NSPoint pos;
+	float displayScale = _display_scale();
 
-	pos.x = p_position.x / display_scale;
-	pos.y = p_position.y / display_scale;
+	pos.x = p_position.x / displayScale;
+	pos.y = p_position.y / displayScale;
 
 	[window_object setFrameTopLeftPoint:pos];
 
@@ -1644,22 +1626,22 @@ Size2 OS_OSX::get_window_size() const {
 Size2 OS_OSX::get_real_window_size() const {
 
 	NSRect frame = [window_object frame];
-	return Size2(frame.size.width, frame.size.height);
+	return Size2(frame.size.width, frame.size.height) * _display_scale();
 }
 
 void OS_OSX::set_window_size(const Size2 p_size) {
 
-	Size2 size = p_size;
+	Size2 size = p_size / _display_scale();
 
 	if (get_borderless_window() == false) {
 		// NSRect used by setFrame includes the title bar, so add it to our size.y
 		CGFloat menuBarHeight = [[[NSApplication sharedApplication] mainMenu] menuBarHeight];
 		if (menuBarHeight != 0.f) {
 			size.y += menuBarHeight;
-#if MAC_OS_X_VERSION_MAX_ALLOWED <= 101104
 		} else {
-			size.y += [[NSStatusBar systemStatusBar] thickness];
-#endif
+			if (floor(NSAppKitVersionNumber) < NSAppKitVersionNumber10_12) {
+				size.y += [[NSStatusBar systemStatusBar] thickness];
+			}
 		}
 	}
 
@@ -1672,23 +1654,14 @@ void OS_OSX::set_window_size(const Size2 p_size) {
 void OS_OSX::set_window_fullscreen(bool p_enabled) {
 
 	if (zoomed != p_enabled) {
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
 		if (!resizable)
-			[window_object setStyleMask:[window_object styleMask] | NSResizableWindowMask];
+			[window_object setStyleMask:[window_object styleMask] | NSWindowStyleMaskResizable];
 		[window_object toggleFullScreen:nil];
-#else
-		[window_object performZoom:nil];
-#endif /*MAC_OS_X_VERSION_MAX_ALLOWED*/
 	}
 	zoomed = p_enabled;
 };
 
 bool OS_OSX::is_window_fullscreen() const {
-
-#if MAC_OS_X_VERSION_MAX_ALLOWED < 1070
-	if ([window_object respondsToSelector:@selector(isZoomed)])
-		return [window_object isZoomed];
-#endif /*MAC_OS_X_VERSION_MAX_ALLOWED*/
 
 	return zoomed;
 };
@@ -1696,16 +1669,16 @@ bool OS_OSX::is_window_fullscreen() const {
 void OS_OSX::set_window_resizable(bool p_enabled) {
 
 	if (p_enabled)
-		[window_object setStyleMask:[window_object styleMask] | NSResizableWindowMask];
+		[window_object setStyleMask:[window_object styleMask] | NSWindowStyleMaskResizable];
 	else if (!zoomed)
-		[window_object setStyleMask:[window_object styleMask] & ~NSResizableWindowMask];
+		[window_object setStyleMask:[window_object styleMask] & ~NSWindowStyleMaskResizable];
 
 	resizable = p_enabled;
 };
 
 bool OS_OSX::is_window_resizable() const {
 
-	return [window_object styleMask] & NSResizableWindowMask;
+	return [window_object styleMask] & NSWindowStyleMaskResizable;
 };
 
 void OS_OSX::set_window_minimized(bool p_enabled) {
@@ -1744,7 +1717,8 @@ bool OS_OSX::is_window_maximized() const {
 
 void OS_OSX::move_window_to_foreground() {
 
-	[window_object orderFrontRegardless];
+	[[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
+	[window_object makeKeyAndOrderFront:nil];
 }
 
 void OS_OSX::set_window_always_on_top(bool p_enabled) {
@@ -1774,7 +1748,7 @@ void OS_OSX::set_borderless_window(int p_borderless) {
 	if (p_borderless) {
 		[window_object setStyleMask:NSWindowStyleMaskBorderless];
 	} else {
-		[window_object setStyleMask:NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask];
+		[window_object setStyleMask:NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable | (resizable ? NSWindowStyleMaskResizable : 0)];
 
 		// Force update of the window styles
 		NSRect frameRect = [window_object frame];
@@ -1898,7 +1872,7 @@ void OS_OSX::process_events() {
 
 	while (true) {
 		NSEvent *event = [NSApp
-				nextEventMatchingMask:NSAnyEventMask
+				nextEventMatchingMask:NSEventMaskAny
 							untilDate:[NSDate distantPast]
 							   inMode:NSDefaultRunLoopMode
 							  dequeue:YES];
@@ -2026,8 +2000,7 @@ OS_OSX::OS_OSX() {
 
 	/*
 	if (pthread_key_create(&_Godot.nsgl.current, NULL) != 0) {
-		_GodotInputError(Godot_PLATFORM_ERROR,
-			"NSGL: Failed to create context TLS");
+		_GodotInputError(Godot_PLATFORM_ERROR, "NSGL: Failed to create context TLS");;
 		return GL_FALSE;
 	}
 */
@@ -2070,7 +2043,7 @@ OS_OSX::OS_OSX() {
 	[apple_menu addItemWithTitle:title action:@selector(hide:) keyEquivalent:@"h"];
 
 	menu_item = [apple_menu addItemWithTitle:NSLocalizedString(@"Hide Others", nil) action:@selector(hideOtherApplications:) keyEquivalent:@"h"];
-	[menu_item setKeyEquivalentModifierMask:(NSAlternateKeyMask | NSCommandKeyMask)];
+	[menu_item setKeyEquivalentModifierMask:(NSEventModifierFlagOption | NSEventModifierFlagCommand)];
 
 	[apple_menu addItemWithTitle:NSLocalizedString(@"Show all", nil) action:@selector(unhideAllApplications:) keyEquivalent:@""];
 
@@ -2101,7 +2074,7 @@ OS_OSX::OS_OSX() {
 	minimized = false;
 	window_size = Vector2(1024, 600);
 	zoomed = false;
-	display_scale = 1.0;
+	resizable = false;
 
 	AudioDriverManagerSW::add_driver(&audio_driver_osx);
 }
