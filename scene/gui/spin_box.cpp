@@ -98,18 +98,18 @@ void SpinBox::_input_event(const InputEvent &p_event) {
 
 			case BUTTON_LEFT: {
 
+				line_edit->grab_focus();
 				set_val(get_val() + (up ? get_step() : -get_step()));
 
 				range_click_timer->set_wait_time(0.6);
 				range_click_timer->set_one_shot(true);
 				range_click_timer->start();
 
-				line_edit->grab_focus();
 			} break;
 			case BUTTON_RIGHT: {
 
-				set_val((up ? get_max() : get_min()));
 				line_edit->grab_focus();
+				set_val((up ? get_max() : get_min()));
 			} break;
 			case BUTTON_WHEEL_UP: {
 				if (line_edit->has_focus()) {

@@ -241,7 +241,27 @@ UpgradeLog*.htm
 
 # SQL Server files
 App_Data/*.mdf
-App_Data/*.ldf
+App_Data/*.ldfCallstack
+scene\main\node.cpp (714)
+Node::add_child
+    
+Dump
+Logs
+    
+Windows
+OS
+true
+Can thread
+1
+CPU count
+GenericDevice
+Model
+en
+Locale
+false
+VSync
+(1920, 1080)
+Resolution
 
 # Business Intelligence projects
 *.rdl.data

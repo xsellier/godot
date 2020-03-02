@@ -287,6 +287,10 @@ void BaseButton::_notification(int p_what) {
 	}
 }
 
+ButtonGroup *BaseButton::get_button_group() const {
+	return group;
+}
+
 void BaseButton::pressed() {
 
 	if (get_script_instance())
@@ -470,6 +474,7 @@ void BaseButton::_bind_methods() {
 	ObjectTypeDB::bind_method(_MD("get_enabled_focus_mode"), &BaseButton::get_enabled_focus_mode);
 	ObjectTypeDB::bind_method(_MD("set_shortcut", "shortcut"), &BaseButton::set_shortcut);
 	ObjectTypeDB::bind_method(_MD("get_shortcut"), &BaseButton::get_shortcut);
+	ObjectTypeDB::bind_method(_MD("get_button_group"), &BaseButton::get_button_group);
 
 	BIND_VMETHOD(MethodInfo("_pressed"));
 	BIND_VMETHOD(MethodInfo("_toggled", PropertyInfo(Variant::BOOL, "pressed")));

@@ -40,23 +40,6 @@ void RangeIterator::_bind_methods() {
 	ObjectTypeDB::bind_method(_MD("set_range", "arg1", "arg2", "arg3"), &RangeIterator::_set_range, DEFVAL(Variant()), DEFVAL(Variant()));
 }
 
-bool RangeIterator::_iter_init(Variant arg) {
-	return !is_finished();
-}
-
-bool RangeIterator::_iter_next(Variant arg) {
-	current += step;
-	return !is_finished();
-}
-
-Variant RangeIterator::_iter_get(Variant arg) {
-	return Variant(current);
-}
-
-bool RangeIterator::is_finished() {
-	return (step > 0) ? current >= stop : current <= stop;
-}
-
 Array RangeIterator::to_array() {
 	if (step == 0) {
 		ERR_EXPLAIN("step is zero!");

@@ -74,6 +74,7 @@ protected:
 	static void _bind_methods();
 
 	void _update_scrollbar_pos();
+	Vector2 compute_scroll_position(Control *p_node);
 
 public:
 	int get_v_scroll() const;

@@ -44,12 +44,39 @@ private:
 	int stop;
 	int step;
 
-	bool _iter_init(Variant arg);
-	bool _iter_next(Variant arg);
-	Variant _iter_get(Variant arg);
+	_ALWAYS_INLINE_ bool _iter_init(Variant arg) const {
+		return !is_finished();
+	}
+
+	_ALWAYS_INLINE_ bool _iter_next(Variant arg) {
+		current += step;
+		return !is_finished();
+	}
+
+	_ALWAYS_INLINE_ int _iter_get(Variant arg) const {
+		return current;
+	}
 
 public:
-	bool is_finished();
+	_ALWAYS_INLINE_ bool use_native_iterator() const {
+		return true;
+	}
+
+	_ALWAYS_INLINE_ bool is_finished() const {
+		return (step > 0) ? current >= stop : current <= stop;
+	}
+
+	_ALWAYS_INLINE_ int get_current() const {
+		return current;
+	}
+
+	_ALWAYS_INLINE_ int get_stop() const {
+		return stop;
+	}
+
+	_ALWAYS_INLINE_ int get_step() const {
+		return step;
+	}
 
 	Array to_array();
 

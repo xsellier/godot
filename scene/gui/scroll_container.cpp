@@ -29,6 +29,7 @@
 /*************************************************************************/
 #include "scroll_container.h"
 #include "os/os.h"
+
 bool ScrollContainer::clips_input() const {
 
 	return true;
@@ -211,6 +212,20 @@ void ScrollContainer::_update_scrollbar_pos() {
 
 	h_scroll->raise();
 	v_scroll->raise();
+}
+
+Vector2 ScrollContainer::compute_scroll_position(Control *p_control) {
+
+	if (is_a_parent_of(p_control)) {
+		float right_margin = (v_scroll->is_visible()) ? v_scroll->get_size().x : 0.0;
+		float bottom_margin = (h_scroll->is_visible()) ? h_scroll->get_size().y : 0.0;
+
+		return Vector2(
+				MAX(MIN(p_control->get_begin().x, get_h_scroll()), p_control->get_end().x - get_size().x + right_margin),
+				MAX(MIN(p_control->get_begin().y, get_v_scroll()), p_control->get_end().y - get_size().y + bottom_margin));
+	}
+
+	return Vector2(0.0, 0.0);
 }
 
 void ScrollContainer::_notification(int p_what) {
@@ -452,6 +467,7 @@ void ScrollContainer::_bind_methods() {
 	ObjectTypeDB::bind_method(_MD("set_enable_v_scroll", "enable"), &ScrollContainer::set_enable_v_scroll);
 	ObjectTypeDB::bind_method(_MD("is_v_scroll_enabled"), &ScrollContainer::is_v_scroll_enabled);
 	ObjectTypeDB::bind_method(_MD("_update_scrollbar_pos"), &ScrollContainer::_update_scrollbar_pos);
+	ObjectTypeDB::bind_method(_MD("compute_scroll_position"), &ScrollContainer::compute_scroll_position);
 	ObjectTypeDB::bind_method(_MD("set_h_scroll", "val"), &ScrollContainer::set_h_scroll);
 	ObjectTypeDB::bind_method(_MD("get_h_scroll"), &ScrollContainer::get_h_scroll);
 	ObjectTypeDB::bind_method(_MD("set_v_scroll", "val"), &ScrollContainer::set_v_scroll);

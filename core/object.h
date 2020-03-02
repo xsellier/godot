@@ -602,8 +602,23 @@ public:
 	virtual Variant getvar(const Variant &p_key, bool *r_valid = NULL) const;
 	virtual void setvar(const Variant &p_key, const Variant &p_value, bool *r_valid = NULL);
 
-	/* SCRIPT */
+	virtual _ALWAYS_INLINE_ bool use_native_iterator() const {
+		return false;
+	}
 
+	virtual _ALWAYS_INLINE_ bool _iter_init(Variant arg) const {
+		return false;
+	}
+
+	virtual _ALWAYS_INLINE_ bool _iter_next(Variant arg) {
+		return false;
+	}
+
+	virtual _ALWAYS_INLINE_ int _iter_get(Variant arg) const {
+		return 0;
+	}
+
+	/* SCRIPT */
 	void set_script(const RefPtr &p_script);
 	RefPtr get_script() const;
 

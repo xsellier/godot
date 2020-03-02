@@ -63,7 +63,7 @@ void LineEdit::_input_event(InputEvent p_event) {
 
 			_reset_caret_blink_timer();
 			if (b.pressed) {
-
+				accept_event();
 				shift_selection_check_pre(b.mod.shift);
 
 				set_cursor_at_pixel_pos(b.x);

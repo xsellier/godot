@@ -96,6 +96,7 @@ public:
 
 	void set_enabled_focus_mode(FocusMode p_mode);
 	FocusMode get_enabled_focus_mode() const;
+	ButtonGroup *get_button_group() const;
 
 	void set_shortcut(const Ref<ShortCut> &p_shortcut);
 	Ref<ShortCut> get_shortcut() const;
