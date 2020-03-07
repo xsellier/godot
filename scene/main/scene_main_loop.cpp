@@ -517,7 +517,8 @@ bool SceneTree::idle(float p_time) {
 		_update_root_rect();
 
 		if (use_font_oversampling) {
-			DynamicFontAtSize::font_oversampling = OS::get_singleton()->get_window_size().width / root->get_visible_rect().size.width;
+			Size2 windows_size = OS::get_singleton()->get_window_size();
+			DynamicFontAtSize::font_oversampling = MIN(windows_size.width / root->get_visible_rect().size.width, windows_size.height / root->get_visible_rect().size.height);
 			DynamicFont::update_oversampling();
 		}
 
@@ -1155,7 +1156,8 @@ void SceneTree::set_use_font_oversampling(bool p_oversampling) {
 
 	use_font_oversampling = p_oversampling;
 	if (use_font_oversampling) {
-		DynamicFontAtSize::font_oversampling = OS::get_singleton()->get_window_size().width / root->get_visible_rect().size.width;
+		Size2 windows_size = OS::get_singleton()->get_window_size();
+		DynamicFontAtSize::font_oversampling = MIN(windows_size.width / root->get_visible_rect().size.width, windows_size.height / root->get_visible_rect().size.height);
 	} else {
 		DynamicFontAtSize::font_oversampling = 1.0;
 	}

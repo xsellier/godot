@@ -157,6 +157,7 @@ class OS_X11 : public OS_Unix {
 	bool minimized;
 
 	bool do_mouse_warp;
+	bool window_has_focus;
 
 	const char *cursor_theme;
 	int cursor_size;

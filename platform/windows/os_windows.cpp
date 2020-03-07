@@ -289,6 +289,26 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
 	switch (uMsg) // Check For Windows Messages
 	{
+		case WM_SETFOCUS: {
+			window_has_focus = true;
+			// Restore mouse mode
+			_set_mouse_mode_impl(mouse_mode);
+			break;
+		}
+		case WM_KILLFOCUS: {
+			window_has_focus = false;
+
+			// Release capture unconditionally because it can be set due to dragging, in addition to captured mode
+			ReleaseCapture();
+#if WINVER >= 0x0601 // for windows 7
+			// Release every touch to avoid sticky points
+			for (Map<int, Point2i>::Element *E = touch_state.front(); E; E = E->next()) {
+				_touch_event(false, E->get().x, E->get().y, E->key());
+			}
+			touch_state.clear();
+#endif
+			break;
+		}
 		case WM_ACTIVATE: // Watch For Window Activate Message
 		{
 			minimized = HIWORD(wParam) != 0;
@@ -301,14 +321,6 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 				alt_mem = false;
 				control_mem = false;
 				shift_mem = false;
-				if (mouse_mode == MOUSE_MODE_CAPTURED) {
-					RECT clipRect;
-					GetClientRect(hWnd, &clipRect);
-					ClientToScreen(hWnd, (POINT *)&clipRect.left);
-					ClientToScreen(hWnd, (POINT *)&clipRect.right);
-					ClipCursor(&clipRect);
-					SetCapture(hWnd);
-				}
 			} else {
 				main_loop->notification(MainLoop::NOTIFICATION_WM_FOCUS_OUT);
 				alt_mem = false;
@@ -316,17 +328,6 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
 			return 0; // Return To The Message Loop
 		}
-
-		case WM_KILLFOCUS: {
-
-#if WINVER >= 0x0601 // for windows 7
-			// Release every touch to avoid sticky points
-			for (Map<int, Point2i>::Element *E = touch_state.front(); E; E = E->next()) {
-				_touch_event(false, E->get().x, E->get().y, E->key());
-			}
-			touch_state.clear();
-#endif
-		} break;
 
 		case WM_PAINT:
 
@@ -383,6 +384,10 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 				tme.dwHoverTime = HOVER_DEFAULT;
 				TrackMouseEvent(&tme);
 			}
+
+			// Don't calculate relative mouse movement if we don't have focus in CAPTURED mode.
+			if (!window_has_focus && mouse_mode == MOUSE_MODE_CAPTURED)
+				break;
 
 			/*
 			LPARAM extra = GetMessageExtraInfo();
@@ -450,7 +455,7 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 			mm.relative_y = mm.y - old_y;
 			old_x = mm.x;
 			old_y = mm.y;
-			if (main_loop)
+			if (window_has_focus && main_loop)
 				input->parse_input_event(event);
 
 		} break;
@@ -597,12 +602,14 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 				if (uMsg != WM_MOUSEWHEEL && uMsg != WM_MOUSEHWHEEL) {
 					if (mb.pressed) {
 
-						if (++pressrc > 0)
+						if (++pressrc > 0 && mouse_mode != MOUSE_MODE_CAPTURED)
 							SetCapture(hWnd);
 					} else {
 
 						if (--pressrc <= 0) {
-							ReleaseCapture();
+							if (mouse_mode != MOUSE_MODE_CAPTURED) {
+								ReleaseCapture();
+							}
 							pressrc = 0;
 						}
 					}
@@ -754,7 +761,7 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 		case WM_SETCURSOR: {
 
 			if (LOWORD(lParam) == HTCLIENT) {
-				if (mouse_mode == MOUSE_MODE_HIDDEN || mouse_mode == MOUSE_MODE_CAPTURED) {
+				if (window_has_focus && (mouse_mode == MOUSE_MODE_HIDDEN || mouse_mode == MOUSE_MODE_CAPTURED)) {
 					//Hide the cursor
 					if (hCursor == NULL)
 						hCursor = SetCursor(NULL);
@@ -951,6 +958,7 @@ void OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int 
 
 	main_loop = NULL;
 	outside = true;
+	window_has_focus = true;
 
 	WNDCLASSEXW wc;
 
@@ -1351,18 +1359,26 @@ void OS_Windows::set_mouse_mode(MouseMode p_mode) {
 
 	if (mouse_mode == p_mode)
 		return;
+	_set_mouse_mode_impl(p_mode);
 	mouse_mode = p_mode;
-	if (p_mode == MOUSE_MODE_CAPTURED) {
+}
+
+void OS_Windows::_set_mouse_mode_impl(MouseMode p_mode) {
+
+	if (p_mode == MOUSE_MODE_CAPTURED || mouse_mode == MOUSE_MODE_CONFINED) {
 		RECT clipRect;
 		GetClientRect(hWnd, &clipRect);
 		ClientToScreen(hWnd, (POINT *)&clipRect.left);
 		ClientToScreen(hWnd, (POINT *)&clipRect.right);
 		ClipCursor(&clipRect);
-		SetCapture(hWnd);
-		center = Point2i(video_mode.width / 2, video_mode.height / 2);
-		POINT pos = { (int)center.x, (int)center.y };
-		ClientToScreen(hWnd, &pos);
-		SetCursorPos(pos.x, pos.y);
+
+		if (p_mode == MOUSE_MODE_CAPTURED) {
+			center = Point2i(video_mode.width / 2, video_mode.height / 2);
+			POINT pos = { (int)center.x, (int)center.y };
+			ClientToScreen(hWnd, &pos);
+			SetCursorPos(pos.x, pos.y);
+			SetCapture(hWnd);
+		}
 	} else {
 		ReleaseCapture();
 		ClipCursor(NULL);
@@ -1554,6 +1570,8 @@ void OS_Windows::set_window_position(const Point2 &p_position) {
 	RECT r;
 	GetWindowRect(hWnd, &r);
 	MoveWindow(hWnd, p_position.x, p_position.y, r.right - r.left, r.bottom - r.top, TRUE);
+
+	_update_cursor_window();
 }
 Size2 OS_Windows::get_window_size() const {
 
@@ -1591,7 +1609,22 @@ void OS_Windows::set_window_size(const Size2 p_size) {
 	}
 
 	MoveWindow(hWnd, rect.left, rect.top, w, h, TRUE);
+	_update_cursor_window();
 }
+
+void OS_Windows::_update_cursor_window() {
+	// Don't let the mouse leave the window when resizing to a smaller resolution
+	if (mouse_mode == MOUSE_MODE_CONFINED) {
+		RECT rect;
+		GetClientRect(hWnd, &rect);
+		ClientToScreen(hWnd, (POINT *)&rect.left);
+		ClientToScreen(hWnd, (POINT *)&rect.right);
+		ClipCursor(&rect);
+	} else {
+		ClipCursor(NULL);
+	}
+}
+
 void OS_Windows::set_window_fullscreen(bool p_enabled) {
 
 	if (video_mode.fullscreen == p_enabled)
@@ -1637,6 +1670,8 @@ void OS_Windows::set_window_fullscreen(bool p_enabled) {
 
 		pre_fs_valid = true;
 	}
+
+	_update_cursor_window();
 }
 bool OS_Windows::is_window_fullscreen() const {
 
@@ -1973,7 +2008,7 @@ void OS_Windows::set_cursor_shape(CursorShape p_shape) {
 	if (cursor_shape == p_shape)
 		return;
 
-	if (mouse_mode != MOUSE_MODE_VISIBLE) {
+	if (mouse_mode != MOUSE_MODE_VISIBLE && mouse_mode != MOUSE_MODE_CONFINED) {
 		cursor_shape = p_shape;
 		return;
 	}
@@ -2079,7 +2114,7 @@ void OS_Windows::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shap
 		cursors[p_shape] = CreateIconIndirect(&iconinfo);
 
 		if (p_shape == cursor_shape) {
-			if (mouse_mode == MOUSE_MODE_VISIBLE) {
+			if (mouse_mode == MOUSE_MODE_VISIBLE || mouse_mode == MOUSE_MODE_CONFINED) {
 				SetCursor(cursors[p_shape]);
 			}
 		}

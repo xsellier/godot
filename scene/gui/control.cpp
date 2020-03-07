@@ -1366,18 +1366,12 @@ void Control::set_pos(const Size2 &p_point) {
 
 	Size2 ret = Size2(x2 - x, y2 - y);
 	Size2 min = get_combined_minimum_size();
-
 	Size2 size = Size2(MAX(min.width, ret.width), MAX(min.height, ret.height));
-	float w = size.x;
-	float h = size.y;
 
-	x = p_point.x;
-	y = p_point.y;
-
-	data.margin[0] = _s2a(x, data.anchor[0], pw);
-	data.margin[1] = _s2a(y, data.anchor[1], ph);
-	data.margin[2] = _s2a(x + w, data.anchor[2], pw);
-	data.margin[3] = _s2a(y + h, data.anchor[3], ph);
+	data.margin[0] = _s2a(p_point.x, data.anchor[0], pw);
+	data.margin[1] = _s2a(p_point.y, data.anchor[1], ph);
+	data.margin[2] = _s2a(p_point.x + size.x, data.anchor[2], pw);
+	data.margin[3] = _s2a(p_point.y + size.y, data.anchor[3], ph);
 
 	_size_changed();
 }
@@ -1397,11 +1391,8 @@ void Control::set_size(const Size2 &p_size) {
 	float x = _a2s(data.margin[0], data.anchor[0], pw);
 	float y = _a2s(data.margin[1], data.anchor[1], ph);
 
-	float w = new_size.width;
-	float h = new_size.height;
-
-	data.margin[2] = _s2a(x + w, data.anchor[2], pw);
-	data.margin[3] = _s2a(y + h, data.anchor[3], ph);
+	data.margin[2] = _s2a(x + new_size.width, data.anchor[2], pw);
+	data.margin[3] = _s2a(y + new_size.height, data.anchor[3], ph);
 
 	_size_changed();
 }

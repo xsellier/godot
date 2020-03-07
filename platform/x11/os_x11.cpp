@@ -481,6 +481,9 @@ void OS_X11::initialize(const VideoMode &p_desired, int p_video_driver, int p_au
 	physics_2d_server->init();
 
 	input = memnew(InputDefault);
+
+	// Set focus to true at init
+	window_has_focus = true;
 #ifdef JOYDEV_ENABLED
 	joystick = memnew(joystick_linux(input));
 #endif
@@ -557,17 +560,22 @@ void OS_X11::set_mouse_mode(MouseMode p_mode) {
 	if (p_mode == mouse_mode)
 		return;
 
-	if (mouse_mode == MOUSE_MODE_CAPTURED)
+	if (mouse_mode == MOUSE_MODE_CAPTURED || mouse_mode == MOUSE_MODE_CONFINED) {
 		XUngrabPointer(x11_display, CurrentTime);
-	if (mouse_mode != MOUSE_MODE_VISIBLE && p_mode == MOUSE_MODE_VISIBLE)
-		XDefineCursor(x11_display, x11_window, cursors[current_cursor]);
-	if (p_mode != MOUSE_MODE_VISIBLE && mouse_mode == MOUSE_MODE_VISIBLE) {
+	}
+
+	// The only modes that show a cursor are VISIBLE and CONFINED
+	bool showCursor = (p_mode == MOUSE_MODE_VISIBLE || p_mode == MOUSE_MODE_CONFINED);
+
+	if (showCursor) {
+		XUndefineCursor(x11_display, x11_window);
+	} else {
 		XDefineCursor(x11_display, x11_window, null_cursor);
 	}
 
 	mouse_mode = p_mode;
 
-	if (mouse_mode == MOUSE_MODE_CAPTURED) {
+	if (mouse_mode == MOUSE_MODE_CAPTURED || mouse_mode == MOUSE_MODE_CONFINED) {
 
 		while (true) {
 			//flush pending motion events
@@ -1422,6 +1430,9 @@ void OS_X11::process_xevents() {
 
 	do_mouse_warp = false;
 
+	// Is the current mouse mode one where it needs to be grabbed.
+	bool mouse_mode_grab = mouse_mode == MOUSE_MODE_CAPTURED || mouse_mode == MOUSE_MODE_CONFINED;
+
 	while (XPending(x11_display) > 0) {
 		XEvent event;
 		XNextEvent(x11_display, &event);
@@ -1556,19 +1567,29 @@ void OS_X11::process_xevents() {
 			} break;
 			case LeaveNotify: {
 
-				if (main_loop && mouse_mode != MOUSE_MODE_CAPTURED)
+				if (main_loop && !mouse_mode_grab)
 					main_loop->notification(MainLoop::NOTIFICATION_WM_MOUSE_EXIT);
 
 			} break;
 			case EnterNotify: {
 
-				if (main_loop && mouse_mode != MOUSE_MODE_CAPTURED)
+				if (main_loop && !mouse_mode_grab)
 					main_loop->notification(MainLoop::NOTIFICATION_WM_MOUSE_ENTER);
 			} break;
 			case FocusIn:
 				minimized = false;
+				window_has_focus = true;
 				main_loop->notification(MainLoop::NOTIFICATION_WM_FOCUS_IN);
-				if (mouse_mode == MOUSE_MODE_CAPTURED) {
+
+				if (mouse_mode_grab) {
+					// Show and update the cursor if confined and the window regained focus.
+					if (mouse_mode == MOUSE_MODE_CONFINED) {
+						XUndefineCursor(x11_display, x11_window);
+					} else if (mouse_mode == MOUSE_MODE_CAPTURED) {
+						// or re-hide it in captured mode
+						XDefineCursor(x11_display, x11_window, null_cursor);
+					}
+
 					XGrabPointer(
 							x11_display, x11_window, True,
 							ButtonPressMask | ButtonReleaseMask | PointerMotionMask,
@@ -1586,9 +1607,14 @@ void OS_X11::process_xevents() {
 				break;
 
 			case FocusOut:
+				window_has_focus = false;
 				main_loop->notification(MainLoop::NOTIFICATION_WM_FOCUS_OUT);
-				if (mouse_mode == MOUSE_MODE_CAPTURED) {
-					//dear X11, I try, I really try, but you never work, you do whathever you want.
+				if (mouse_mode_grab) {
+					if (mouse_mode == MOUSE_MODE_CAPTURED) {
+						// Show the cursor if we're in captured mode so it doesn't look weird.
+						XUndefineCursor(x11_display, x11_window);
+					}
+
 					XUngrabPointer(x11_display, CurrentTime);
 				}
 #ifdef TOUCH_ENABLED
@@ -1723,7 +1749,7 @@ void OS_X11::process_xevents() {
 					Point2i new_center = pos;
 					pos = last_mouse_pos + (pos - center);
 					center = new_center;
-					do_mouse_warp = true;
+					do_mouse_warp = window_has_focus;
 #else
 					//Dear X11, thanks for making my life miserable
 
@@ -1765,9 +1791,12 @@ void OS_X11::process_xevents() {
 
 				last_mouse_pos = pos;
 
-				// printf("rel: %d,%d\n", rel.x, rel.y );
-
-				input->parse_input_event(motion_event);
+				// Don't propagate the motion event unless we have focus
+				// this is so that the relative motion doesn't get messed up
+				// after we regain focus.
+				if (window_has_focus || !mouse_mode_grab) {
+					input->parse_input_event(motion_event);
+				}
 
 			} break;
 			case KeyPress:
@@ -2211,7 +2240,7 @@ void OS_X11::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shape, c
 		cursors[p_shape] = XcursorImageLoadCursor(x11_display, cursor_image);
 
 		if (p_shape == current_cursor) {
-			if (mouse_mode == MOUSE_MODE_VISIBLE) {
+			if (mouse_mode == MOUSE_MODE_VISIBLE || mouse_mode == MOUSE_MODE_CONFINED) {
 				XDefineCursor(x11_display, x11_window, cursors[p_shape]);
 			}
 		}

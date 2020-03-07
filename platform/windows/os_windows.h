@@ -124,6 +124,7 @@ class OS_Windows : public OS {
 	bool control_mem;
 	bool meta_mem;
 	bool force_quit;
+	bool window_has_focus;
 	uint32_t last_button_state;
 
 	HCURSOR cursors[CURSOR_MAX] = { NULL };
@@ -148,6 +149,9 @@ class OS_Windows : public OS {
 	void _touch_event(bool p_pressed, int p_x, int p_y, int idx);
 
 	void _update_window_style(bool repaint = true);
+
+	void _set_mouse_mode_impl(MouseMode p_mode);
+	void _update_cursor_window();
 
 	// functions used by main to initialize/deintialize the OS
 protected:
