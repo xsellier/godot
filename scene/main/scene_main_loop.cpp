@@ -1015,7 +1015,12 @@ int SceneTree::get_node_count() const {
 void SceneTree::_update_root_rect() {
 
 	if (stretch_mode == STRETCH_MODE_DISABLED) {
-		root->set_rect(Rect2(Point2(), last_screen_size));
+		Rect2 visible_rectangle = Rect2(Point2(), last_screen_size);
+
+		OS::get_singleton()->set_visible_rectangle(visible_rectangle);
+
+		root->set_rect(visible_rectangle);
+
 		return; //user will take care
 	}
 
@@ -1090,15 +1095,22 @@ void SceneTree::_update_root_rect() {
 		case STRETCH_MODE_2D: {
 
 			//			root->set_rect(Rect2(Point2(),video_mode));
+			Rect2 visible_rectangle = Rect2(margin, screen_size);
+
+			OS::get_singleton()->set_visible_rectangle(visible_rectangle);
+
 			root->set_as_render_target(false);
-			root->set_rect(Rect2(margin, screen_size));
+			root->set_rect(visible_rectangle);
 			root->set_size_override_stretch(true);
 			root->set_size_override(true, viewport_size);
 
 		} break;
 		case STRETCH_MODE_VIEWPORT: {
+			Rect2 visible_rectangle = Rect2(Point2(), viewport_size);
 
-			root->set_rect(Rect2(Point2(), viewport_size));
+			OS::get_singleton()->set_visible_rectangle(visible_rectangle);
+
+			root->set_rect(visible_rectangle);
 			root->set_size_override_stretch(false);
 			root->set_size_override(false, Size2());
 			root->set_as_render_target(true);

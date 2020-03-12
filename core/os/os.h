@@ -185,6 +185,7 @@ public:
 	virtual bool is_window_always_on_top() const { return false; }
 	virtual void request_attention() {}
 	virtual void center_window();
+	virtual void set_visible_rectangle(const Rect2 &p_visible_rectangle) {}
 
 	virtual void set_borderless_window(int p_borderless) {}
 	virtual bool get_borderless_window() { return 0; }

@@ -213,7 +213,12 @@ String SpinBox::get_suffix() const {
 
 	return suffix;
 }
+void SpinBox::set_tooltip(const String &p_tooltip) {
 
+	Control::set_tooltip(p_tooltip);
+
+	line_edit->set_tooltip(p_tooltip);
+}
 void SpinBox::set_prefix(const String &p_prefix) {
 
 	prefix = p_prefix;

@@ -2230,7 +2230,8 @@ void _Thread::_start_func(void *ud) {
 	Thread::set_name(t->target_method);
 
 	t->ret = t->target_instance->call(t->target_method, arg, 1, ce);
-	t->emit_signal(CoreStringNames::get_singleton()->thread_finished);
+	t->call_deferred("emit_signal", "thread_finished");
+
 	if (ce.error != Variant::CallError::CALL_OK) {
 
 		String reason;

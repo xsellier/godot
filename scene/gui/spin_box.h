@@ -72,6 +72,7 @@ public:
 	LineEdit *get_line_edit();
 
 	virtual Size2 get_minimum_size() const;
+	virtual void set_tooltip(const String &p_tooltip);
 
 	void set_editable(bool p_editable);
 	bool is_editable() const;

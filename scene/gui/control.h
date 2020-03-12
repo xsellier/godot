@@ -357,7 +357,7 @@ public:
 
 	/* TOOLTIP */
 
-	void set_tooltip(const String &p_tooltip);
+	virtual void set_tooltip(const String &p_tooltip);
 	virtual String get_tooltip(const Point2 &p_pos) const;
 
 	/* CURSOR */

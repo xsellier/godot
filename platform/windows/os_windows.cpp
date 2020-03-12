@@ -986,6 +986,11 @@ void OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int 
 	WindowRect.top = 0;
 	WindowRect.bottom = video_mode.height;
 
+	visible_rectangle.size.width = video_mode.width;
+	visible_rectangle.size.height = video_mode.height;
+	visible_rectangle.pos.x = 0;
+	visible_rectangle.pos.y = 0;
+
 	memset(&wc, 0, sizeof(WNDCLASSEXW));
 	wc.cbSize = sizeof(WNDCLASSEXW);
 	wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC | CS_DBLCLKS;
@@ -1366,11 +1371,18 @@ void OS_Windows::set_mouse_mode(MouseMode p_mode) {
 void OS_Windows::_set_mouse_mode_impl(MouseMode p_mode) {
 
 	if (p_mode == MOUSE_MODE_CAPTURED || mouse_mode == MOUSE_MODE_CONFINED) {
-		RECT clipRect;
-		GetClientRect(hWnd, &clipRect);
-		ClientToScreen(hWnd, (POINT *)&clipRect.left);
-		ClientToScreen(hWnd, (POINT *)&clipRect.right);
-		ClipCursor(&clipRect);
+		RECT rect;
+
+		GetClientRect(hWnd, &rect);
+		ClientToScreen(hWnd, (POINT *)&rect.left);
+		ClientToScreen(hWnd, (POINT *)&rect.right);
+
+		rect.left += visible_rectangle.pos.x;
+		rect.top += visible_rectangle.pos.y;
+		rect.right -= visible_rectangle.pos.x;
+		rect.bottom -= visible_rectangle.pos.y;
+
+		ClipCursor(&rect);
 
 		if (p_mode == MOUSE_MODE_CAPTURED) {
 			center = Point2i(video_mode.width / 2, video_mode.height / 2);
@@ -1619,6 +1631,12 @@ void OS_Windows::_update_cursor_window() {
 		GetClientRect(hWnd, &rect);
 		ClientToScreen(hWnd, (POINT *)&rect.left);
 		ClientToScreen(hWnd, (POINT *)&rect.right);
+
+		rect.left += visible_rectangle.pos.x;
+		rect.top += visible_rectangle.pos.y;
+		rect.right -= visible_rectangle.pos.x;
+		rect.bottom -= visible_rectangle.pos.y;
+
 		ClipCursor(&rect);
 	} else {
 		ClipCursor(NULL);
@@ -2040,6 +2058,16 @@ void OS_Windows::set_cursor_shape(CursorShape p_shape) {
 	}
 
 	cursor_shape = p_shape;
+}
+
+void OS_Windows::set_visible_rectangle(const Rect2 &p_visible_rectangle) {
+
+	visible_rectangle.size.width = (int)p_visible_rectangle.size.width;
+	visible_rectangle.size.height = (int)p_visible_rectangle.size.height;
+	visible_rectangle.pos.x = (int)p_visible_rectangle.pos.x;
+	visible_rectangle.pos.y = (int)p_visible_rectangle.pos.y;
+
+	_update_cursor_window();
 }
 
 void OS_Windows::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shape, const Vector2 &p_hotspot) {
@@ -2643,6 +2671,12 @@ OS_Windows::OS_Windows(HINSTANCE _hInstance) {
 	old_invalid = true;
 	last_id = 0;
 	mouse_mode = MOUSE_MODE_VISIBLE;
+
+	visible_rectangle.size.width = 0;
+	visible_rectangle.size.height = 0;
+	visible_rectangle.pos.x = 0;
+	visible_rectangle.pos.y = 0;
+
 #ifdef STDOUT_FILE
 	stdo = fopen("stdout.txt", "wb");
 #endif

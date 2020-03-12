@@ -1698,15 +1698,7 @@ void OS_X11::process_xevents() {
 			} break;
 			case MotionNotify: {
 
-				// FUCK YOU X11 API YOU SERIOUSLY GROSS ME OUT
-				// YOU ARE AS GROSS AS LOOKING AT A PUTRID PILE
-				// OF POOP STICKING OUT OF A CLOGGED TOILET
-				// HOW THE FUCK I AM SUPPOSED TO KNOW WHICH ONE
-				// OF THE MOTION NOTIFY EVENTS IS THE ONE GENERATED
-				// BY WARPING THE MOUSE POINTER?
-				// YOU ARE FORCING ME TO FILTER ONE BY ONE TO FIND IT
-				// PLEASE DO ME A FAVOR AND DIE DROWNED IN A FECAL
-				// MOUNTAIN BECAUSE THAT'S WHERE YOU BELONG.
+				// Filter events one by one to find the right one
 
 				while (true) {
 					if (mouse_mode == MOUSE_MODE_CAPTURED && event.xmotion.x == current_videomode.width / 2 && event.xmotion.y == current_videomode.height / 2) {
@@ -1736,7 +1728,6 @@ void OS_X11::process_xevents() {
 				Point2i pos(event.xmotion.x, event.xmotion.y);
 
 				if (mouse_mode == MOUSE_MODE_CAPTURED) {
-#if 1
 					//Vector2 c = Point2i(current_videomode.width/2,current_videomode.height/2);
 					if (pos == Point2i(current_videomode.width / 2, current_videomode.height / 2)) {
 						//this sucks, it's a hack, etc and is a little inaccurate, etc.
@@ -1750,17 +1741,6 @@ void OS_X11::process_xevents() {
 					pos = last_mouse_pos + (pos - center);
 					center = new_center;
 					do_mouse_warp = window_has_focus;
-#else
-					//Dear X11, thanks for making my life miserable
-
-					center.x = current_videomode.width / 2;
-					center.y = current_videomode.height / 2;
-					pos = last_mouse_pos + (pos - center);
-					if (pos == last_mouse_pos)
-						break;
-					XWarpPointer(x11_display, None, x11_window,
-							0, 0, 0, 0, (int)center.x, (int)center.y);
-#endif
 				}
 
 				if (!last_mouse_pos_valid) {

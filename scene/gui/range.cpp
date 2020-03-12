@@ -64,7 +64,7 @@ void Range::Shared::emit_changed(const char *p_what) {
 	}
 }
 
-void Range::set_val(double p_val) {
+bool Range::set_val(double p_val) {
 
 	if (_rounded_values) {
 		p_val = Math::round(p_val);
@@ -77,11 +77,12 @@ void Range::set_val(double p_val) {
 		p_val = shared->min;
 
 	if (shared->val == p_val)
-		return;
+		return false;
 
 	shared->val = p_val;
 
 	shared->emit_value_changed();
+	return true;
 }
 void Range::set_min(double p_min) {
 

@@ -129,6 +129,7 @@ class OS_Windows : public OS {
 
 	HCURSOR cursors[CURSOR_MAX] = { NULL };
 	CursorShape cursor_shape;
+	Rect2 visible_rectangle;
 
 	InputDefault *input;
 	joystick_windows *joystick;
@@ -232,6 +233,7 @@ public:
 	virtual void set_window_always_on_top(bool p_enabled);
 	virtual bool is_window_always_on_top() const;
 	virtual void request_attention();
+	virtual void set_visible_rectangle(const Rect2 &p_visible_rectangle);
 
 	virtual void set_borderless_window(int p_borderless);
 	virtual bool get_borderless_window();

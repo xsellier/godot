@@ -1148,19 +1148,19 @@ void Control::_size_changed() {
 
 			case ANCHOR_BEGIN: {
 
-				margin_pos[i] = data.margin[i];
+				margin_pos[i] = Math::floor(data.margin[i]);
 			} break;
 			case ANCHOR_END: {
 
-				margin_pos[i] = area - data.margin[i];
+				margin_pos[i] = Math::floor(area - data.margin[i]);
 			} break;
 			case ANCHOR_RATIO: {
 
-				margin_pos[i] = area * data.margin[i];
+				margin_pos[i] = Math::floor(area * data.margin[i]);
 			} break;
 			case ANCHOR_CENTER: {
 
-				margin_pos[i] = (area / 2) - data.margin[i];
+				margin_pos[i] = Math::floor((area / 2) - data.margin[i]);
 			} break;
 		}
 	}

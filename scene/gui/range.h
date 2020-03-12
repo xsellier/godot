@@ -65,7 +65,7 @@ protected:
 	bool _rounded_values;
 
 public:
-	void set_val(double p_val);
+	bool set_val(double p_val);
 	void set_min(double p_min);
 	void set_max(double p_max);
 	void set_step(double p_step);
