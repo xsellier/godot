@@ -987,9 +987,12 @@ Error Main::setup2(Thread::ID p_main_tid_override) {
 	}
 	translation_server->load_translations();
 
+#ifdef DEBUG_ENABLED
 	if (use_debug_profiler && script_debugger) {
 		script_debugger->profiling_start();
 	}
+#endif
+
 	_start_success = true;
 	locale = String();
 
@@ -1588,12 +1591,14 @@ bool Main::iteration() {
 		ScriptServer::get_language(i)->frame();
 	}
 
+#ifdef DEBUG_ENABLED
 	if (script_debugger) {
 		if (script_debugger->is_profiling()) {
 			script_debugger->profiling_set_frame_times(USEC_TO_SEC(frame_time), USEC_TO_SEC(idle_process_ticks), USEC_TO_SEC(fixed_process_ticks), frame_slice);
 		}
 		script_debugger->idle_poll();
 	}
+#endif
 
 	//	x11_delay_usec(10000);
 	frames++;

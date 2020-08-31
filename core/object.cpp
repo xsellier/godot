@@ -396,34 +396,6 @@ Variant Object::get(const StringName &p_name, bool *r_valid) const {
 	}
 }
 
-#if 0
-//old style get, deprecated
-Variant Object::get(const String& p_name) const {
-
-	Variant ret=_getv(p_name);
-	if (ret.get_type()!=Variant::NIL)
-		return ret;
-
-	bool success;
-	ObjectTypeDB::get_property(const_cast<Object*>(this),p_name,ret,success);
-	if (success) {
-		return ret;
-	}
-
-	if (p_name=="__meta__")
-		return metadata;
-	else if (p_name=="script/script")
-		return script;
-
-	if (script_instance) {
-		return script_instance->get(p_name);
-	}
-
-	return Variant();
-
-}
-#endif
-
 void Object::get_property_list(List<PropertyInfo> *p_list, bool p_reversed) const {
 
 	if (script_instance && p_reversed) {

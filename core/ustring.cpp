@@ -58,6 +58,11 @@
 /** STRING **/
 char *UUID_DELIMITER = "-";
 
+Vector<String> DIACRITICS_LETTERS;
+int DIACRITICS_LETTERS_LENGTH;
+Vector<String> DIACRITICS_LETTERS_LIST;
+bool initialize = false;
+
 const char *CharString::get_data() const {
 
 	if (size())
@@ -2981,6 +2986,28 @@ bool String::matchn(const String &p_wildcard) const {
 	if (!p_wildcard.length() || !length())
 		return false;
 	return _wildcard_match(p_wildcard.c_str(), c_str(), false);
+}
+
+String String::remove_diacritics() const {
+
+	if (!initialize) {
+		DIACRITICS_LETTERS = String::utf8("Š,Œ,Ž,š,œ,ž,Ÿ,¥,µ,À,Á,Â,Ã,Ä,Å,Æ,Ç,È,É,Ê,Ë,Ì,Í,Î,Ï,Ð,Ñ,Ò,Ó,Ô,Õ,Ö,Ø,Ù,Ú,Û,Ü,Ý,ß,à,á,â,ã,ä,å,æ,ç,è,é,ê,ë,ì,í,î,ï,ð,ñ,ò,ó,ô,õ,ö,ø,ù,ú,û,ü,ý,ÿ").split(",");
+		DIACRITICS_LETTERS_LENGTH = DIACRITICS_LETTERS.size();
+		DIACRITICS_LETTERS_LIST = String::utf8("S,OE,Z,s,oe,z,Y,Y,u,A,A,A,A,A,A,AE,C,E,E,E,E,I,I,I,I,D,N,O,O,O,O,O,O,U,U,U,U,Y,s,a,a,a,a,a,a,ae,c,e,e,e,e,i,i,i,i,o,n,o,o,o,o,o,o,u,u,u,u,y,y").split(",");
+
+		initialize = true;
+	}
+	String res = String(this->ptr());
+
+	/* Compare char by char */
+	for (int index = 0; index < DIACRITICS_LETTERS_LENGTH; index++) {
+
+		res = res.replace(
+				DIACRITICS_LETTERS[index],
+				DIACRITICS_LETTERS_LIST[index]);
+	}
+
+	return res;
 }
 
 String String::format(const Variant &values, String placeholder) const {

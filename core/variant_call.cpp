@@ -245,6 +245,7 @@ struct _VariantCall {
 	VCALL_LOCALMEM0R(String, bigrams);
 	VCALL_LOCALMEM1R(String, similarity);
 	VCALL_LOCALMEM2R(String, format);
+	VCALL_LOCALMEM0R(String, remove_diacritics);
 	VCALL_LOCALMEM2R(String, replace);
 	VCALL_LOCALMEM2R(String, replacen);
 	VCALL_LOCALMEM2R(String, insert);
@@ -1384,6 +1385,7 @@ void register_variant_methods() {
 	ADDFUNC1(STRING, REAL, String, similarity, STRING, "text", varray());
 
 	ADDFUNC2(STRING, STRING, String, format, NIL, "values", STRING, "placeholder", varray("{_}"));
+	ADDFUNC0(STRING, STRING, String, remove_diacritics, varray());
 	ADDFUNC2(STRING, STRING, String, replace, STRING, "what", STRING, "forwhat", varray());
 	ADDFUNC2(STRING, STRING, String, replacen, STRING, "what", STRING, "forwhat", varray());
 	ADDFUNC2(STRING, STRING, String, insert, INT, "pos", STRING, "what", varray());
