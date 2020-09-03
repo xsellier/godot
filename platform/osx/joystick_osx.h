@@ -1,12 +1,12 @@
 /*************************************************************************/
-/*  joystick_osx.h                                                     */
+/*  joystick_osx.h                                                       */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,6 +27,7 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #ifndef JOYSTICKOSX_H
 #define JOYSTICKOSX_H
 
@@ -102,6 +103,7 @@ private:
 	bool configure_joystick(IOHIDDeviceRef p_device_ref, joystick *p_joy);
 
 	int get_joy_index(int p_id) const;
+	int get_joy_ref(IOHIDDeviceRef p_device) const;
 
 	void poll_joysticks() const;
 	void setup_joystick_objects();
@@ -114,7 +116,7 @@ public:
 	uint32_t process_joysticks(uint32_t p_last_id);
 
 	void _device_added(IOReturn p_res, IOHIDDeviceRef p_device);
-	void _device_removed(int p_id);
+	void _device_removed(IOReturn p_res, IOHIDDeviceRef p_device);
 
 	JoystickOSX();
 	~JoystickOSX();

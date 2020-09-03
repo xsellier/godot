@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -50,7 +50,6 @@
 
 static uint64_t load_address() {
 	const struct segment_command_64 *cmd = getsegbyname("__TEXT");
-
 	char full_path[1024];
 	uint32_t size = sizeof(full_path);
 
@@ -68,7 +67,7 @@ static uint64_t load_address() {
 }
 
 static void handle_crash(int sig) {
-	if (OS::get_singleton() == NULL || Globals::get_singleton() == NULL) {
+	if (OS::get_singleton() == NULL) {
 		abort();
 	}
 
@@ -115,7 +114,9 @@ static void handle_crash(int sig) {
 				args.push_back("-o");
 				args.push_back(_execpath);
 				args.push_back("-arch");
+
 				args.push_back("x86_64");
+
 				args.push_back("-l");
 				snprintf(str, 1024, "%p", load_addr);
 				args.push_back(str);

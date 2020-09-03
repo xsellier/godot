@@ -3,10 +3,10 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -96,7 +96,7 @@ Error AudioDriverRtAudio::init() {
 	mix_rate = GLOBAL_DEF("audio/mix_rate", 44100);
 
 	int latency = GLOBAL_DEF("audio/output_latency", 25);
-	// calculate desired buffer_size
+	// calculate desired buffer_size, taking the desired numberOfBuffers into account (latency depends on numberOfBuffers*buffer_size)
 	unsigned int buffer_size = closest_power_of_2(latency * mix_rate / 1000);
 
 	if (OS::get_singleton()->is_stdout_verbose()) {
@@ -113,6 +113,7 @@ Error AudioDriverRtAudio::init() {
 			case OUTPUT_7_1: parameters.nChannels = 8; break;
 			default:
 				parameters.nChannels = 2;
+
 				break;
 		};
 
@@ -147,6 +148,7 @@ int AudioDriverRtAudio::get_mix_rate() const {
 }
 
 AudioDriverSW::OutputFormat AudioDriverRtAudio::get_output_format() const {
+
 	return output_format;
 }
 

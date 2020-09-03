@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -60,13 +60,9 @@
 static const WORD MAX_CONSOLE_LINES = 1500;
 
 extern "C" {
-// #ifdef _MSC_VER
+#ifdef _MSC_VER
 _declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
 _declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
-// #else
-// 	__attribute__((visibility("default"))) DWORD NvOptimusEnablement = 0x00000001;
-// 	__attribute__((visibility("default"))) int AmdPowerXpressRequestHighPerformance = 1;
-// #endif
 }
 
 // Workaround mingw-w64 < 4.0 bug
@@ -386,7 +382,6 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 				tme.dwHoverTime = HOVER_DEFAULT;
 				TrackMouseEvent(&tme);
 			}
-
 			// Don't calculate relative mouse movement if we don't have focus in CAPTURED mode.
 			if (!window_has_focus && mouse_mode == MOUSE_MODE_CAPTURED)
 				break;
@@ -966,7 +961,6 @@ void OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int 
 
 	if (is_hidpi_allowed()) {
 		HMODULE Shcore = LoadLibraryW(L"Shcore.dll");
-		;
 
 		if (Shcore != NULL) {
 			typedef HRESULT(WINAPI * SetProcessDpiAwareness_t)(SHC_PROCESS_DPI_AWARENESS);
@@ -992,7 +986,6 @@ void OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int 
 	visible_rectangle.size.height = video_mode.height;
 	visible_rectangle.pos.x = 0;
 	visible_rectangle.pos.y = 0;
-
 	memset(&wc, 0, sizeof(WNDCLASSEXW));
 	wc.cbSize = sizeof(WNDCLASSEXW);
 	wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC | CS_DBLCLKS;
@@ -1584,7 +1577,6 @@ void OS_Windows::set_window_position(const Point2 &p_position) {
 	RECT r;
 	GetWindowRect(hWnd, &r);
 	MoveWindow(hWnd, p_position.x, p_position.y, r.right - r.left, r.bottom - r.top, TRUE);
-
 	_update_cursor_window();
 }
 Size2 OS_Windows::get_window_size() const {
@@ -1644,7 +1636,6 @@ void OS_Windows::_update_cursor_window() {
 		ClipCursor(NULL);
 	}
 }
-
 void OS_Windows::set_window_fullscreen(bool p_enabled) {
 
 	if (video_mode.fullscreen == p_enabled)
@@ -1690,7 +1681,6 @@ void OS_Windows::set_window_fullscreen(bool p_enabled) {
 
 		pre_fs_valid = true;
 	}
-
 	_update_cursor_window();
 }
 bool OS_Windows::is_window_fullscreen() const {
@@ -2673,12 +2663,10 @@ OS_Windows::OS_Windows(HINSTANCE _hInstance) {
 	old_invalid = true;
 	last_id = 0;
 	mouse_mode = MOUSE_MODE_VISIBLE;
-
 	visible_rectangle.size.width = 0;
 	visible_rectangle.size.height = 0;
 	visible_rectangle.pos.x = 0;
 	visible_rectangle.pos.y = 0;
-
 #ifdef STDOUT_FILE
 	stdo = fopen("stdout.txt", "wb");
 #endif

@@ -49,9 +49,9 @@ def configure(env):
 
     env['CC'] = em_path + '/emcc'
     env['CXX'] = em_path + '/emcc'
-    env['AR'] = em_path+"/emar"
+    env['AR'] = em_path + "/emar"
+    env['RANLIB'] = em_path + "/emranlib"
 
-	env['RANLIB'] = em_path+"/emranlib"
     env['OBJSUFFIX'] = '.bc'
     env['LIBSUFFIX'] = '.bc'
     env['CCCOM'] = "$CC -o $TARGET $CFLAGS $CCFLAGS $_CCCOMCOM $SOURCES"
@@ -85,6 +85,9 @@ def configure(env):
         lzma_decoder = em_path + "/third_party/lzma.js/lzma-decoder.js"
         lzma_dec = "LZMA.decompress"
         env.Append(LINKFLAGS=['--compression', lzma_binpath + "," + lzma_decoder + "," + lzma_dec])
+    # We use IDBFS in javascript_main.cpp. Since Emscripten 1.39.1 it needs to
+    # be linked explicitly.
+    env.Append(LIBS=['idbfs.js'])
 
     env.Append(LINKFLAGS=['-s', 'ASM_JS=1'])
     env.Append(LINKFLAGS=['-s', 'WASM=0'])

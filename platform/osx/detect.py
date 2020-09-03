@@ -37,6 +37,8 @@ def configure(env):
 
     env.Append(CPPPATH=['#platform/osx'])
 
+    # Mac OS X no longer runs on 32-bit since 10.7 which is unsupported since 2014
+    # As such, we only support 64-bit
     env["bits"] = "64"
 
     if (env["target"] == "release"):
@@ -55,7 +57,6 @@ def configure(env):
         # regular native build
         env.Append(CCFLAGS=['-arch', 'x86_64'])
         env.Append(LINKFLAGS=['-arch', 'x86_64'])
-
     else:
         # osxcross build
         root = os.environ.get("OSXCROSS_ROOT", 0)

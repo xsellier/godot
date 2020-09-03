@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -58,6 +58,35 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+//uses portions of glfw
+
+//========================================================================
+// GLFW 3.0 - www.glfw.org
+//------------------------------------------------------------------------
+// Copyright (c) 2002-2006 Marcus Geelnard
+// Copyright (c) 2006-2010 Camilla Berglund <elmindreda@elmindreda.org>
+//
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+//
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+//
+// 1. The origin of this software must not be misrepresented; you must not
+//    claim that you wrote the original software. If you use this software
+//    in a product, an acknowledgment in the product documentation would
+//    be appreciated but is not required.
+//
+// 2. Altered source versions must be plainly marked as such, and must not
+//    be misrepresented as being the original software.
+//
+// 3. This notice may not be removed or altered from any source
+//    distribution.
+//
+//========================================================================
+
 #if MAC_OS_X_VERSION_MAX_ALLOWED < 101200
 #define NSEventMaskAny NSAnyEventMask
 #define NSEventTypeKeyDown NSKeyDown
@@ -79,7 +108,6 @@
 #ifndef NSAppKitVersionNumber10_14
 #define NSAppKitVersionNumber10_14 1671
 #endif
-
 static NSRect convertRectToBacking(NSRect contentRect) {
 
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
@@ -126,10 +154,43 @@ static bool mouse_down_control = false;
 @end
 
 @interface GodotApplicationDelegate : NSObject
+- (void)forceUnbundledWindowActivationHackStep1;
+- (void)forceUnbundledWindowActivationHackStep2;
+- (void)forceUnbundledWindowActivationHackStep3;
 @end
 
 @implementation GodotApplicationDelegate
 
+- (void)forceUnbundledWindowActivationHackStep1 {
+	// Step1: Switch focus to macOS Dock.
+	// Required to perform step 2, TransformProcessType will fail if app is already the in focus.
+	for (NSRunningApplication *app in [NSRunningApplication runningApplicationsWithBundleIdentifier:@"com.apple.dock"]) {
+		[app activateWithOptions:NSApplicationActivateIgnoringOtherApps];
+		break;
+	}
+	[self performSelector:@selector(forceUnbundledWindowActivationHackStep2) withObject:nil afterDelay:0.02];
+}
+
+- (void)forceUnbundledWindowActivationHackStep2 {
+	// Step 2: Register app as foreground process.
+	ProcessSerialNumber psn = { 0, kCurrentProcess };
+	(void)TransformProcessType(&psn, kProcessTransformToForegroundApplication);
+
+	[self performSelector:@selector(forceUnbundledWindowActivationHackStep3) withObject:nil afterDelay:0.02];
+}
+
+- (void)forceUnbundledWindowActivationHackStep3 {
+	// Step 3: Switch focus back to app window.
+	[[NSRunningApplication currentApplication] activateWithOptions:NSApplicationActivateIgnoringOtherApps];
+}
+
+- (void)applicationDidFinishLaunching:(NSNotification *)notice {
+	NSString *nsappname = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"];
+	if (nsappname == nil) {
+		// If executable is not a bundled, macOS WindowServer won't register and activate app window correctly (menu and title bar are grayed out and input ignored).
+		[self performSelector:@selector(forceUnbundledWindowActivationHackStep1) withObject:nil afterDelay:0.02];
+	}
+}
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender {
 	if (OS_OSX::singleton->get_main_loop())
 		OS_OSX::singleton->get_main_loop()->notification(MainLoop::NOTIFICATION_WM_QUIT_REQUEST);
@@ -150,7 +211,8 @@ static bool mouse_down_control = false;
 	/*
 	_Godotwindow* window;
 
-	for (window = _Godot.windowListHead;  window;  window = window->next) {
+	for (window = _Godot.windowListHead;  window;  window = window->next)
+	{
 		if ([window_object isVisible])
 			_GodotInputWindowVisibility(window, GL_TRUE);
 	}
@@ -178,6 +240,7 @@ static bool mouse_down_control = false;
 	return NO;
 }
 
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
 - (void)windowDidEnterFullScreen:(NSNotification *)notification {
 	OS_OSX::singleton->zoomed = true;
 }
@@ -187,6 +250,7 @@ static bool mouse_down_control = false;
 	if (!OS_OSX::singleton->resizable)
 		[OS_OSX::singleton->window_object setStyleMask:[OS_OSX::singleton->window_object styleMask] & ~NSWindowStyleMaskResizable];
 }
+#endif // MAC_OS_X_VERSION_MAX_ALLOWED
 
 - (void)windowDidChangeBackingProperties:(NSNotification *)notification {
 	if (!OS_OSX::singleton)
@@ -201,7 +265,6 @@ static bool mouse_down_control = false;
 	} else {
 		[OS_OSX::singleton->window_view setWantsBestResolutionOpenGLSurface:NO];
 	}
-
 	if (newBackingScaleFactor != oldBackingScaleFactor) {
 		//Set new display scale and window size
 		float newDisplayScale = OS_OSX::singleton->is_hidpi_allowed() ? newBackingScaleFactor : 1.0;
@@ -480,7 +543,6 @@ static void _mouseDownEvent(NSEvent *event, int index, int mask, bool pressed) {
 
 	if (OS_OSX::singleton->input)
 		OS_OSX::singleton->cursor_shape = OS::CURSOR_MAX;
-
 	OS::CursorShape p_shape = OS_OSX::singleton->cursor_shape;
 	OS_OSX::singleton->cursor_shape = OS::CURSOR_MAX;
 	OS_OSX::singleton->set_cursor_shape(p_shape);
@@ -905,6 +967,7 @@ void OS_OSX::initialize(const VideoMode &p_desired, int p_video_driver, int p_au
 	} else {
 		[window_view setWantsBestResolutionOpenGLSurface:NO];
 	}
+#endif /*MAC_OS_X_VERSION_MAX_ALLOWED*/
 
 	//[window_object setTitle:[NSString stringWithUTF8String:"GodotEnginies"]];
 	[window_object setContentView:window_view];
@@ -986,6 +1049,8 @@ void OS_OSX::initialize(const VideoMode &p_desired, int p_video_driver, int p_au
 	/*** END OSX INITIALIZATION ***/
 
 	bool use_gl2 = p_video_driver != 1;
+
+	AudioDriverManagerSW::add_driver(&audio_driver_osx);
 
 	rasterizer = instance_RasterizerGLES2();
 
@@ -1397,7 +1462,7 @@ Error OS_OSX::shell_open(String p_uri) {
 }
 
 String OS_OSX::get_locale() const {
-	NSString *locale_code = [[NSLocale currentLocale] localeIdentifier];
+	NSString *locale_code = [[NSLocale preferredLanguages] objectAtIndex:0];
 	return [locale_code UTF8String];
 }
 
@@ -1479,10 +1544,10 @@ Point2 OS_OSX::get_native_screen_position(int p_screen) const {
 	if (p_screen == -1) {
 		p_screen = get_current_screen();
 	}
-
 	NSArray *screenArray = [NSScreen screens];
 	if (p_screen < [screenArray count]) {
 		float displayScale = _display_scale([screenArray objectAtIndex:p_screen]);
+
 		NSRect nsrect = [[screenArray objectAtIndex:p_screen] frame];
 		// Return the top-left corner of the screen, for OS X the y starts at the bottom
 		return Point2(nsrect.origin.x, nsrect.origin.y + nsrect.size.height) * displayScale;
@@ -1503,10 +1568,10 @@ int OS_OSX::get_screen_dpi(int p_screen) const {
 	if (p_screen == -1) {
 		p_screen = get_current_screen();
 	}
-
 	NSArray *screenArray = [NSScreen screens];
 	if (p_screen < [screenArray count]) {
 		float displayScale = _display_scale([screenArray objectAtIndex:p_screen]);
+
 		NSDictionary *description = [[screenArray objectAtIndex:p_screen] deviceDescription];
 		NSSize displayPixelSize = [[description objectForKey:NSDeviceSize] sizeValue];
 		CGSize displayPhysicalSize = CGDisplayScreenSize(
@@ -1522,16 +1587,36 @@ Size2 OS_OSX::get_screen_size(int p_screen) const {
 	if (p_screen == -1) {
 		p_screen = get_current_screen();
 	}
-
 	NSArray *screenArray = [NSScreen screens];
 	if (p_screen < [screenArray count]) {
 		float displayScale = _display_scale([screenArray objectAtIndex:p_screen]);
+
 		// Note: Use frame to get the whole screen size
 		NSRect nsrect = [[screenArray objectAtIndex:p_screen] frame];
 		return Size2(nsrect.size.width, nsrect.size.height) * displayScale;
 	}
 
 	return Size2();
+}
+
+Point2 OS_OSX::get_native_window_position() const {
+	NSRect nsrect = [window_object frame];
+
+	Point2 pos;
+
+	// Return the position of the top-left corner, for OS X the y starts at the bottom
+	pos.x = nsrect.origin.x * display_scale;
+	pos.y = (nsrect.origin.y + nsrect.size.height) * display_scale;
+
+	return pos;
+};
+
+Point2 OS_OSX::get_window_position() const {
+	Point2 position = get_native_window_position() - get_screens_origin();
+	// OS X native y-coordinate relative to get_screens_origin() is negative,
+	// Godot expects a positive value
+	position.y *= -1;
+	return position;
 }
 
 void OS_OSX::_update_window() {
@@ -1596,7 +1681,6 @@ Point2 OS_OSX::get_window_position() const {
 	position.y *= -1;
 	return position;
 }
-
 void OS_OSX::set_native_window_position(const Point2 &p_position) {
 
 	NSPoint pos;
@@ -2000,7 +2084,8 @@ OS_OSX::OS_OSX() {
 
 	/*
 	if (pthread_key_create(&_Godot.nsgl.current, NULL) != 0) {
-		_GodotInputError(Godot_PLATFORM_ERROR, "NSGL: Failed to create context TLS");;
+		_GodotInputError(Godot_PLATFORM_ERROR,
+			"NSGL: Failed to create context TLS");
 		return GL_FALSE;
 	}
 */
