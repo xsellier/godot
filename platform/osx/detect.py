@@ -22,7 +22,6 @@ def can_build():
 def get_opts():
 
     return [
-        ('force_64_bits', 'Force 64 bits binary', 'no'),
         ('osxcross_sdk', 'OSXCross SDK version', 'darwin14'),
 
     ]
@@ -38,12 +37,11 @@ def configure(env):
 
     env.Append(CPPPATH=['#platform/osx'])
 
-    if (env["bits"] == "default"):
-        env["bits"] = "32"
+    env["bits"] = "64"
 
     if (env["target"] == "release"):
 
-        env.Append(CCFLAGS=['-O2', '-ffast-math', '-fomit-frame-pointer', '-ftree-vectorize', '-msse2'])
+        env.Append(CCFLAGS=['-O2', '-fomit-frame-pointer', '-ftree-vectorize', '-msse2'])
 
     elif (env["target"] == "release_debug"):
 
@@ -55,26 +53,13 @@ def configure(env):
 
     if ("OSXCROSS_ROOT" not in os.environ):
         # regular native build
-        if (env["bits"] == "64"):
-            env.Append(CCFLAGS=['-arch', 'x86_64'])
-            env.Append(LINKFLAGS=['-arch', 'x86_64'])
-        elif (env["bits"] == "32"):
-            env.Append(CCFLAGS=['-arch', 'i386'])
-            env.Append(LINKFLAGS=['-arch', 'i386'])
-        else:
-            env.Append(CCFLAGS=['-arch', 'i386', '-arch', 'x86_64'])
-            env.Append(LINKFLAGS=['-arch', 'i386', '-arch', 'x86_64'])
+        env.Append(CCFLAGS=['-arch', 'x86_64'])
+        env.Append(LINKFLAGS=['-arch', 'x86_64'])
+
     else:
         # osxcross build
         root = os.environ.get("OSXCROSS_ROOT", 0)
-        if env["bits"] == "fat":
-            basecmd = root + "/target/bin/x86_64-apple-" + env["osxcross_sdk"] + "-"
-            env.Append(CCFLAGS=['-arch', 'i386', '-arch', 'x86_64'])
-            env.Append(LINKFLAGS=['-arch', 'i386', '-arch', 'x86_64'])
-        elif env["bits"] == "32":
-            basecmd = root + "/target/bin/i386-apple-" + env["osxcross_sdk"] + "-"
-        else: # 64-bit, default
-            basecmd = root + "/target/bin/x86_64-apple-" + env["osxcross_sdk"] + "-"
+        basecmd = root + "/target/bin/x86_64-apple-" + env["osxcross_sdk"] + "-"
 
         ccache_path = os.environ.get("CCACHE")
         if ccache_path == None:

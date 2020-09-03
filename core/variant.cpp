@@ -2579,6 +2579,10 @@ Variant::Variant(const Vector<Color> &p_array) {
 
 void Variant::operator=(const Variant &p_variant) {
 
+	if (this == &p_variant) {
+		return;
+	}
+
 	reference(p_variant);
 }
 
@@ -2593,12 +2597,6 @@ Variant::Variant(const Variant &p_variant) {
 	type = NIL;
 	reference(p_variant);
 }
-
-/*
-Variant::~Variant() {
-
-	clear();
-}*/
 
 uint32_t Variant::hash() const {
 

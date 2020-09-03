@@ -57,31 +57,27 @@ struct SafeRefCount {
 public:
 	// destroy() is called when weak_count_ drops to zero.
 
-	bool ref() { //true on success
+	_ALWAYS_INLINE_ bool ref() { //true on success
 
 		return atomic_conditional_increment(&count) != 0;
 	}
 
-	uint32_t refval() { //true on success
+	_ALWAYS_INLINE_ uint32_t refval() { //true on success
 
 		return atomic_conditional_increment(&count);
 	}
 
-	bool unref() { // true if must be disposed of
+	_ALWAYS_INLINE_ bool unref() { // true if must be disposed of
 
-		if (atomic_decrement(&count) == 0) {
-			return true;
-		}
-
-		return false;
+		return atomic_decrement(&count) == 0;
 	}
 
-	uint32_t get() const { // nothrow
+	_ALWAYS_INLINE_ uint32_t get() const { // nothrow
 
 		return count;
 	}
 
-	void init(uint32_t p_value = 1) {
+	_ALWAYS_INLINE_ void init(uint32_t p_value = 1) {
 
 		count = p_value;
 	}
