@@ -823,7 +823,6 @@ inline void sendScrollEvent(int button, double factor) {
 
 	double deltaX, deltaY;
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
 	if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_6) {
 		deltaX = [event scrollingDeltaX];
 		deltaY = [event scrollingDeltaY];
@@ -832,9 +831,7 @@ inline void sendScrollEvent(int button, double factor) {
 			deltaX *= 0.03;
 			deltaY *= 0.03;
 		}
-	} else
-#endif // MAC_OS_X_VERSION_MAX_ALLOWED
-	{
+	} else {
 		deltaX = [event deltaX];
 		deltaY = [event deltaY];
 	}
@@ -967,7 +964,6 @@ void OS_OSX::initialize(const VideoMode &p_desired, int p_video_driver, int p_au
 	} else {
 		[window_view setWantsBestResolutionOpenGLSurface:NO];
 	}
-#endif /*MAC_OS_X_VERSION_MAX_ALLOWED*/
 
 	//[window_object setTitle:[NSString stringWithUTF8String:"GodotEnginies"]];
 	[window_object setContentView:window_view];
@@ -1599,18 +1595,6 @@ Size2 OS_OSX::get_screen_size(int p_screen) const {
 	return Size2();
 }
 
-Point2 OS_OSX::get_native_window_position() const {
-	NSRect nsrect = [window_object frame];
-
-	Point2 pos;
-
-	// Return the position of the top-left corner, for OS X the y starts at the bottom
-	pos.x = nsrect.origin.x * display_scale;
-	pos.y = (nsrect.origin.y + nsrect.size.height) * display_scale;
-
-	return pos;
-};
-
 Point2 OS_OSX::get_window_position() const {
 	Point2 position = get_native_window_position() - get_screens_origin();
 	// OS X native y-coordinate relative to get_screens_origin() is negative,
@@ -1674,13 +1658,6 @@ Point2 OS_OSX::get_native_window_position() const {
 	return pos;
 };
 
-Point2 OS_OSX::get_window_position() const {
-	Point2 position = get_native_window_position() - get_screens_origin();
-	// OS X native y-coordinate relative to get_screens_origin() is negative,
-	// Godot expects a positive value
-	position.y *= -1;
-	return position;
-}
 void OS_OSX::set_native_window_position(const Point2 &p_position) {
 
 	NSPoint pos;
