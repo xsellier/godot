@@ -893,8 +893,8 @@ String String::num(double p_num, int p_decimals) {
 
 #ifndef NO_USE_STDLIB
 
-	if (p_decimals > 12)
-		p_decimals = 12;
+	if (p_decimals > 16)
+		p_decimals = 16;
 
 	char fmt[7];
 	fmt[0] = '%';
@@ -1049,9 +1049,8 @@ String String::num(double p_num, int p_decimals) {
 String String::num_int64(int64_t p_num, int base, bool capitalize_hex) {
 
 	bool sign = p_num < 0;
-	int64_t num = ABS(p_num);
 
-	int64_t n = num;
+	int64_t n = p_num;
 
 	int chars = 0;
 	do {
@@ -1059,15 +1058,16 @@ String String::num_int64(int64_t p_num, int base, bool capitalize_hex) {
 		chars++;
 	} while (n);
 
-	if (sign)
+	if (sign) {
 		chars++;
+	}
 	String s;
 	s.resize(chars + 1);
 	CharType *c = s.ptr();
 	c[chars] = 0;
-	n = num;
+	n = p_num;
 	do {
-		int mod = n % base;
+		int mod = ABS(n % base);
 		if (mod >= 10) {
 			char a = (capitalize_hex ? 'A' : 'a');
 			c[--chars] = a + (mod - 10);
@@ -3757,8 +3757,9 @@ bool String::is_valid_float() const {
 			period_found = true;
 		} else if ((operator[](i) == '-' || operator[](i) == '+') && exponent_found && !exponent_values_found && !sign_found) {
 			sign_found = true;
-		} else
+		} else {
 			return false; // no start with number plz
+		}
 	}
 
 	return numbers_found;

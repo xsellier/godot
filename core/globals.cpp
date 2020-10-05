@@ -501,7 +501,7 @@ static Variant _decode_variant(const String &p_string) {
 		return Variant();
 	if (str.is_valid_float()) {
 		if (str.find(".") == -1)
-			return str.to_int();
+			return str.to_int64();
 		else
 			return str.to_double();
 	}
@@ -874,12 +874,12 @@ static String _encode_variant(const Variant &p_variant) {
 			return (val ? "true" : "false");
 		} break;
 		case Variant::INT: {
-			int val = p_variant;
+			int64_t val = p_variant;
 			return itos(val);
 		} break;
 		case Variant::REAL: {
 			float val = p_variant;
-			return rtos(val) + (val == int(val) ? ".0" : "");
+			return rtos(val) + (val == int64_t(val) ? ".0" : "");
 		} break;
 		case Variant::VECTOR2: {
 			Vector2 val = p_variant;

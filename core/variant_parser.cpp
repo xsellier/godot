@@ -369,7 +369,7 @@ Error VariantParser::get_token(Stream *p_stream, Token &r_token, int &line, Stri
 					if (is_float)
 						r_token.value = num.to_double();
 					else
-						r_token.value = num.to_int();
+						r_token.value = num.to_int64();
 					return OK;
 
 				} else if ((cchar >= 'A' && cchar <= 'Z') || (cchar >= 'a' && cchar <= 'z') || cchar == '_') {
@@ -1792,7 +1792,7 @@ Error VariantWriter::write(const Variant &p_variant, StoreStringFunc p_store_str
 		} break;
 		case Variant::INT: {
 
-			p_store_string_func(p_store_string_ud, itos(p_variant.operator int()));
+			p_store_string_func(p_store_string_ud, itos(p_variant.operator int64_t()));
 		} break;
 		case Variant::REAL: {
 

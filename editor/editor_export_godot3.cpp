@@ -1081,7 +1081,7 @@ Error EditorExportGodot3::_get_property_as_text(const Variant &p_variant, String
 		} break;
 		case Variant::INT: {
 
-			p_string += (itos(p_variant.operator int()));
+			p_string += (itos(p_variant.operator int64_t()));
 		} break;
 		case Variant::REAL: {
 
