@@ -936,6 +936,26 @@ void TranslationServer::add_translation(const Ref<Translation> &p_translation) {
 
 	translations.insert(p_translation);
 }
+
+Ref<Translation> TranslationServer::get_translation_object(const String &p_locale) {
+
+	Ref<Translation> res;
+	bool near_match_found = false;
+
+	for (const Set<Ref<Translation> >::Element *E = translations.front(); E; E = E->next()) {
+
+		const Ref<Translation> &t = E->get();
+		String l = t->get_locale();
+
+		if (l == p_locale) {
+
+			return t;
+		}
+	}
+
+	return res;
+}
+
 void TranslationServer::remove_translation(const Ref<Translation> &p_translation) {
 
 	translations.erase(p_translation);
@@ -1099,6 +1119,7 @@ void TranslationServer::_bind_methods() {
 
 	ObjectTypeDB::bind_method(_MD("translate", "message"), &TranslationServer::translate);
 
+	ObjectTypeDB::bind_method(_MD("get_translation_object", "locale"), &TranslationServer::get_translation_object);
 	ObjectTypeDB::bind_method(_MD("add_translation", "translation:Translation"), &TranslationServer::add_translation);
 	ObjectTypeDB::bind_method(_MD("remove_translation", "translation:Translation"), &TranslationServer::remove_translation);
 

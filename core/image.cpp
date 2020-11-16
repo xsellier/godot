@@ -2540,6 +2540,34 @@ void Image::fix_alpha_edges() {
 	}
 }
 
+Error Image::load_png_from_buffer(const DVector<uint8_t> &p_array) {
+
+	int buffer_size = p_array.size();
+
+	ERR_FAIL_COND_V(buffer_size == 0, ERR_INVALID_PARAMETER);
+	ERR_FAIL_COND_V(!_png_mem_loader_func, ERR_INVALID_PARAMETER);
+
+	DVector<uint8_t>::Read r = p_array.read();
+
+	*this = _png_mem_loader_func(r.ptr(), buffer_size);
+
+	return OK;
+}
+
+Error Image::load_jpg_from_buffer(const DVector<uint8_t> &p_array) {
+
+	int buffer_size = p_array.size();
+
+	ERR_FAIL_COND_V(buffer_size == 0, ERR_INVALID_PARAMETER);
+	ERR_FAIL_COND_V(!_jpg_mem_loader_func, ERR_INVALID_PARAMETER);
+
+	DVector<uint8_t>::Read r = p_array.read();
+
+	*this = _jpg_mem_loader_func(r.ptr(), buffer_size);
+
+	return OK;
+}
+
 String Image::get_format_name(Format p_format) {
 
 	ERR_FAIL_INDEX_V(p_format, FORMAT_MAX, String());

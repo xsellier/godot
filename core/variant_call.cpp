@@ -673,6 +673,8 @@ struct _VariantCall {
 	VCALL_PTR0R(Image, get_used_rect);
 	VCALL_PTR3R(Image, brushed);
 	VCALL_PTR1R(Image, load);
+	VCALL_PTR1R(Image, load_png_from_buffer);
+	VCALL_PTR1R(Image, load_jpg_from_buffer);
 	VCALL_PTR1R(Image, save_png);
 	VCALL_PTR3(Image, brush_transfer);
 	VCALL_PTR1R(Image, get_rect);
@@ -1531,6 +1533,8 @@ void register_variant_methods() {
 	ADDFUNC4(IMAGE, NIL, Image, put_pixel, INT, "x", INT, "y", COLOR, "color", INT, "mipmap_level", varray(0));
 	ADDFUNC3(IMAGE, IMAGE, Image, brushed, IMAGE, "src", IMAGE, "brush", VECTOR2, "pos", varray(0));
 	ADDFUNC1(IMAGE, INT, Image, load, STRING, "path", varray(0));
+	ADDFUNC1(IMAGE, INT, Image, load_png_from_buffer, RAW_ARRAY, "array", varray(0));
+	ADDFUNC1(IMAGE, INT, Image, load_jpg_from_buffer, RAW_ARRAY, "array", varray(0));
 	ADDFUNC1(IMAGE, INT, Image, save_png, STRING, "path", varray(0));
 	ADDFUNC3(IMAGE, NIL, Image, brush_transfer, IMAGE, "src", IMAGE, "brush", VECTOR2, "pos", varray(0));
 	ADDFUNC0(IMAGE, RECT2, Image, get_used_rect, varray(0));

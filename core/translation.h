@@ -92,6 +92,7 @@ public:
 	void set_locale(const String &p_locale);
 	String get_locale() const;
 
+	Ref<Translation> get_translation_object(const String &p_locale);
 	void add_translation(const Ref<Translation> &p_translation);
 	void remove_translation(const Ref<Translation> &p_translation);
 

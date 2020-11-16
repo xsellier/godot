@@ -70,6 +70,7 @@ _declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 #define WM_TOUCH 576
 #endif
 
+extern bool _print_error_enabled;
 extern HINSTANCE godot_hinstance;
 
 void RedirectIOToConsole() {
@@ -918,7 +919,6 @@ static int QueryDpiForMonitor(HMONITOR hmon, _MonitorDpiType dpiType = MDT_Defau
 
 	UINT x = 0, y = 0;
 	HRESULT hr = E_FAIL;
-	bool bSet = false;
 	if (hmon && (Shcore != (HMODULE)INVALID_HANDLE_VALUE)) {
 		hr = getDPIForMonitor(hmon, dpiType /*MDT_Effective_DPI*/, &x, &y);
 		if (SUCCEEDED(hr) && (x > 0) && (y > 0)) {
@@ -1359,23 +1359,19 @@ void OS_Windows::set_mouse_mode(MouseMode p_mode) {
 
 	if (mouse_mode == p_mode)
 		return;
-	_set_mouse_mode_impl(p_mode);
+
 	mouse_mode = p_mode;
+	_set_mouse_mode_impl(p_mode);
 }
 
 void OS_Windows::_set_mouse_mode_impl(MouseMode p_mode) {
 
-	if (p_mode == MOUSE_MODE_CAPTURED || mouse_mode == MOUSE_MODE_CONFINED) {
+	if (p_mode == MOUSE_MODE_CAPTURED || p_mode == MOUSE_MODE_CONFINED) {
 		RECT rect;
 
 		GetClientRect(hWnd, &rect);
 		ClientToScreen(hWnd, (POINT *)&rect.left);
 		ClientToScreen(hWnd, (POINT *)&rect.right);
-
-		rect.left += visible_rectangle.pos.x;
-		rect.top += visible_rectangle.pos.y;
-		rect.right -= visible_rectangle.pos.x;
-		rect.bottom -= visible_rectangle.pos.y;
 
 		ClipCursor(&rect);
 
@@ -1392,7 +1388,11 @@ void OS_Windows::_set_mouse_mode_impl(MouseMode p_mode) {
 	}
 
 	if (p_mode == MOUSE_MODE_CAPTURED || p_mode == MOUSE_MODE_HIDDEN) {
-		hCursor = SetCursor(NULL);
+		if (hCursor == NULL) {
+			hCursor = SetCursor(NULL);
+		} else {
+			SetCursor(NULL);
+		}
 	} else {
 		CursorShape c = cursor_shape;
 		cursor_shape = CURSOR_MAX;
@@ -1626,11 +1626,6 @@ void OS_Windows::_update_cursor_window() {
 		ClientToScreen(hWnd, (POINT *)&rect.left);
 		ClientToScreen(hWnd, (POINT *)&rect.right);
 
-		rect.left += visible_rectangle.pos.x;
-		rect.top += visible_rectangle.pos.y;
-		rect.right -= visible_rectangle.pos.x;
-		rect.bottom -= visible_rectangle.pos.y;
-
 		ClipCursor(&rect);
 	} else {
 		ClipCursor(NULL);
@@ -1791,6 +1786,9 @@ void OS_Windows::request_attention() {
 }
 
 void OS_Windows::print_error(const char *p_function, const char *p_file, int p_line, const char *p_code, const char *p_rationale, ErrorType p_type) {
+
+	if (!_print_error_enabled)
+		return;
 
 	HANDLE hCon = GetStdHandle(STD_OUTPUT_HANDLE);
 	if (!hCon || hCon == INVALID_HANDLE_VALUE) {

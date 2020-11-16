@@ -56,9 +56,8 @@ void Math::seed(uint32_t x) {
 }
 
 uint32_t Math::generate_seed() {
-	uint32_t timestamp = OS::get_singleton()->get_unix_time() + rand();
 
-	return timestamp;
+	return OS::get_singleton()->get_unix_time() + rand();
 }
 
 void Math::randomize() {

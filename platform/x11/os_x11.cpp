@@ -601,12 +601,15 @@ void OS_X11::set_mouse_mode(MouseMode p_mode) {
 			ERR_PRINT("NO GRAB");
 		}
 
-		center.x = current_videomode.width / 2;
-		center.y = current_videomode.height / 2;
-		XWarpPointer(x11_display, None, x11_window,
-				0, 0, 0, 0, (int)center.x, (int)center.y);
+		if (mouse_mode == MOUSE_MODE_CAPTURED) {
+			center.x = current_videomode.width / 2;
+			center.y = current_videomode.height / 2;
+			XWarpPointer(x11_display, None, x11_window,
+					0, 0, 0, 0, (int)center.x, (int)center.y);
 
-		input->set_mouse_pos(center);
+			input->set_mouse_pos(center);
+		}
+
 	} else {
 		do_mouse_warp = false;
 	}
