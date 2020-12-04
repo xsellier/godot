@@ -1350,20 +1350,18 @@ GDFunction::~GDFunction() {
 
 Variant GDFunctionState::_signal_callback(const Variant **p_args, int p_argcount, Variant::CallError &r_error) {
 
+	// Fails gracefully if object for resume no longer exists
+	if (state.instance_id && (!ObjectDB::get_instance(state.instance_id) || !ObjectDB::get_instance(state.script_id))) {
 #ifdef DEBUG_ENABLED
-	if (state.instance_id && !ObjectDB::get_instance(state.instance_id)) {
-		ERR_EXPLAIN("Resumed after yield, but class instance is gone");
-		ERR_FAIL_V(Variant());
-	}
+		if (!ObjectDB::get_instance(state.instance_id)) {
+			WARN_PRINTS("Resumed after yield, but class instance is gone");
+		}
 
-	if (state.script_id && !ObjectDB::get_instance(state.script_id)) {
-		ERR_EXPLAIN("Resumed after yield, but script is gone");
-		ERR_FAIL_V(Variant());
-	}
+		if (!ObjectDB::get_instance(state.script_id)) {
+			WARN_PRINTS("Resumed after yield, but script is gone");
+		}
 #endif
 
-	// Fails gracefully if object for resume no longer exists
-	if (state.instance_id && !ObjectDB::get_instance(state.instance_id) || state.script_id && !ObjectDB::get_instance(state.script_id)) {
 		return Variant();
 	}
 
