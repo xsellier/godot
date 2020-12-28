@@ -30,7 +30,6 @@
 
 #include "file_access.h"
 
-#include "core/io/file_access_memory.h"
 #include "core/io/file_access_pack.h"
 #include "core/io/marshalls.h"
 #include "globals.h"
@@ -98,16 +97,6 @@ Error FileAccess::reopen(const String &p_path, int p_mode_flags) {
 FileAccess *FileAccess::open(const String &p_path, int p_mode_flags, Error *r_error) {
 
 	FileAccess *ret = NULL;
-
-	// try memory first
-	if (!(p_mode_flags & WRITE) && PackedData::get_singleton() && FileAccessMemory::has_file(p_path)) {
-
-		ret = memnew(FileAccessMemory);
-		Error err = ret->_open(p_path, p_mode_flags);
-		if (r_error)
-			*r_error = err;
-		return ret;
-	};
 
 	if (!(p_mode_flags & WRITE) && PackedData::get_singleton() && !PackedData::get_singleton()->is_disabled()) {
 		ret = PackedData::get_singleton()->try_open_path(p_path);
@@ -290,7 +279,8 @@ Vector<String> FileAccess::get_csv_line(String delim) const {
 	String l;
 	int qc = 0;
 	do {
-		ERR_FAIL_COND_V(eof_reached(), Vector<String>());
+		if (eof_reached())
+			break;
 
 		l += get_line() + "\n";
 		qc = 0;

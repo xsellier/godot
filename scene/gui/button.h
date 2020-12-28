@@ -53,6 +53,7 @@ private:
 	bool autowrap;
 	bool clip_text;
 	bool icon_scale;
+	Color modulate;
 	TextAlign align;
 
 protected:
@@ -71,6 +72,9 @@ public:
 
 	void set_icon_scale(bool p_icon_scale);
 	bool is_icon_scaling() const;
+
+	void set_modulate(const Color &p_tex);
+	Color get_modulate() const;
 
 	void set_icon(const Ref<Texture> &p_icon);
 	Ref<Texture> get_icon() const;

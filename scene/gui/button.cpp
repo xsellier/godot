@@ -54,6 +54,20 @@ void Button::set_icon_scale(bool p_icon_scale) {
 		minimum_size_changed();
 	}
 }
+
+void Button::set_modulate(const Color &p_tex) {
+
+	if (modulate != p_tex) {
+		modulate = p_tex;
+		update();
+	}
+}
+
+Color Button::get_modulate() const {
+
+	return modulate;
+}
+
 bool Button::is_icon_scaling() const {
 
 	return icon_scale;
@@ -274,11 +288,16 @@ void Button::_notification(int p_what) {
 
 		if (!_icon.is_null()) {
 			int valign = size.height - minimum_style_size.y;
-			Color modulate = is_disabled() ? Color(1, 1, 1, 0.4) : Color(1, 1, 1);
+			Color computed_modulation = modulate;
+
+			if (is_disabled()) {
+				computed_modulation.a = 0.4;
+			}
+
 			Size2 _icon_size = Size2(_icon->get_width() * icon_scale, _icon->get_height() * icon_scale);
 			Point2 offset = style->get_offset() + Point2(0, Math::floor((valign - _icon_size.y) / 2.0));
 
-			_icon->draw_rect(ci, Rect2(offset.x, offset.y, _icon_size.x, _icon_size.y), false, modulate);
+			_icon->draw_rect(ci, Rect2(offset.x, offset.y, _icon_size.x, _icon_size.y), false, computed_modulation);
 		}
 	}
 }
@@ -362,6 +381,8 @@ void Button::_bind_methods() {
 	ObjectTypeDB::bind_method(_MD("set_flat", "enabled"), &Button::set_flat);
 	ObjectTypeDB::bind_method(_MD("set_icon_scale", "enable"), &Button::set_icon_scale);
 	ObjectTypeDB::bind_method(_MD("is_icon_scaling"), &Button::is_icon_scaling);
+	ObjectTypeDB::bind_method(_MD("set_icon_modulate", "modulate"), &Button::set_modulate);
+	ObjectTypeDB::bind_method(_MD("get_icon_modulate"), &Button::get_modulate);
 	ObjectTypeDB::bind_method(_MD("set_autowrap", "enable"), &Button::set_autowrap);
 	ObjectTypeDB::bind_method(_MD("has_autowrap"), &Button::has_autowrap);
 	ObjectTypeDB::bind_method(_MD("set_clip_text", "enabled"), &Button::set_clip_text);
@@ -377,6 +398,7 @@ void Button::_bind_methods() {
 	ADD_PROPERTYNZ(PropertyInfo(Variant::STRING, "text", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT_INTL), _SCS("set_text"), _SCS("get_text"));
 	ADD_PROPERTYNZ(PropertyInfo(Variant::OBJECT, "icon", PROPERTY_HINT_RESOURCE_TYPE, "Texture"), _SCS("set_button_icon"), _SCS("get_button_icon"));
 	ADD_PROPERTYNZ(PropertyInfo(Variant::BOOL, "icon_scale"), _SCS("set_icon_scale"), _SCS("is_icon_scaling"));
+	ADD_PROPERTYNO(PropertyInfo(Variant::COLOR, "modulate"), _SCS("set_icon_modulate"), _SCS("get_icon_modulate"));
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "flat"), _SCS("set_flat"), _SCS("is_flat"));
 	ADD_PROPERTYNZ(PropertyInfo(Variant::BOOL, "autowrap"), _SCS("set_autowrap"), _SCS("has_autowrap"));
 	ADD_PROPERTYNZ(PropertyInfo(Variant::BOOL, "clip_text"), _SCS("set_clip_text"), _SCS("get_clip_text"));
@@ -389,6 +411,7 @@ Button::Button(const String &p_text) {
 	clip_text = false;
 	autowrap = false;
 	icon_scale = false;
+	modulate = Color(1, 1, 1, 1);
 	set_stop_mouse(true);
 	set_text(p_text);
 	align = ALIGN_CENTER;

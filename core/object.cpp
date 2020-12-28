@@ -1819,22 +1819,24 @@ int ObjectDB::get_object_count() {
 void ObjectDB::cleanup() {
 
 	GLOBAL_LOCK_FUNCTION;
+
+#ifdef DEBUG_ENABLED
 	if (instances.size()) {
 
 		WARN_PRINT("ObjectDB Instances still exist!");
-		if (OS::get_singleton()->is_stdout_verbose()) {
-			const uint32_t *K = NULL;
-			while ((K = instances.next(K))) {
 
-				String node_name;
-				if (instances[*K]->is_type("Node"))
-					node_name = " - Node Name: " + String(instances[*K]->call("get_name"));
-				if (instances[*K]->is_type("Resource"))
-					node_name = " - Resource Name: " + String(instances[*K]->call("get_name")) + " Path: " + String(instances[*K]->call("get_path"));
-				print_line("Leaked Instance: " + String(instances[*K]->get_type()) + ":" + itos(*K) + node_name);
-			}
+		const uint32_t *K = NULL;
+		while ((K = instances.next(K))) {
+
+			String node_name;
+			if (instances[*K]->is_type("Node"))
+				node_name = " - Node Name: " + String(instances[*K]->call("get_name"));
+			if (instances[*K]->is_type("Resource"))
+				node_name = " - Resource Name: " + String(instances[*K]->call("get_name")) + " Path: " + String(instances[*K]->call("get_path"));
+			print_line("Leaked Instance: " + String(instances[*K]->get_type()) + ":" + itos(*K) + node_name);
 		}
 	}
+#endif
 	instances.clear();
 	instance_checks.clear();
 }

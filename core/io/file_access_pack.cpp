@@ -88,7 +88,12 @@ void PackedData::add_path(const String &pkg_path, const String &path, uint64_t o
 				}
 			}
 		}
-		cd->files.insert(path.get_file());
+
+		String filename = path.get_file();
+		// Don't add as a file if the path points to a directoryy
+		if (!filename.empty()) {
+			cd->files.insert(filename);
+		}
 	}
 }
 
@@ -144,7 +149,7 @@ bool PackedSourcePCK::try_open_pack(const String &p_path) {
 		f->seek(f->get_pos() - 4);
 		magic = f->get_32();
 		if (magic != 0x43504447) {
-
+			f->close();
 			memdelete(f);
 			return false;
 		}
@@ -155,7 +160,7 @@ bool PackedSourcePCK::try_open_pack(const String &p_path) {
 
 		magic = f->get_32();
 		if (magic != 0x43504447) {
-
+			f->close();
 			memdelete(f);
 			return false;
 		}
@@ -166,10 +171,21 @@ bool PackedSourcePCK::try_open_pack(const String &p_path) {
 	uint32_t ver_minor = f->get_32();
 	uint32_t ver_rev = f->get_32();
 
-	ERR_EXPLAIN("Pack version newer than supported by engine: " + itos(version));
-	ERR_FAIL_COND_V(version > PACK_VERSION, ERR_INVALID_DATA);
-	ERR_EXPLAIN("Pack created with a newer version of the engine: " + itos(ver_major) + "." + itos(ver_minor) + "." + itos(ver_rev));
-	ERR_FAIL_COND_V(ver_major > VERSION_MAJOR || (ver_major == VERSION_MAJOR && ver_minor > VERSION_MINOR), ERR_INVALID_DATA);
+	if (version > PACK_VERSION) {
+		f->close();
+		memdelete(f);
+
+		ERR_EXPLAIN("Pack version newer than supported by engine: " + itos(version));
+		ERR_FAIL_COND_V(version > PACK_VERSION, ERR_INVALID_DATA);
+	}
+
+	if (ver_major > VERSION_MAJOR || (ver_major == VERSION_MAJOR && ver_minor > VERSION_MINOR)) {
+		f->close();
+		memdelete(f);
+
+		ERR_EXPLAIN("Pack created with a newer version of the engine: " + itos(ver_major) + "." + itos(ver_minor) + "." + itos(ver_rev));
+		ERR_FAIL_COND_V(ver_major > VERSION_MAJOR || (ver_major == VERSION_MAJOR && ver_minor > VERSION_MINOR), ERR_INVALID_DATA);
+	}
 
 	for (int i = 0; i < 16; i++) {
 		//reserved
@@ -196,6 +212,8 @@ bool PackedSourcePCK::try_open_pack(const String &p_path) {
 		PackedData::get_singleton()->add_path(p_path, path, ofs, size, md5, this);
 	};
 
+	f->close();
+	memdelete(f);
 	return true;
 };
 
@@ -314,7 +332,7 @@ FileAccessPack::FileAccessPack(const String &p_path, const PackedData::PackedFil
 	pf = p_file;
 	f = FileAccess::open(pf.pack, FileAccess::READ);
 	if (!f) {
-		ERR_EXPLAIN("Can't open pack-referenced file: " + String(pf.pack));
+		ERR_PRINTS("Can't open pack-referenced file: " + String(pf.pack));
 		ERR_FAIL_COND(!f);
 	}
 	f->seek(pf.offset);
