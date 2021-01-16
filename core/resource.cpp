@@ -367,17 +367,21 @@ Resource::~Resource() {
 
 	if (path_cache != "")
 		ResourceCache::resources.erase(path_cache);
+#ifdef DEBUG_ENABLED
 	if (owners.size()) {
 		WARN_PRINT("Resource is still owned");
 	}
+#endif
 }
 
 HashMap<String, Resource *> ResourceCache::resources;
 
 void ResourceCache::clear() {
-	if (resources.size())
+#ifdef DEBUG_ENABLED
+	if (resources.size()) {
 		ERR_PRINT("Resources Still in use at Exit!");
-
+	}
+#endif
 	resources.clear();
 }
 

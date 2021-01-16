@@ -108,7 +108,12 @@ public:
 			_first = NULL;
 			_last = NULL;
 		}
-		_FORCE_INLINE_ ~List() { ERR_FAIL_COND(_first != NULL); }
+		_FORCE_INLINE_ ~List() {
+
+#ifdef DEBUG_ENABLED
+			ERR_FAIL_COND(_first != NULL);
+#endif
+		}
 	};
 
 private:

@@ -79,19 +79,20 @@ void remove_error_handler(ErrorHandlerList *p_handler) {
 
 void _err_print_error(const char *p_function, const char *p_file, int p_line, const char *p_error, ErrorHandlerType p_type) {
 
+	bool local_error_exists = _err_error_exists;
 	OS::get_singleton()->print_error(p_function, p_file, p_line, p_error, _err_error_exists ? OS::get_singleton()->get_last_error() : "", (OS::ErrorType)p_type);
 
 	_global_lock();
 	ErrorHandlerList *l = error_handler_list;
 	while (l) {
 
-		l->errfunc(l->userdata, p_function, p_file, p_line, p_error, _err_error_exists ? OS::get_singleton()->get_last_error() : "", p_type);
+		l->errfunc(l->userdata, p_function, p_file, p_line, p_error, local_error_exists ? OS::get_singleton()->get_last_error() : "", p_type);
 		l = l->next;
 	}
 
 	_global_unlock();
 
-	if (_err_error_exists) {
+	if (local_error_exists) {
 		OS::get_singleton()->clear_last_error();
 		_err_error_exists = false;
 	}
