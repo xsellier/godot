@@ -57,7 +57,15 @@ void *Memory::realloc_static(void *p_memory, size_t p_bytes) {
 
 void Memory::free_static(void *p_ptr) {
 
+#ifdef DEBUG_ENABLED
 	ERR_FAIL_COND(!MemoryPoolStatic::get_singleton());
+
+#else
+	if (!MemoryPoolStatic::get_singleton()) {
+		return;
+	}
+#endif
+
 	MemoryPoolStatic::get_singleton()->free(p_ptr);
 }
 
