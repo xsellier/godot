@@ -60,11 +60,10 @@
 static const WORD MAX_CONSOLE_LINES = 1500;
 
 extern "C" {
-#ifdef _MSC_VER
-_declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
-_declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+__declspec(dllexport) DWORD NvOptimusEnablement = 1;
+__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 }
-#endif
+
 // Workaround mingw-w64 < 4.0 bug
 #ifndef WM_TOUCH
 #define WM_TOUCH 576
