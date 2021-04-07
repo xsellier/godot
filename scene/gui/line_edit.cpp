@@ -701,15 +701,32 @@ void LineEdit::copy_text() {
 
 	if (selection.enabled) {
 
-		OS::get_singleton()->set_clipboard(text.substr(selection.begin, selection.end - selection.begin));
+		int p_from_column = MAX(0, selection.begin);
+		int p_to_column = MIN(selection.end, text.size());
+
+		if (p_from_column >= p_to_column) {
+			// Nothing to do
+			return;
+		}
+
+		OS::get_singleton()->set_clipboard(text.substr(p_from_column, p_to_column - p_from_column));
 	}
 }
 
 void LineEdit::cut_text() {
 
 	if (selection.enabled) {
+
+		int p_from_column = MAX(0, selection.begin);
+		int p_to_column = MIN(selection.end, text.size());
+
+		if (p_from_column >= p_to_column) {
+			// Nothing to do
+			return;
+		}
+
 		undo_text = text;
-		OS::get_singleton()->set_clipboard(text.substr(selection.begin, selection.end - selection.begin));
+		OS::get_singleton()->set_clipboard(text.substr(p_from_column, p_to_column - p_from_column));
 		selection_delete();
 	}
 }
@@ -855,7 +872,7 @@ void LineEdit::_toggle_draw_caret() {
 
 void LineEdit::delete_char() {
 
-	if ((text.length() <= 0) || (cursor_pos == 0)) return;
+	if ((text.length() <= 0) || (cursor_pos == 0) || (cursor_pos > text.length())) return;
 
 	Ref<Font> font = get_font("font");
 	if (font != NULL) {
@@ -866,26 +883,32 @@ void LineEdit::delete_char() {
 
 	set_cursor_pos(get_cursor_pos() - 1);
 
-	if (cursor_pos == window_pos) {
-
-		//	set_window_pos(cursor_pos-get_window_length());
-	}
-
 	emit_signal("text_changed", text);
 	_change_notify("text");
 }
 
 void LineEdit::delete_text(int p_from_column, int p_to_column) {
 
+	p_from_column = MAX(0, p_from_column);
+	p_to_column = MIN(p_to_column, text.size());
+
+	if (p_from_column >= p_to_column) {
+		// Nothing to do
+		return;
+	}
+
 	undo_text = text;
 
 	if (text.size() > 0) {
 		Ref<Font> font = get_font("font");
+
 		if (font != NULL) {
 			for (int i = p_from_column; i < p_to_column; i++)
 				cached_width -= font->get_char_size(text[i]).width;
 		}
+
 	} else {
+
 		cached_width = 0;
 	}
 

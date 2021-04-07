@@ -509,6 +509,7 @@ BaseButton::BaseButton() {
 	status.click_on_press = false;
 	status.pressing_button = 0;
 	set_focus_mode(FOCUS_ALL);
+	set_default_cursor_shape(CURSOR_POINTING_HAND);
 	enabled_focus_mode = FOCUS_ALL;
 	group = NULL;
 }

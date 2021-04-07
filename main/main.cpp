@@ -104,6 +104,8 @@ static int frame_delay = 0;
 static Vector2 init_custom_pos;
 static int video_driver_idx = -1;
 static int audio_driver_idx = -1;
+static int audio_output_latency = 25;
+static int mixer_latency = 10;
 static String locale;
 static bool use_debug_profiler = false;
 static bool force_lowdpi = false;
@@ -174,6 +176,8 @@ void Main::print_help(const char *p_binary) {
 		OS::get_singleton()->print("%s", OS::get_singleton()->get_audio_driver_name(i));
 	}
 	OS::get_singleton()->print(").\n");
+	OS::get_singleton()->print("\t-output_latency <10-100> : Audio output latency (default 25) \n");
+	OS::get_singleton()->print("\t-mixer_latency <10-100> : Audio mixer latency (default 10) \n");
 	OS::get_singleton()->print("\t-rthread <mode> : Render thread mode ('unsafe', 'safe', 'separate').\n");
 	OS::get_singleton()->print("\t-s, -script <script> : Run a script.\n");
 	OS::get_singleton()->print("\t-d, -debug : Debug (local stdout debugger).\n");
@@ -424,11 +428,31 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 				goto error;
 			}
 
-		} else if (I->get() == "-ad") { // video driver
+		} else if (I->get() == "-ad") { // audio driver
 
 			if (I->next()) {
 
 				audio_driver = I->next()->get();
+				N = I->next()->next();
+			} else {
+				goto error;
+			}
+
+		} else if (I->get() == "-output_latency") { // audio driver
+
+			if (I->next()) {
+
+				audio_output_latency = I->next()->get().to_int();
+				N = I->next()->next();
+			} else {
+				goto error;
+			}
+
+		} else if (I->get() == "-mixer_latency") { // audio driver
+
+			if (I->next()) {
+
+				mixer_latency = I->next()->get().to_int();
 				N = I->next()->next();
 			} else {
 				goto error;
@@ -722,6 +746,9 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	GLOBAL_DEF("display/resizable", video_mode.resizable);
 	GLOBAL_DEF("display/borderless_window", video_mode.borderless_window);
 	GLOBAL_DEF("display/always_on_top", video_mode.always_on_top);
+	GLOBAL_DEF("audio/output_latency", audio_output_latency);
+	GLOBAL_DEF("audio/mixer_latency", mixer_latency);
+
 	use_vsync = GLOBAL_DEF("display/use_vsync", use_vsync);
 	GLOBAL_DEF("display/test_width", 0);
 	GLOBAL_DEF("display/test_height", 0);

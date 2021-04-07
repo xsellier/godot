@@ -48,7 +48,7 @@ Error MessageQueue::push_call(ObjectID p_id, const StringName &p_method, const V
 		String type;
 		if (ObjectDB::get_instance(p_id))
 			type = ObjectDB::get_instance(p_id)->get_type();
-		print_line("failed method: " + type + ":" + p_method + " target ID: " + itos(p_id));
+		ERR_PRINTS("failed method: " + type + ":" + p_method + " target ID: " + itos(p_id));
 		statistics();
 		ERR_EXPLAIN("Message queue out of memory. Try increasing 'message_queue_size_kb' in project settings");
 		ERR_FAIL_V(ERR_OUT_OF_MEMORY);
@@ -99,7 +99,7 @@ Error MessageQueue::push_set(ObjectID p_id, const StringName &p_prop, const Vari
 		String type;
 		if (ObjectDB::get_instance(p_id))
 			type = ObjectDB::get_instance(p_id)->get_type();
-		print_line("failed set: " + type + ":" + p_prop + " target ID: " + itos(p_id));
+		WARN_PRINTS("failed set: " + type + ":" + p_prop + " target ID: " + itos(p_id));
 		statistics();
 		ERR_EXPLAIN("Message queue out of memory. Try increasing 'message_queue_size_kb' in project settings");
 		ERR_FAIL_V(ERR_OUT_OF_MEMORY);
@@ -132,7 +132,7 @@ Error MessageQueue::push_notification(ObjectID p_id, int p_notification) {
 		String type;
 		if (ObjectDB::get_instance(p_id))
 			type = ObjectDB::get_instance(p_id)->get_type();
-		print_line("failed notification: " + itos(p_notification) + " target ID: " + itos(p_id));
+		ERR_PRINTS("failed notification: " + itos(p_notification) + " target ID: " + itos(p_id));
 		statistics();
 		ERR_EXPLAIN("Message queue out of memory. Try increasing 'message_queue_size_kb' in project settings");
 		ERR_FAIL_V(ERR_OUT_OF_MEMORY);
@@ -207,9 +207,6 @@ void MessageQueue::statistics() {
 				} break;
 			}
 
-			//object was deleted
-			//WARN_PRINT("Object was deleted while awaiting a callback")
-			//should it print a warning?
 		} else {
 
 			null_count++;
@@ -220,63 +217,27 @@ void MessageQueue::statistics() {
 			read_pos += sizeof(Variant) * message->args;
 	}
 
-	print_line("TOTAL BYTES: " + itos(buffer_end));
-	print_line("NULL count: " + itos(null_count));
+	ERR_PRINTS("TOTAL BYTES: " + itos(buffer_end));
+	ERR_PRINTS("NULL count: " + itos(null_count));
 
 	for (Map<StringName, int>::Element *E = set_count.front(); E; E = E->next()) {
 
-		print_line("SET " + E->key() + ": " + itos(E->get()));
+		ERR_PRINTS("SET " + E->key() + ": " + itos(E->get()));
 	}
 
 	for (Map<StringName, int>::Element *E = call_count.front(); E; E = E->next()) {
 
-		print_line("CALL " + E->key() + ": " + itos(E->get()));
+		ERR_PRINTS("CALL " + E->key() + ": " + itos(E->get()));
 	}
 
 	for (Map<int, int>::Element *E = notify_count.front(); E; E = E->next()) {
 
-		print_line("NOTIFY " + itos(E->key()) + ": " + itos(E->get()));
+		ERR_PRINTS("NOTIFY " + itos(E->key()) + ": " + itos(E->get()));
 	}
 }
 
 bool MessageQueue::print() {
-#if 0
-	uint32_t read_pos=0;
-	while (read_pos < buffer_end ) {
-		Message *message = (Message*)&buffer[ read_pos ];
 
-		Object *target = ObjectDB::get_instance(message->instance_ID);
-		String cname;
-		String cfunc;
-
-		if (target==NULL) {
-			//object was deleted
-			//WARN_PRINT("Object was deleted while awaiting a callback")
-			//should it print a warning?
-		} else if (message->notification>=0) {
-
-			// messages don't expect a return value
-			cfunc="notification # "+itos(message->notification);
-			cname=target->get_type();
-
-		} else if (!message->target.empty()) {
-
-			cfunc="property:  "+message->target;
-			cname=target->get_type();
-
-
-		} else if (message->target) {
-
-			cfunc=String(message->target)+"()";
-			cname=target->get_type();
-		}
-
-
-		read_pos+=sizeof(Message);
-		if (message->type!=TYPE_NOTIFICATION)
-			read_pos+=sizeof(Variant)*message->args;
-	}
-#endif
 	return false;
 }
 
@@ -307,7 +268,6 @@ void MessageQueue::flush() {
 
 	if (buffer_end > buffer_max_used) {
 		buffer_max_used = buffer_end;
-		//statistics();
 	}
 
 	uint32_t read_pos = 0;
