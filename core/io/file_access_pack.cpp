@@ -51,7 +51,6 @@ Error PackedData::add_pack(const String &p_path) {
 void PackedData::add_path(const String &pkg_path, const String &path, uint64_t ofs, uint64_t size, const uint8_t *p_md5, PackSource *p_src) {
 
 	PathMD5 pmd5(path.md5_buffer());
-	//printf("adding path %ls, %lli, %lli\n", path.c_str(), pmd5.a, pmd5.b);
 
 	bool exists = files.has(pmd5);
 
@@ -66,11 +65,11 @@ void PackedData::add_path(const String &pkg_path, const String &path, uint64_t o
 	files[pmd5] = pf;
 
 	if (!exists) {
-		//search for dir
+		// Search for dir
 		String p = path.replace_first("res://", "");
 		PackedDir *cd = root;
 
-		if (p.find("/") != -1) { //in a subdir
+		if (p.find("/") != -1) { // in a subdir
 
 			Vector<String> ds = p.get_base_dir().split("/");
 
@@ -90,7 +89,7 @@ void PackedData::add_path(const String &pkg_path, const String &path, uint64_t o
 		}
 
 		String filename = path.get_file();
-		// Don't add as a file if the path points to a directoryy
+		// Don't add as a file if the path points to a directory
 		if (!filename.empty()) {
 			cd->files.insert(filename);
 		}
@@ -139,12 +138,10 @@ bool PackedSourcePCK::try_open_pack(const String &p_path) {
 	if (!f)
 		return false;
 
-	//printf("try open %ls!\n", p_path.c_str());
-
 	uint32_t magic = f->get_32();
 
 	if (magic != 0x43504447) {
-		//maybe at he end.... self contained exe
+		// maybe at the end.... self contained exe
 		f->seek_end();
 		f->seek(f->get_pos() - 4);
 		magic = f->get_32();
@@ -232,10 +229,24 @@ Error FileAccessPack::_open(const String &p_path, int p_mode_flags) {
 
 void FileAccessPack::close() {
 
+#ifdef DEBUG_ENABLED
+	ERR_FAIL_COND(!f);
+#else
+	if (!f)
+		return;
+#endif
+
 	f->close();
 }
 
 bool FileAccessPack::is_open() const {
+
+#ifdef DEBUG_ENABLED
+	ERR_FAIL_COND_V(!f, false);
+#else
+	if (!f)
+		return false;
+#endif
 
 	return f->is_open();
 }
@@ -247,6 +258,13 @@ void FileAccessPack::seek(size_t p_position) {
 	} else {
 		eof = false;
 	}
+
+#ifdef DEBUG_ENABLED
+	ERR_FAIL_COND(!f);
+#else
+	if (!f)
+		return;
+#endif
 
 	f->seek(pf.offset + p_position);
 	pos = p_position;
@@ -271,6 +289,13 @@ bool FileAccessPack::eof_reached() const {
 
 uint8_t FileAccessPack::get_8() const {
 
+#ifdef DEBUG_ENABLED
+	ERR_FAIL_COND_V(!f, 0);
+#else
+	if (!f)
+		return 0;
+#endif
+
 	if (pos >= pf.size) {
 		eof = true;
 		return 0;
@@ -281,6 +306,13 @@ uint8_t FileAccessPack::get_8() const {
 }
 
 int FileAccessPack::get_buffer(uint8_t *p_dst, int p_length) const {
+
+#ifdef DEBUG_ENABLED
+	ERR_FAIL_COND_V(!f, 0);
+#else
+	if (!f)
+		return 0;
+#endif
 
 	if (eof)
 		return 0;
