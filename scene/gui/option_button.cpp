@@ -107,6 +107,11 @@ void OptionButton::add_item(const String &p_label, int p_ID) {
 		select(0);
 }
 
+void OptionButton::set_item_tooltip(int p_idx, const String &p_tooltip) {
+
+	popup->set_item_tooltip(p_idx, p_tooltip);
+}
+
 void OptionButton::set_item_text(int p_idx, const String &p_text) {
 
 	popup->set_item_text(p_idx, p_text);
@@ -128,6 +133,11 @@ void OptionButton::set_item_metadata(int p_idx, const Variant &p_metadata) {
 void OptionButton::set_item_disabled(int p_idx, bool p_disabled) {
 
 	popup->set_item_disabled(p_idx, p_disabled);
+}
+
+String OptionButton::get_item_tooltip(int p_idx) const {
+
+	return popup->get_item_tooltip(p_idx);
 }
 
 String OptionButton::get_item_text(int p_idx) const {
@@ -281,8 +291,10 @@ void OptionButton::_bind_methods() {
 	ObjectTypeDB::bind_method(_MD("set_item_disabled", "idx", "disabled"), &OptionButton::set_item_disabled);
 	ObjectTypeDB::bind_method(_MD("set_item_ID", "idx", "id"), &OptionButton::set_item_ID);
 	ObjectTypeDB::bind_method(_MD("set_item_metadata", "idx", "metadata"), &OptionButton::set_item_metadata);
+	ObjectTypeDB::bind_method(_MD("set_item_tooltip", "idx", "tooltip"), &OptionButton::set_item_tooltip);
 	ObjectTypeDB::bind_method(_MD("get_item_text", "idx"), &OptionButton::get_item_text);
 	ObjectTypeDB::bind_method(_MD("get_item_icon:Texture", "idx"), &OptionButton::get_item_icon);
+	ObjectTypeDB::bind_method(_MD("get_item_tooltip", "idx"), &OptionButton::get_item_tooltip);
 	ObjectTypeDB::bind_method(_MD("get_item_ID", "idx"), &OptionButton::get_item_ID);
 	ObjectTypeDB::bind_method(_MD("get_item_metadata", "idx"), &OptionButton::get_item_metadata);
 	ObjectTypeDB::bind_method(_MD("is_item_disabled", "idx"), &OptionButton::is_item_disabled);
