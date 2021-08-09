@@ -92,6 +92,12 @@ void SamplePlayer2D::_notification(int p_what) {
 			SpatialSound2DServer::get_singleton()->source_set_polyphony(get_source_rid(), polyphony);
 
 		} break;
+
+		case NOTIFICATION_EXIT_TREE: {
+
+			stop_all();
+
+		} break;
 	}
 }
 

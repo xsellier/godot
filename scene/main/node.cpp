@@ -65,6 +65,8 @@ void Node::_notification(int p_notification) {
 
 		} break;
 		case NOTIFICATION_ENTER_TREE: {
+			ERR_FAIL_COND(!get_viewport());
+			ERR_FAIL_COND(!get_tree());
 
 			if (data.pause_mode == PAUSE_MODE_INHERIT) {
 
@@ -87,6 +89,8 @@ void Node::_notification(int p_notification) {
 
 		} break;
 		case NOTIFICATION_EXIT_TREE: {
+			ERR_FAIL_COND(!get_viewport());
+			ERR_FAIL_COND(!get_tree());
 
 			get_tree()->node_count--;
 			if (data.input)

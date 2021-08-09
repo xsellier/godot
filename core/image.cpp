@@ -915,7 +915,7 @@ void Image::shrink_x2() {
 
 		int new_size = data.size() - ofs;
 		new_img.resize(new_size);
-
+		ERR_FAIL_COND(new_img.size() == 0);
 		{
 			DVector<uint8_t>::Write w = new_img.write();
 			DVector<uint8_t>::Read r = data.read();
@@ -935,7 +935,7 @@ void Image::shrink_x2() {
 		ERR_FAIL_COND(format >= FORMAT_INDEXED);
 		int ps = get_format_pixel_size(format);
 		new_img.resize((width / 2) * (height / 2) * ps);
-
+		ERR_FAIL_COND(new_img.size() == 0);
 		{
 			DVector<uint8_t>::Write w = new_img.write();
 			DVector<uint8_t>::Read r = data.read();
