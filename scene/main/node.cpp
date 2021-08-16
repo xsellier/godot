@@ -49,7 +49,6 @@ void Node::_notification(int p_notification) {
 
 				Variant time = get_process_delta_time();
 				const Variant *ptr[1] = { &time };
-				Variant::CallError err;
 				get_script_instance()->call_multilevel(SceneStringNames::get_singleton()->_process, ptr, 1);
 			}
 		} break;
@@ -59,7 +58,6 @@ void Node::_notification(int p_notification) {
 
 				Variant time = get_fixed_process_delta_time();
 				const Variant *ptr[1] = { &time };
-				Variant::CallError err;
 				get_script_instance()->call_multilevel(SceneStringNames::get_singleton()->_fixed_process, ptr, 1);
 			}
 
@@ -105,7 +103,6 @@ void Node::_notification(int p_notification) {
 
 			if (get_script_instance()) {
 
-				Variant::CallError err;
 				get_script_instance()->call_multilevel_reversed(SceneStringNames::get_singleton()->_ready, NULL, 0);
 			}
 			//emit_signal(SceneStringNames::get_singleton()->enter_tree);
@@ -131,7 +128,8 @@ void Node::_notification(int p_notification) {
 			// kill children as cleanly as possible
 			while (data.children.size()) {
 
-				Node *child = data.children[0];
+				// begin from the end because its faster and more consistent with creation
+				Node *child = data.children[data.children.size() - 1];
 				remove_child(child);
 				memdelete(child);
 			}
@@ -177,7 +175,6 @@ void Node::_propagate_enter_tree() {
 
 	if (get_script_instance()) {
 
-		Variant::CallError err;
 		get_script_instance()->call_multilevel_reversed(SceneStringNames::get_singleton()->_enter_tree, NULL, 0);
 	}
 
@@ -241,7 +238,6 @@ void Node::_propagate_exit_tree() {
 
 	if (get_script_instance()) {
 
-		Variant::CallError err;
 		get_script_instance()->call_multilevel(SceneStringNames::get_singleton()->_exit_tree, NULL, 0);
 	}
 	emit_signal(SceneStringNames::get_singleton()->exit_tree);
@@ -263,6 +259,7 @@ void Node::_propagate_exit_tree() {
 		data.tree->tree_changed();
 
 	data.inside_tree = false;
+	data.ready_notified = false;
 	data.tree = NULL;
 	data.depth = -1;
 }
@@ -410,7 +407,7 @@ void Node::_propagate_pause_owner(Node *p_owner) {
 bool Node::can_process() const {
 
 	if (!is_inside_tree()) {
-		ERR_PRINTS("can_process() failed, node '" + get_name() + "' is not in the tree (" + get_filename() + ").");
+		ERR_PRINTS("can_process() failed, node '" + get_name() + "'/'" + get_type() + "' is not in the tree (" + get_filename() + ").");
 
 		return false;
 	}
@@ -744,6 +741,10 @@ void Node::add_child(Node *p_child, bool p_legible_unique_name) {
 }
 
 void Node::add_child_below_node(Node *p_node, Node *p_child, bool p_legible_unique_name) {
+
+	ERR_FAIL_NULL(p_node);
+	ERR_FAIL_NULL(p_child);
+
 	add_child(p_child, p_legible_unique_name);
 
 	if (is_a_parent_of(p_node)) {
@@ -973,13 +974,13 @@ bool Node::is_greater_than(const Node *p_node) const {
 	ERR_FAIL_NULL_V(p_node, false);
 
 	if (!data.inside_tree) {
-		ERR_PRINTS("is_greater_than() failed, node '" + get_name() + "' is not in the tree (" + get_filename() + ").");
+		ERR_PRINTS("is_greater_than() failed, node '" + get_name() + "'/'" + get_type() + "' is not in the tree (" + get_filename() + ").");
 
 		return false;
 	}
 
 	if (!p_node->data.inside_tree) {
-		ERR_PRINTS("is_greater_than() failed, node '" + p_node->get_name() + "' is not in the tree (" + p_node->get_filename() + ").");
+		ERR_PRINTS("is_greater_than() failed, node '" + p_node->get_name() + "'/'" + p_node->get_type() + "' is not in the tree (" + p_node->get_filename() + ").");
 
 		return false;
 	}
@@ -1421,59 +1422,6 @@ HashMap<NodePath, int> Node::get_editable_instances() const {
 	return data.editable_instances;
 }
 
-#if 0
-
-void Node::generate_instance_state() {
-
-	List<PropertyInfo> properties;
-	get_property_list(&properties);
-
-	data.instance_state.clear();
-
-	for( List<PropertyInfo>::Element *E=properties.front();E;E=E->next() ) {
-
-		PropertyInfo &pi=E->get();
-		if ((pi.usage&PROPERTY_USAGE_NO_INSTANCE_STATE) || !(pi.usage&PROPERTY_USAGE_EDITOR) || !(pi.usage&PROPERTY_USAGE_STORAGE))
-			continue;
-
-		data.instance_state[pi.name]=get(pi.name);
-	}
-
-	List<GroupInfo> groups;
-	get_groups(&groups);
-	for(List<GroupInfo>::Element *E=groups.front();E;E=E->next()) {
-
-		if (!E->get().persistent)
-			continue;
-		data.instance_groups.push_back(E->get().name);
-	}
-
-	List<MethodInfo> signal_list;
-
-	get_signal_list(&signal_list);
-
-	for(List<MethodInfo>::Element *E=signal_list.front();E;E=E->next()) {
-
-		StringName name = E->get().name;
-		List<Connection> connections;
-		get_signal_connection_list(name,&connections);
-
-		for(List<Connection>::Element *F=connections.front();F;F=F->next()) {
-
-			if (F->get().flags&CONNECT_PERSIST)
-				data.instance_connections.push_back(F->get());
-		}
-
-	}
-}
-
-Dictionary Node::get_instance_state() const {
-
-	return data.instance_state;
-}
-
-#endif
-
 void Node::set_scene_instance_state(const Ref<SceneState> &p_state) {
 
 	data.instance_state = p_state;
@@ -1808,7 +1756,10 @@ void Node::replace_by(Node *p_node, bool p_keep_data) {
 
 		Node *child = get_child(0);
 		remove_child(child);
-		p_node->add_child(child);
+
+		if (!child->is_owned_by_parent()) {
+			p_node->add_child(child);
+		}
 	}
 
 	p_node->set_owner(owner);
