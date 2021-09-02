@@ -386,19 +386,6 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 			if (!window_has_focus && mouse_mode == MOUSE_MODE_CAPTURED)
 				break;
 
-			/*
-			LPARAM extra = GetMessageExtraInfo();
-			if (IsPenEvent(extra)) {
-
-				int idx = extra & 0x7f;
-				_drag_event(idx, uMsg, wParam, lParam);
-				if (idx != 0) {
-					return 0;
-				};
-				// fallthrough for mouse event
-			};
-			*/
-
 			InputEvent event;
 			event.type = InputEvent::MOUSE_MOTION;
 			event.ID = ++last_id;
@@ -2128,6 +2115,9 @@ void OS_Windows::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shap
 		iconinfo.hbmMask = hAndMask;
 		iconinfo.hbmColor = hXorMask;
 
+		if (cursors[p_shape])
+			DestroyIcon(cursors[p_shape]);
+
 		cursors[p_shape] = CreateIconIndirect(&iconinfo);
 
 		if (p_shape == cursor_shape) {
@@ -2146,6 +2136,16 @@ void OS_Windows::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shap
 
 		memfree(buffer);
 		DeleteObject(bitmap);
+	} else {
+		// Reset to default system cursor
+		if (cursors[p_shape]) {
+			DestroyIcon(cursors[p_shape]);
+			cursors[p_shape] = NULL;
+		}
+
+		CursorShape c = cursor_shape;
+		cursor_shape = CURSOR_MAX;
+		set_cursor_shape(c);
 	}
 }
 
