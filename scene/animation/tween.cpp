@@ -195,6 +195,7 @@ void Tween::_bind_methods() {
 
 	ObjectTypeDB::bind_method(_MD("set_tween_process_mode", "mode"), &Tween::set_tween_process_mode);
 	ObjectTypeDB::bind_method(_MD("get_tween_process_mode"), &Tween::get_tween_process_mode);
+	ObjectTypeDB::bind_method(_MD("running_interpolation"), &Tween::running_interpolation);
 
 	ObjectTypeDB::bind_method(_MD("start"), &Tween::start);
 	ObjectTypeDB::bind_method(_MD("reset", "object", "key"), &Tween::reset);
@@ -324,6 +325,24 @@ Variant &Tween::_get_delta_val(InterpolateData &p_data) {
 		} break;
 	}
 	return p_data.initial_val;
+
+}
+
+bool Tween::running_interpolation() {
+
+	bool running_interpolation = false;
+
+	for (List<InterpolateData>::Element *E = interpolates.front(); E; E = E->next()) {
+
+		InterpolateData &data = E->get();
+
+		if (!data.finish) {
+			running_interpolation = true;
+			break;
+		}
+	}
+
+	return running_interpolation;
 }
 
 Variant Tween::_run_equation(InterpolateData &p_data) {

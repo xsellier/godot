@@ -724,7 +724,7 @@ Error ResourceInteractiveLoaderBinary::poll() {
 			} else {
 
 				error = ERR_FILE_MISSING_DEPENDENCIES;
-				ERR_EXPLAIN("Can't load dependency: " + path);
+				ERR_PRINTS("Can't load dependency: " + path);
 				ERR_FAIL_V(error);
 			}
 

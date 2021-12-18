@@ -169,6 +169,8 @@ public:
 	real_t tell() const;
 	real_t get_runtime() const;
 
+	bool running_interpolation();
+
 	bool interpolate_property(Object *p_node, String p_property, Variant p_initial_val, Variant p_final_val, real_t p_times_in_sec, TransitionType p_trans_type, EaseType p_ease_type, real_t p_delay = 0);
 
 	bool interpolate_method(Object *p_node, String p_method, Variant p_initial_val, Variant p_final_val, real_t p_times_in_sec, TransitionType p_trans_type, EaseType p_ease_type, real_t p_delay = 0);
