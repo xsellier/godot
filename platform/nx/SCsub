@@ -1,0 +1,17 @@
+#!/usr/bin/env python
+
+Import('env')
+
+
+common_nx = [
+    "audio_driver_nx.cpp",
+    "dir_access_nx.cpp",
+    "display_server_nx.cpp",
+    "file_access_nx.cpp",
+    "ip_nx.cpp",
+    "netsocket_nx.cpp",
+    "os_nx.cpp",
+    "vulkan_context_nx.cpp"
+]
+
+prog = env.add_program('#bin/godot_nx', ['godot_nx.cpp'] + common_nx)

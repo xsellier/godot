@@ -710,7 +710,10 @@ elif methods.using_clang(env):
         elif env["debug_paths_relative"] and cc_version_major < 10:
             print_warning("Clang < 10 doesn't support -ffile-prefix-map, disabling `debug_paths_relative` option.")
             env["debug_paths_relative"] = False
-
+elif env["platform"] == "nx":
+    print(
+        "C++17 support limited in Nintendo SDK"
+    )
 elif env.msvc:
     # Ensure latest minor builds of Visual Studio 2017/2019.
     # https://github.com/godotengine/godot/pull/94995#issuecomment-2336464574

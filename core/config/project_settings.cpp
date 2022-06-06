@@ -671,7 +671,22 @@ Error ProjectSettings::_setup(const String &p_path, const String &p_main_pack, b
 		// We need to test both possibilities as extensions for Linux binaries are optional
 		// (so both 'mygame.bin' and 'mygame' should be able to find 'mygame.pck').
 
-#ifdef MACOS_ENABLED
+		// Try to load data pack at the location of the executable
+		// As mentioned above, we have two potential names to attempt
+
+		if (_load_resource_pack(exec_dir.path_join(exec_basename + ".pck")) ||
+				_load_resource_pack(exec_dir.path_join(exec_filename + ".pck"))) {
+			found = true;
+		} else {
+			// If we couldn't find them next to the executable, we attempt
+			// the current working directory. Same story, two tests.
+			if (_load_resource_pack(exec_basename + ".pck") ||
+					_load_resource_pack(exec_filename + ".pck")) {
+				found = true;
+			} 
+		}
+
+#ifdef OSX_ENABLED
 		if (!found) {
 			// Attempt to load PCK from macOS .app bundle resources.
 			found = _load_resource_pack(OS::get_singleton()->get_bundle_resource_dir().path_join(exec_basename + ".pck"), false, 0, true) || _load_resource_pack(OS::get_singleton()->get_bundle_resource_dir().path_join(exec_filename + ".pck"), false, 0, true);
@@ -710,6 +725,13 @@ Error ProjectSettings::_setup(const String &p_path, const String &p_main_pack, b
 
 	// Try to use the filesystem for files, according to OS.
 	// (Only Android -when reading from pck- and iOS use this.)
+	// Look for pack file in Resource folder
+	if (OS::get_singleton()->get_resource_dir() != "") {
+		if (_load_resource_pack(OS::get_singleton()->get_resource_dir().path_join("project.pck"))) {
+			Error err = _load_settings_text_or_binary("res://project.godot", "res://project.binary");
+			return err;
+		}
+	}
 
 	if (!OS::get_singleton()->get_resource_dir().is_empty()) {
 		Error err = _load_settings_text_or_binary("res://project.godot", "res://project.binary");

@@ -1,0 +1,107 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Windows Debug",
+            "type": "shell",
+            "command": "scons",
+            "args": [
+                "platform=windows",
+                "target=editor",
+                "-j20"
+              ],
+              "problemMatcher": ["$msCompile"],
+              "group": {
+                "kind": "build",
+                "isDefault": true
+              }
+        },
+        {
+            "label": "Build NX 64 Debug",
+            "type": "shell",
+            "command": "scons",
+            "args": [
+                "platform=nx",
+                "target=template_debug",
+                "debug_symbols=yes",
+                "arch=arm64",
+                "-j20"
+              ],
+              "problemMatcher": ["$msCompile"],
+              "group": {
+                "kind": "build",
+              },
+        },
+        {
+            "label": "Build NX 64 Release",
+            "type": "shell",
+            "command": "scons",
+            "args": [
+                "platform=nx",
+                "target=template_release",
+                "arch=arm64",
+                "-j20"
+              ],
+              "problemMatcher": ["$msCompile"],
+              "group": {
+                "kind": "build",
+              },
+        },
+        {
+            "label": "Build NX 32 Debug",
+            "type": "shell",
+            "command": "scons",
+            "args": [
+                "platform=nx",
+                "target=template_debug",
+                "arch=arm32",
+                "-j20"
+              ],
+              "problemMatcher": ["$msCompile"],
+              "group": {
+                "kind": "build",
+              },
+        },
+        {
+            "label": "Build NX 32 Release",
+            "type": "shell",
+            "command": "scons",
+            "args": [
+                "platform=nx",
+                "target=template_release",
+                "arch=arm32",
+                "-j20"
+              ],
+              "problemMatcher": ["$msCompile"],
+              "group": {
+                "kind": "build",
+              },
+        },
+        {
+            "label": "Deploy NX Export Templates",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "misc/scripts/export_nx_templates.py",
+              ],
+              "problemMatcher": ["$msCompile"],
+              "group": {
+                "kind": "build",
+              },
+        },
+        {
+            "label": "Build Everything",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Build NX 64 Debug",
+                "Build NX 64 Release",
+                "Build NX 32 Debug",
+                "Build NX 32 Release",
+                "Build Windows Debug",
+                "Deploy NX Export Templates"
+                ]
+          }
+    ]
+}

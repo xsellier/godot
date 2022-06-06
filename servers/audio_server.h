@@ -94,7 +94,7 @@ public:
 	// Virtual API to implement.
 
 	virtual const char *get_name() const = 0;
-
+	
 	virtual Error init() = 0;
 	virtual void start() = 0;
 	virtual int get_mix_rate() const = 0;
