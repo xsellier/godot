@@ -122,20 +122,45 @@ void OS_NX::getNpadEvents() {
 			nn::hid::GetNpadState(&(npadStates[i].current.fullKey), s_NpadIds[i]);
 			process_joy_buttons(npadStates[i].deviceId, npadStates[i].current.fullKey.buttons);
 			process_joy_axis(npadStates[i].deviceId, npadStates[i].current.fullKey.analogStickL, npadStates[i].current.fullKey.analogStickR);
+			process_joy_vibration(i);
+
 		} else if (npadStyleSet.Test<nn::hid::NpadStyleHandheld>() == true) {
 			npadStates[i].previous.handheld = npadStates[i].current.handheld;
 			nn::hid::GetNpadState(&(npadStates[i].current.handheld), s_NpadIds[i]);
 			process_joy_buttons(npadStates[i].deviceId, npadStates[i].current.handheld.buttons);
 			process_joy_axis(npadStates[i].deviceId, npadStates[i].current.handheld.analogStickL, npadStates[i].current.handheld.analogStickR);
+			process_joy_vibration(i);
 
 		} else if (npadStyleSet.Test<nn::hid::NpadStyleJoyDual>() == true) {
 			npadStates[i].previous.joyDual = npadStates[i].current.joyDual;
 			nn::hid::GetNpadState(&(npadStates[i].current.joyDual), s_NpadIds[i]);
 			process_joy_buttons(npadStates[i].deviceId, npadStates[i].current.joyDual.buttons);
 			process_joy_axis(npadStates[i].deviceId, npadStates[i].current.joyDual.analogStickL, npadStates[i].current.joyDual.analogStickR);
+			process_joy_vibration(i);
+
 		}
 	}
 }
+
+void OS_NX::process_joy_vibration(int deviceIndex)
+{
+	auto input = Input::get_singleton();
+	uint64_t timestamp = input->get_joy_vibration_timestamp(deviceIndex);
+	if (timestamp > npadStates[deviceIndex].ff_timestamp) {
+		Vector2 strength = input->get_joy_vibration_strength(deviceIndex);
+		float duration = input->get_joy_vibration_duration(deviceIndex);
+		if (strength.x == 0 && strength.y == 0) {
+			joypad_vibration_stop(deviceIndex, timestamp);
+		} else {
+			joypad_vibration_start(deviceIndex, strength.x, strength.y, duration, timestamp);
+		}
+	} else if (npadStates[deviceIndex].vibrating && npadStates[deviceIndex].ff_end_timestamp != 0) {
+		uint64_t current_time = OS::get_singleton()->get_ticks_usec();
+		if (current_time >= npadStates[deviceIndex].ff_end_timestamp)
+			joypad_vibration_stop(deviceIndex, current_time);
+	}
+}
+
 
 void OS_NX::process_input() {
 	// Touchscreen
@@ -152,6 +177,7 @@ void OS_NX::process_input() {
 
 void OS_NX::process_joy_buttons(int deviceIndex, const nn::hid::NpadButtonSet& currentState) {
     auto input = Input::get_singleton();
+
 	if (currentState.Test<nn::hid::NpadJoyButton::A>()) {
 		input->joy_button(deviceIndex, JoyButton::A, true);
 	} else {
@@ -285,16 +311,46 @@ void OS_NX::initialize() {
 	DirAccess::make_default<DirAccessNX>(DirAccess::ACCESS_RESOURCES);
 	DirAccess::make_default<DirAccessNX>(DirAccess::ACCESS_USERDATA);
 
+	NpadIdCountMax = sizeof(s_NpadIds) / sizeof(nn::hid::NpadIdType);
 	nn::hid::InitializeTouchScreen();
 	nn::hid::InitializeNpad();
 	nn::hid::SetSupportedNpadStyleSet(nn::hid::NpadStyleFullKey::Mask | nn::hid::NpadStyleJoyDual::Mask | nn::hid::NpadStyleHandheld::Mask);
-	nn::hid::SetSupportedNpadIdType(s_NpadIds, 4);
+	nn::hid::SetSupportedNpadIdType(s_NpadIds, NpadIdCountMax);
+
+	for (int i = 0; i < NpadIdCountMax; ++i)
+    {
+        nn::hid::NpadStyleSet mask = (s_NpadIds[i] == nn::hid::NpadId::Handheld) ? nn::hid::NpadStyleHandheld::Mask : nn::hid::NpadStyleFullKey::Mask;
+        vibration_device_count += nn::hid::GetVibrationDeviceHandles(&vibration_handles[2*i], 2, s_NpadIds[i], mask);
+    }
+
+    for (int i = 0; i < vibration_device_count; ++i)
+    {
+        nn::hid::InitializeVibrationDevice(vibration_handles[i]);
+    }
 
     main_loop = nullptr;
 }
 
 void OS_NX::initialize_joypads() {
 
+}
+
+void OS_NX::joypad_vibration_start(int p_device, float p_weak_magnitude, float p_strong_magnitude, float p_duration, uint64_t p_timestamp) {
+
+    nn::hid::VibrationValue vib = nn::hid::VibrationValue::Make(p_weak_magnitude, 60.0f, p_strong_magnitude, 120.0f);
+    nn::hid::SendVibrationValue(vibration_handles[p_device*2], vib);
+    nn::hid::SendVibrationValue(vibration_handles[(p_device*2) + 1], vib);
+    npadStates[p_device].vibrating = true;
+    npadStates[p_device].ff_timestamp = p_timestamp;
+	npadStates[p_device].ff_end_timestamp = p_duration == 0 ? 0 : p_timestamp + (uint64_t)(p_duration * 1000000.0);
+}
+
+void OS_NX::joypad_vibration_stop(int p_device, uint64_t p_timestamp) {
+
+    nn::hid::VibrationValue vib = nn::hid::VibrationValue::Make();
+    nn::hid::SendVibrationValue(vibration_handles[p_device*2], vib);
+    nn::hid::SendVibrationValue(vibration_handles[(p_device*2) + 1], vib);
+    npadStates[p_device].vibrating = false;
 }
 
 void OS_NX::set_main_loop(MainLoop *p_main_loop) {

@@ -13,6 +13,7 @@
 #include <nn/hid.h>
 #include <nn/hid/hid_Npad.h>
 #include <nn/hid/hid_NpadJoy.h>
+#include <nn/hid/hid_Vibration.h>
 
 class OS_NX : public OS {
 	enum {
@@ -30,9 +31,16 @@ class OS_NX : public OS {
 		int deviceId = -1;
 		NpadState current;
 		NpadState previous;
+		float ff_timestamp = 0.0f;
+		float ff_end_timestamp = 0.0f;
+		bool vibrating = false;
 	} npadStates[5];
 
-	bool force_quit = false;
+	int vibration_device_count = 0;
+	nn::hid::VibrationDeviceHandle vibration_handles[10] = {};
+	int NpadIdCountMax;
+
+    bool force_quit = false;
 
     MainLoop *main_loop = nullptr;
 
@@ -55,7 +63,11 @@ class OS_NX : public OS {
 	void getNpadEvents();
 	void process_input();
 	void process_joy_buttons(int deviceIndex, const nn::hid::NpadButtonSet& currentState);
+	void process_joy_vibration(int deviceIndex);
 	void process_joy_axis(int deviceIndex, const nn::hid::AnalogStickState &leftStick, const nn::hid::AnalogStickState &rightStick);
+	
+	void joypad_vibration_start(int p_device, float p_weak_magnitude, float p_strong_magnitude, float p_duration, uint64_t p_timestamp);
+	void joypad_vibration_stop(int p_device, uint64_t p_timestamp);
 
 protected:
     void initialize() override;
