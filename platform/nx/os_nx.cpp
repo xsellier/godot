@@ -64,21 +64,44 @@ void OS_NX::unmountRom() {
 	memdelete_arr(romCacheBuffer);
 }
 
-void OS_NX::getTouchscreenEvents() {
-    nn::hid::TouchScreenState<nn::hid::TouchStateCountMax> state = {};
+void OS_NX::getTouchscreenEvents()
+{
     nn::hid::GetTouchScreenState(&state);
-  
-    for (int i = 0; i < state.count; ++i)
-    {
-        // Processing for each touch.
-		auto touchState = state.touches[i];
-		Ref<InputEventScreenTouch> ev;
-		ev.instantiate();
-		ev->set_index(touchState.fingerId);
-		ev->set_pressed(true);
-		ev->set_position(Vector2(touchState.x, touchState.y));
-		queue_event(ev);
-    }
+	if (state.count != last_touch_count) {
+		if (state.count > last_touch_count) {
+			for (int i = last_touch_count; i < state.count; i++) {
+				Vector2 pos(state.touches[i].x, state.touches[i].y);
+				Ref<InputEventScreenTouch> st;
+				st.instantiate();
+				st->set_index(i);
+				st->set_position(pos);
+				st->set_pressed(true);
+				queue_event(st);
+			}
+		} else {
+			for (int i = state.count; i < last_touch_count; i++) {
+				Ref<InputEventScreenTouch> st;
+				st.instantiate();
+				st->set_index(i);
+				st->set_position(last_touch_pos[i]);
+				st->set_pressed(false);
+				queue_event(st);
+			}
+		}
+	} else {
+		for (int i = 0; i < state.count; i++) {
+			Vector2 pos(state.touches[i].x, state.touches[i].y);
+			Ref<InputEventScreenDrag> sd;
+			sd.instantiate();
+			sd->set_index(i);
+			sd->set_position(pos);
+			sd->set_relative(pos - last_touch_pos[i]);
+			last_touch_pos[i] = pos;
+			queue_event(sd);
+		}
+	}
+
+	last_touch_count = state.count;
 }
 
 namespace {

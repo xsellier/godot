@@ -49,6 +49,9 @@ class OS_NX : public OS {
 	Ref<InputEvent> event_queue[MAX_EVENTS];
 	int event_count = 0;
 	void queue_event(const Ref<InputEvent> &p_event);
+	int last_touch_count = 0;
+	nn::hid::TouchScreenState<nn::hid::TouchStateCountMax> state = {};
+	Vector2 last_touch_pos[nn::hid::TouchStateCountMax];
 
     String stdin_buf;
 	int roModuleCount = 0;
