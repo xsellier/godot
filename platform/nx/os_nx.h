@@ -28,6 +28,7 @@ class OS_NX : public OS {
 
 	struct {
 		bool connected = false;
+		bool previous_connected = false;
 		int deviceId = -1;
 		NpadState current;
 		NpadState previous;
@@ -38,7 +39,11 @@ class OS_NX : public OS {
 
 	int vibration_device_count = 0;
 	nn::hid::VibrationDeviceHandle vibration_handles[10] = {};
-	int NpadIdCountMax;
+	int npadIdCountMax;
+	nn::hid::ControllerSupportArg controllerArg;
+	bool npadInit = false;
+	bool handHeldMode = false;
+	bool ignore_changed_connect_status = false;
 
     bool force_quit = false;
 
@@ -64,6 +69,7 @@ class OS_NX : public OS {
 
 	void getTouchscreenEvents();
 	void getNpadEvents();
+	void getNpadSupport();
 	void process_input();
 	void process_joy_buttons(int deviceIndex, const nn::hid::NpadButtonSet& currentState);
 	void process_joy_vibration(int deviceIndex);

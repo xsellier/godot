@@ -121,10 +121,12 @@ namespace {
 
 }
 
-void OS_NX::getNpadEvents() {
-    auto input = Input::get_singleton();
-	for (int i = 0; i < 5; ++i) {
+void OS_NX::getNpadEvents()
+{
+	auto input = Input::get_singleton();
+	for (int i = 0; i < npadIdCountMax; ++i) {
 		nn::hid::NpadStyleSet npadStyleSet = nn::hid::GetNpadStyleSet(s_NpadIds[i]);
+		npadStates[i].previous_connected = npadStates[i].connected;
 		if (npadStyleSet.IsAllOff()) {
 			if (npadStates[i].connected == true) {
 				npadStates[i].connected = false;
@@ -136,9 +138,10 @@ void OS_NX::getNpadEvents() {
 				npadStates[i].connected = true;
 				npadStates[i].deviceId = input->get_unused_joy_id();
 				input->joy_connection_changed(npadStates[i].deviceId, true, getJoyName(i, npadStyleSet));
+				if (!npadInit)
+					npadStates[i].previous_connected = npadStates[i].connected;
 			}
 		}
-
 		
 		if (npadStyleSet.Test<nn::hid::NpadStyleFullKey>() == true) {
 			npadStates[i].previous.fullKey = npadStates[i].current.fullKey; 
@@ -162,6 +165,52 @@ void OS_NX::getNpadEvents() {
 			process_joy_vibration(i);
 
 		}
+		npadInit = true;
+	}
+
+	getNpadSupport();
+
+}
+
+void OS_NX::getNpadSupport()
+{
+
+	for (int i = 0; i < npadIdCountMax; ++i) {
+		if (npadStates[i].previous_connected != npadStates[i].connected && s_NpadIds[i] != nn::hid::NpadId::Handheld){
+			if(!ignore_changed_connect_status)
+				nn::hid::ShowControllerSupport(controllerArg);
+			nn::hid::NpadStyleSet npadStyleSet = nn::hid::GetNpadStyleSet(s_NpadIds[i]);
+			if (npadStyleSet.IsAllOff()) {
+				if (npadStates[i].connected == true) {
+					ignore_changed_connect_status = true;
+				} else{
+					ignore_changed_connect_status = false;
+				}
+			} else {
+				if (npadStates[i].connected == false) {
+					ignore_changed_connect_status = true;
+				} else{
+					ignore_changed_connect_status = false;
+				}
+			}
+			npadStates[i].previous_connected = npadStates[i].connected;
+			break;
+		}
+	}
+
+	if(nn::oe::GetOperationMode() == nn::oe::OperationMode_Handheld){
+		if(!handHeldMode){
+			ignore_changed_connect_status = false;
+		}
+		handHeldMode = true;
+	}
+	else{
+		if(handHeldMode){
+			nn::hid::ShowControllerSupport(controllerArg);
+			ignore_changed_connect_status = true;
+		}
+
+		handHeldMode = false;
 	}
 }
 
@@ -334,13 +383,18 @@ void OS_NX::initialize() {
 	DirAccess::make_default<DirAccessNX>(DirAccess::ACCESS_RESOURCES);
 	DirAccess::make_default<DirAccessNX>(DirAccess::ACCESS_USERDATA);
 
-	NpadIdCountMax = sizeof(s_NpadIds) / sizeof(nn::hid::NpadIdType);
+	npadIdCountMax = sizeof(s_NpadIds) / sizeof(nn::hid::NpadIdType);
 	nn::hid::InitializeTouchScreen();
 	nn::hid::InitializeNpad();
+	nn::hid::SetNpadJoyHoldType(nn::hid::NpadJoyHoldType_Horizontal);
 	nn::hid::SetSupportedNpadStyleSet(nn::hid::NpadStyleFullKey::Mask | nn::hid::NpadStyleJoyDual::Mask | nn::hid::NpadStyleHandheld::Mask);
-	nn::hid::SetSupportedNpadIdType(s_NpadIds, NpadIdCountMax);
+	nn::hid::SetSupportedNpadIdType(s_NpadIds, npadIdCountMax);
 
-	for (int i = 0; i < NpadIdCountMax; ++i)
+	controllerArg.SetDefault();
+    controllerArg.playerCountMax = 1;
+    controllerArg.enableSingleMode = true;
+
+	for (int i = 0; i < npadIdCountMax; ++i)
     {
         nn::hid::NpadStyleSet mask = (s_NpadIds[i] == nn::hid::NpadId::Handheld) ? nn::hid::NpadStyleHandheld::Mask : nn::hid::NpadStyleFullKey::Mask;
         vibration_device_count += nn::hid::GetVibrationDeviceHandles(&vibration_handles[2*i], 2, s_NpadIds[i], mask);
@@ -350,6 +404,8 @@ void OS_NX::initialize() {
     {
         nn::hid::InitializeVibrationDevice(vibration_handles[i]);
     }
+
+	handHeldMode = nn::oe::GetOperationMode() == nn::oe::OperationMode_Handheld ? true : false;
 
     main_loop = nullptr;
 }
