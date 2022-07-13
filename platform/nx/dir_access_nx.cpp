@@ -10,10 +10,11 @@ Error DirAccessNX::list_dir_begin()
 
     int64_t entryCount;
     nn::fs::GetDirectoryEntryCount(&entryCount, directoryHandle);
+    auto entries = new nn::fs::DirectoryEntry[static_cast<int32_t>(entryCount)];
     dir_entries.resize(entryCount);
 
     int64_t entriesStored;
-    nn::fs::ReadDirectory(&entriesStored, (nn::fs::DirectoryEntry *)dir_entries.ptrw(), directoryHandle, entryCount);
+    nn::fs::ReadDirectory(&entriesStored, entries, directoryHandle, entryCount);
 
     if (entryCount != entriesStored)
         return ERR_INVALID_DATA;
