@@ -16,6 +16,9 @@ Error DirAccessNX::list_dir_begin()
     int64_t entriesStored;
     nn::fs::ReadDirectory(&entriesStored, entries, directoryHandle, entryCount);
 
+    for(int i = 0; i<entryCount; i++)
+        dir_entries.write[i] = &entries[i];
+
     if (entryCount != entriesStored)
         return ERR_INVALID_DATA;
 
@@ -24,6 +27,9 @@ Error DirAccessNX::list_dir_begin()
 	
 String DirAccessNX::get_next()
 {
+    if(index == dir_entries.size())
+        return "";
+    
     nn::fs::DirectoryEntry *entry = dir_entries[index];
     String entryName = entry->name;
     _cishidden = (entryName != "." && entryName != ".." && entryName.begins_with("."));
@@ -125,6 +131,8 @@ Error DirAccessNX::make_dir(String p_dir)
         return ERR_CANT_CREATE;
     }
 
+    NN_LOG("Committing user save data");
+    nn::fs::Commit("user");
     return OK;
 }
 
@@ -185,6 +193,8 @@ Error DirAccessNX::rename(String p_path, String p_new_path)
         return ERR_FILE_NOT_FOUND;
     }
 
+    NN_LOG("Committing user save data");
+    nn::fs::Commit("user");
     return OK;
 }
 
@@ -213,6 +223,9 @@ Error DirAccessNX::remove(String p_path)
     } else {
         return ERR_FILE_NOT_FOUND;
     }
+
+    NN_LOG("Committing user save data");
+    nn::fs::Commit("user");
     return OK;
 }
 
