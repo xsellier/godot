@@ -2,6 +2,7 @@
 #include "core/config/project_settings.h"
 
 #include <nn/init/init_Malloc.h>
+#include <nn/os.h>
 
 
 AudioDriverNX::AudioDriverNX()
@@ -16,6 +17,8 @@ AudioDriverNX::~AudioDriverNX()
 
 void AudioDriverNX::thread_func(void *userData)
 {
+    nn::os::ChangeThreadPriority(nn::os::GetCurrentThread(), 5);
+
     AudioDriverNX *ad = static_cast<AudioDriverNX *>(userData);
     nn::audio::StartAudioOut(&ad->audioOut);
     while (!ad->exit_thread) {
