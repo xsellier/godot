@@ -1,6 +1,6 @@
 
 
-def can_build(platform):
+def can_build(platform, env):
     return True
 
 

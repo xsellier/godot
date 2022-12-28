@@ -31,6 +31,7 @@
 #ifndef FILE_ACCESS_H
 #define FILE_ACCESS_H
 
+#include "dictionary.h"
 #include "math_defs.h"
 #include "os/memory.h"
 #include "typedefs.h"
@@ -130,6 +131,7 @@ public:
 
 	virtual void store_string(const String &p_string);
 	virtual void store_line(const String &p_string);
+	virtual void store_dictionary(const Dictionary &p_dictionary);
 
 	virtual void store_pascal_string(const String &p_string);
 	virtual String get_pascal_string();

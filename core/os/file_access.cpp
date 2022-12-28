@@ -127,7 +127,7 @@ FileAccess::CreateFunc FileAccess::get_create_func(AccessType p_access) {
 };
 
 String FileAccess::fix_path(const String &p_path) const {
-	//helper used by file accesses that use a single filesystem
+	// helper used by file accesses that use a single filesystem
 
 	String r_path = p_path.replace("\\", "/");
 
@@ -419,6 +419,12 @@ void FileAccess::store_string(const String &p_string) {
 		return;
 
 	CharString cs = p_string.utf8();
+	store_buffer((uint8_t *)&cs[0], cs.length());
+}
+
+void FileAccess::store_dictionary(const Dictionary &p_dictionary) {
+
+	CharString cs = p_dictionary.to_json().utf8();
 	store_buffer((uint8_t *)&cs[0], cs.length());
 }
 

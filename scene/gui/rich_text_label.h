@@ -85,6 +85,7 @@ private:
 		int height_accum_cache;
 		int char_count;
 		int minimum_width;
+		int maximum_width;
 
 		Line() {
 			from = NULL;
@@ -197,6 +198,7 @@ private:
 			bool expand;
 			int expand_ratio;
 			int min_width;
+			int max_width;
 			int width;
 		};
 

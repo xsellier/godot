@@ -1032,8 +1032,8 @@ _OS *_OS::singleton = NULL;
 
 void _OS::_bind_methods() {
 
-	//ObjectTypeDB::bind_method(_MD("get_mouse_pos"),&_OS::get_mouse_pos);
-	//ObjectTypeDB::bind_method(_MD("is_mouse_grab_enabled"),&_OS::is_mouse_grab_enabled);
+	// ObjectTypeDB::bind_method(_MD("get_mouse_pos"),&_OS::get_mouse_pos);
+	// ObjectTypeDB::bind_method(_MD("is_mouse_grab_enabled"),&_OS::is_mouse_grab_enabled);
 
 	ObjectTypeDB::bind_method(_MD("set_clipboard", "clipboard"), &_OS::set_clipboard);
 	ObjectTypeDB::bind_method(_MD("get_clipboard"), &_OS::get_clipboard);
@@ -1142,7 +1142,7 @@ void _OS::_bind_methods() {
 
 	ObjectTypeDB::bind_method(_MD("is_debug_build"), &_OS::is_debug_build);
 
-	//ObjectTypeDB::bind_method(_MD("get_mouse_button_state"),&_OS::get_mouse_button_state);
+	// ObjectTypeDB::bind_method(_MD("get_mouse_button_state"),&_OS::get_mouse_button_state);
 
 	ObjectTypeDB::bind_method(_MD("dump_memory_to_file", "file"), &_OS::dump_memory_to_file);
 	ObjectTypeDB::bind_method(_MD("dump_resources_to_file", "file"), &_OS::dump_resources_to_file);
@@ -1697,6 +1697,13 @@ void _File::store_real(real_t p_real) {
 	f->store_real(p_real);
 }
 
+void _File::store_dictionary(const Dictionary &p_dictionary) {
+
+	ERR_FAIL_COND(!f);
+
+	f->store_dictionary(p_dictionary);
+}
+
 void _File::store_string(const String &p_string) {
 
 	ERR_FAIL_COND(!f);
@@ -1819,6 +1826,7 @@ void _File::_bind_methods() {
 	ObjectTypeDB::bind_method(_MD("store_64", "value"), &_File::store_64);
 	ObjectTypeDB::bind_method(_MD("store_float", "value"), &_File::store_float);
 	ObjectTypeDB::bind_method(_MD("store_double", "value"), &_File::store_double);
+	ObjectTypeDB::bind_method(_MD("store_dictionary", "dictionary"), &_File::store_dictionary);
 	ObjectTypeDB::bind_method(_MD("store_real", "value"), &_File::store_real);
 	ObjectTypeDB::bind_method(_MD("store_buffer", "buffer"), &_File::store_buffer);
 	ObjectTypeDB::bind_method(_MD("store_line", "line"), &_File::store_line);
@@ -1963,7 +1971,7 @@ bool _Directory::dir_exists(String p_dir) {
 int _Directory::get_space_left() {
 
 	ERR_FAIL_COND_V(!d, 0);
-	return d->get_space_left() / 1024 * 1024; //return value in megabytes, given binding is int
+	return d->get_space_left() / 1024 * 1024; // return value in megabytes, given binding is int
 }
 
 Error _Directory::copy(String p_from, String p_to) {
@@ -2048,7 +2056,7 @@ String _Marshalls::variant_to_base64(const Variant &p_var) {
 	DVector<uint8_t>::Write w64 = b64buff.write();
 
 	int strlen = base64_encode((char *)(&w64[0]), (char *)(&w[0]), len);
-	//OS::get_singleton()->print("len is %i, vector size is %i\n", b64len, strlen);
+	// OS::get_singleton()->print("len is %i, vector size is %i\n", b64len, strlen);
 	w64[strlen] = 0;
 	String ret = (char *)&w64[0];
 

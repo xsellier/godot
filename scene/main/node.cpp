@@ -105,7 +105,7 @@ void Node::_notification(int p_notification) {
 
 				get_script_instance()->call_multilevel_reversed(SceneStringNames::get_singleton()->_ready, NULL, 0);
 			}
-			//emit_signal(SceneStringNames::get_singleton()->enter_tree);
+			// emit_signal(SceneStringNames::get_singleton()->enter_tree);
 
 		} break;
 		case NOTIFICATION_POSTINITIALIZE: {
@@ -181,7 +181,7 @@ void Node::_propagate_enter_tree() {
 	emit_signal(SceneStringNames::get_singleton()->enter_tree);
 
 	data.blocked++;
-	//block while adding children
+	// block while adding children
 
 	for (int i = 0; i < data.children.size(); i++) {
 
@@ -194,7 +194,7 @@ void Node::_propagate_enter_tree() {
 #ifdef DEBUG_ENABLED
 
 	if (ScriptDebugger::get_singleton() && data.filename != String()) {
-		//used for live edit
+		// used for live edit
 		data.tree->live_scene_edit_cache[data.filename].insert(this);
 	}
 #endif
@@ -203,12 +203,12 @@ void Node::_propagate_enter_tree() {
 
 void Node::_propagate_exit_tree() {
 
-	//block while removing children
+	// block while removing children
 
 #ifdef DEBUG_ENABLED
 
 	if (ScriptDebugger::get_singleton() && data.filename != String()) {
-		//used for live edit
+		// used for live edit
 		Map<String, Set<Node *> >::Element *E = data.tree->live_scene_edit_cache.find(data.filename);
 		if (E) {
 			E->get().erase(this);
@@ -292,7 +292,7 @@ void Node::move_child(Node *p_child, int p_pos) {
 	}
 
 	data.blocked++;
-	//new pos first
+	// new pos first
 	for (int i = motion_from; i <= motion_to; i++) {
 
 		data.children[i]->data.pos = i;
@@ -371,9 +371,9 @@ void Node::set_pause_mode(PauseMode p_mode) {
 	bool prev_inherits = data.pause_mode == PAUSE_MODE_INHERIT;
 	data.pause_mode = p_mode;
 	if (!is_inside_tree())
-		return; //pointless
+		return; // pointless
 	if ((data.pause_mode == PAUSE_MODE_INHERIT) == prev_inherits)
-		return; ///nothing changed
+		return; /// nothing changed
 
 	Node *owner = NULL;
 
@@ -407,7 +407,7 @@ void Node::_propagate_pause_owner(Node *p_owner) {
 bool Node::can_process() const {
 
 	if (!is_inside_tree()) {
-		ERR_PRINTS("can_process() failed, node '" + get_name() + "'/'" + get_type() + "' is not in the tree (" + get_filename() + ").");
+		// ERR_PRINTS("can_process() failed, node '" + get_name() + "'/'" + get_type() + "' is not in the tree (" + get_filename() + ").");
 
 		return false;
 	}
@@ -421,7 +421,7 @@ bool Node::can_process() const {
 		if (data.pause_mode == PAUSE_MODE_INHERIT) {
 
 			if (!data.pause_owner)
-				return false; //clearly no pause owner by default
+				return false; // clearly no pause owner by default
 
 			if (data.pause_owner->data.pause_mode == PAUSE_MODE_PROCESS)
 				return true;
@@ -574,8 +574,8 @@ void Node::set_human_readable_collision_renaming(bool p_enabled) {
 
 String Node::validate_child_name(const String &p_name) const {
 
-	//this approach to autoset node names is human readable but very slow
-	//it's turned on while running in the editor
+	// this approach to autoset node names is human readable but very slow
+	// it's turned on while running in the editor
 
 	String basename = p_name;
 
@@ -594,7 +594,7 @@ String Node::validate_child_name(const String &p_name) const {
 
 		for (int i = 0; i < data.children.size(); i++) {
 
-			//if (data.children[i]==p_child)
+			// if (data.children[i]==p_child)
 			//	continue;
 			if (data.children[i]->get_name() == attempted) {
 				found = true;
@@ -621,8 +621,8 @@ void Node::_validate_child_name(Node *p_child, bool p_force_human_readable) {
 
 	if (node_hrcr || p_force_human_readable) {
 
-		//this approach to autoset node names is human readable but very slow
-		//it's turned on while running in the editor
+		// this approach to autoset node names is human readable but very slow
+		// it's turned on while running in the editor
 
 		String basename = p_child->data.name;
 
@@ -660,16 +660,16 @@ void Node::_validate_child_name(Node *p_child, bool p_force_human_readable) {
 		}
 	} else {
 
-		//this approach to autoset node names is fast but not as readable
-		//it's the default and reserves the '@' character for unique names.
+		// this approach to autoset node names is fast but not as readable
+		// it's the default and reserves the '@' character for unique names.
 
 		bool unique = true;
 
 		if (p_child->data.name == StringName() || p_child->data.name.operator String()[0] == '@') {
-			//new unique name must be assigned
+			// new unique name must be assigned
 			unique = false;
 		} else {
-			//check if exists
+			// check if exists
 			Node **childs = data.children.ptr();
 			int cc = data.children.size();
 
@@ -693,7 +693,7 @@ void Node::_validate_child_name(Node *p_child, bool p_force_human_readable) {
 }
 
 void Node::_add_child_nocheck(Node *p_child, const StringName &p_name) {
-	//add a child node quickly, without name validation
+	// add a child node quickly, without name validation
 
 	p_child->data.name = p_name;
 	p_child->data.pos = data.children.size();
@@ -706,7 +706,7 @@ void Node::_add_child_nocheck(Node *p_child, const StringName &p_name) {
 	}
 
 	/* Notify */
-	//recognize childs created in this node constructor
+	// recognize childs created in this node constructor
 	p_child->data.parent_owned = data.in_constructor;
 	add_child_notify(p_child);
 }
@@ -804,9 +804,9 @@ void Node::remove_child(Node *p_child) {
 	}
 
 	ERR_FAIL_COND(idx == -1);
-	//ERR_FAIL_COND( p_child->data.blocked > 0 );
+	// ERR_FAIL_COND( p_child->data.blocked > 0 );
 
-	//if (data.scene) { does not matter
+	// if (data.scene) { does not matter
 
 	p_child->_set_tree(NULL);
 	//}
@@ -863,12 +863,12 @@ Node *Node::_get_node(const NodePath &p_path) const {
 	Node *root = NULL;
 
 	if (!p_path.is_absolute()) {
-		current = const_cast<Node *>(this); //start from this
+		current = const_cast<Node *>(this); // start from this
 	} else {
 
 		root = const_cast<Node *>(this);
 		while (root->data.parent)
-			root = root->data.parent; //start from root
+			root = root->data.parent; // start from root
 	}
 
 	for (int i = 0; i < p_path.get_name_count(); i++) {
@@ -974,13 +974,13 @@ bool Node::is_greater_than(const Node *p_node) const {
 	ERR_FAIL_NULL_V(p_node, false);
 
 	if (!data.inside_tree) {
-		ERR_PRINTS("is_greater_than() failed, node '" + get_name() + "'/'" + get_type() + "' is not in the tree (" + get_filename() + ").");
+		// ERR_PRINTS("is_greater_than() failed, node '" + get_name() + "'/'" + get_type() + "' is not in the tree (" + get_filename() + ").");
 
 		return false;
 	}
 
 	if (!p_node->data.inside_tree) {
-		ERR_PRINTS("is_greater_than() failed, node '" + p_node->get_name() + "'/'" + p_node->get_type() + "' is not in the tree (" + p_node->get_filename() + ").");
+		// ERR_PRINTS("is_greater_than() failed, node '" + p_node->get_name() + "'/'" + p_node->get_type() + "' is not in the tree (" + p_node->get_filename() + ").");
 
 		return false;
 	}
@@ -1156,7 +1156,7 @@ NodePath Node::get_path_to(const Node *p_node) const {
 		common_parent = common_parent->data.parent;
 	}
 
-	ERR_FAIL_COND_V(!common_parent, NodePath()); //nodes not in the same tree
+	ERR_FAIL_COND_V(!common_parent, NodePath()); // nodes not in the same tree
 
 	visited.clear();
 
@@ -1406,7 +1406,7 @@ void Node::set_editable_instance(Node *p_node, bool p_editable) {
 bool Node::is_editable_instance(Node *p_node) const {
 
 	if (!p_node)
-		return false; //easier, null is never editable :)
+		return false; // easier, null is never editable :)
 	ERR_FAIL_COND_V(!is_a_parent_of(p_node), false);
 	NodePath p = get_path_to(p_node);
 	return data.editable_instances.has(p);
@@ -1489,7 +1489,7 @@ Node *Node::_duplicate(bool p_use_instancing, int p_flags) const {
 		ERR_FAIL_COND_V(!node, NULL);
 	}
 
-	if (get_filename() != "") { //an instance
+	if (get_filename() != "") { // an instance
 		node->set_filename(get_filename());
 	}
 
@@ -1527,7 +1527,7 @@ Node *Node::_duplicate(bool p_use_instancing, int p_flags) const {
 		if (get_child(i)->data.parent_owned)
 			continue;
 		if (instanced && get_child(i)->data.owner == this)
-			continue; //part of instance
+			continue; // part of instance
 
 		Node *dup = get_child(i)->duplicate(p_use_instancing, p_flags);
 		if (!dup) {
@@ -1625,7 +1625,7 @@ void Node::_duplicate_signals(const Node *p_original, Node *p_copy) const {
 	for (List<Connection>::Element *E = conns.front(); E; E = E->next()) {
 
 		if (E->get().flags & CONNECT_PERSIST) {
-			//user connected
+			// user connected
 			NodePath p = p_original->get_path_to(this);
 			Node *copy = p_copy->get_node(p);
 
@@ -1902,7 +1902,7 @@ void Node::_set_tree(SceneTree *p_tree) {
 
 		_propagate_enter_tree();
 		if (!data.parent || data.parent->data.ready_notified) { // No parent (root) or parent ready
-			_propagate_ready(); //reverse_notification(NOTIFICATION_READY);
+			_propagate_ready(); // reverse_notification(NOTIFICATION_READY);
 		}
 
 		tree_changed_b = data.tree;
@@ -2048,7 +2048,7 @@ void Node::_bind_methods() {
 	ObjectTypeDB::bind_method(_MD("get_name"), &Node::get_name);
 	ObjectTypeDB::bind_method(_MD("add_child", "node:Node", "legible_unique_name"), &Node::add_child, DEFVAL(false));
 	ObjectTypeDB::bind_method(_MD("remove_child", "node:Node"), &Node::remove_child);
-	//ObjectTypeDB::bind_method(_MD("remove_and_delete_child","node:Node"),&Node::remove_and_delete_child);
+	// ObjectTypeDB::bind_method(_MD("remove_and_delete_child","node:Node"),&Node::remove_and_delete_child);
 	ObjectTypeDB::bind_method(_MD("get_child_count"), &Node::get_child_count);
 	ObjectTypeDB::bind_method(_MD("get_children"), &Node::_get_children);
 	ObjectTypeDB::bind_method(_MD("get_child:Node", "idx"), &Node::get_child);
@@ -2120,7 +2120,7 @@ void Node::_bind_methods() {
 	BIND_CONSTANT(NOTIFICATION_ENTER_TREE);
 	BIND_CONSTANT(NOTIFICATION_EXIT_TREE);
 	BIND_CONSTANT(NOTIFICATION_MOVED_IN_PARENT);
-	//BIND_CONSTANT( NOTIFICATION_PARENT_DECONFIGURED );
+	// BIND_CONSTANT( NOTIFICATION_PARENT_DECONFIGURED );
 	BIND_CONSTANT(NOTIFICATION_READY);
 	BIND_CONSTANT(NOTIFICATION_FIXED_PROCESS);
 	BIND_CONSTANT(NOTIFICATION_PROCESS);
@@ -2146,8 +2146,8 @@ void Node::_bind_methods() {
 
 	//	ADD_PROPERTYNZ( PropertyInfo( Variant::BOOL, "process/process" ),_SCS("set_process"),_SCS("is_processing") );
 	//	ADD_PROPERTYNZ( PropertyInfo( Variant::BOOL, "process/fixed_process" ), _SCS("set_fixed_process"),_SCS("is_fixed_processing") );
-	//ADD_PROPERTYNZ( PropertyInfo( Variant::BOOL, "process/input" ), _SCS("set_process_input"),_SCS("is_processing_input" ) );
-	//ADD_PROPERTYNZ( PropertyInfo( Variant::BOOL, "process/unhandled_input" ), _SCS("set_process_unhandled_input"),_SCS("is_processing_unhandled_input" ) );
+	// ADD_PROPERTYNZ( PropertyInfo( Variant::BOOL, "process/input" ), _SCS("set_process_input"),_SCS("is_processing_input" ) );
+	// ADD_PROPERTYNZ( PropertyInfo( Variant::BOOL, "process/unhandled_input" ), _SCS("set_process_unhandled_input"),_SCS("is_processing_unhandled_input" ) );
 	ADD_PROPERTYNZ(PropertyInfo(Variant::INT, "process/pause_mode", PROPERTY_HINT_ENUM, "Inherit,Stop,Process"), _SCS("set_pause_mode"), _SCS("get_pause_mode"));
 	ADD_PROPERTYNZ(PropertyInfo(Variant::BOOL, "editor/display_folded", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR), _SCS("set_display_folded"), _SCS("is_displayed_folded"));
 
@@ -2160,8 +2160,8 @@ void Node::_bind_methods() {
 	BIND_VMETHOD(MethodInfo("_unhandled_input", PropertyInfo(Variant::INPUT_EVENT, "event")));
 	BIND_VMETHOD(MethodInfo("_unhandled_key_input", PropertyInfo(Variant::INPUT_EVENT, "key_event")));
 
-	//ObjectTypeDB::bind_method(_MD("get_child",&Node::get_child,PH("index")));
-	//ObjectTypeDB::bind_method(_MD("get_node",&Node::get_node,PH("path")));
+	// ObjectTypeDB::bind_method(_MD("get_child",&Node::get_child,PH("index")));
+	// ObjectTypeDB::bind_method(_MD("get_node",&Node::get_node,PH("path")));
 }
 
 Node::Node() {

@@ -43,11 +43,11 @@ def configure(env):
 
     if (env["target"] == "release"):
 
-        env.Append(CCFLAGS=['-O2', '-fomit-frame-pointer', '-ftree-vectorize', '-msse2'])
+        env.Append(CCFLAGS=['-O3', '-fomit-frame-pointer', '-ftree-vectorize', '-msse2'])
 
     elif (env["target"] == "release_debug"):
 
-        env.Append(CCFLAGS=['-O2', '-DDEBUG_ENABLED'])
+        env.Append(CCFLAGS=['-O3', '-DDEBUG_ENABLED'])
 
     elif (env["target"] == "debug"):
 

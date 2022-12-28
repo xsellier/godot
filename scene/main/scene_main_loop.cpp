@@ -327,7 +327,7 @@ void SceneTree::input_text(const String &p_text) {
 
 	root_lock++;
 
-	call_group(GROUP_CALL_REALTIME, "_viewports", "_vp_input_text", p_text); //special one for GUI, as controls use their own process check
+	call_group(GROUP_CALL_REALTIME, "_viewports", "_vp_input_text", p_text); // special one for GUI, as controls use their own process check
 
 	root_lock--;
 }
@@ -339,15 +339,15 @@ bool SceneTree::is_input_handled() {
 void SceneTree::input_event(const InputEvent &p_event) {
 
 	if (is_editor_hint() && (p_event.type == InputEvent::JOYSTICK_MOTION || p_event.type == InputEvent::JOYSTICK_BUTTON))
-		return; //avoid joy input on editor
+		return; // avoid joy input on editor
 
 	root_lock++;
-	//last_id=p_event.ID;
+	// last_id=p_event.ID;
 
 	input_handled = false;
 
 	InputEvent ev = p_event;
-	ev.ID = ++last_id; //this should work better
+	ev.ID = ++last_id; // this should work better
 #if 0
 	switch(ev.type) {
 
@@ -423,7 +423,7 @@ void SceneTree::input_event(const InputEvent &p_event) {
 	//transform for the rest
 #else
 
-	call_group(GROUP_CALL_REALTIME, "_viewports", "_vp_input", ev); //special one for GUI, as controls use their own process check
+	call_group(GROUP_CALL_REALTIME, "_viewports", "_vp_input", ev); // special one for GUI, as controls use their own process check
 
 #endif
 	if (ScriptDebugger::get_singleton() && ScriptDebugger::get_singleton()->is_remote() && ev.type == InputEvent::KEY && ev.key.pressed && !ev.key.echo && ev.key.scancode == KEY_F8) {
@@ -433,7 +433,7 @@ void SceneTree::input_event(const InputEvent &p_event) {
 
 	_flush_ugc();
 	root_lock--;
-	MessageQueue::get_singleton()->flush(); //small little hack
+	MessageQueue::get_singleton()->flush(); // small little hack
 
 	root_lock++;
 
@@ -448,13 +448,13 @@ void SceneTree::input_event(const InputEvent &p_event) {
 		}
 #else
 
-		call_group(GROUP_CALL_REALTIME, "_viewports", "_vp_unhandled_input", ev); //special one for GUI, as controls use their own process check
+		call_group(GROUP_CALL_REALTIME, "_viewports", "_vp_unhandled_input", ev); // special one for GUI, as controls use their own process check
 
 #endif
 		input_handled = true;
 		_flush_ugc();
 		root_lock--;
-		MessageQueue::get_singleton()->flush(); //small little hack
+		MessageQueue::get_singleton()->flush(); // small little hack
 	} else {
 		input_handled = true;
 		root_lock--;
@@ -527,7 +527,7 @@ bool SceneTree::idle(float p_time) {
 	}
 
 	_flush_ugc();
-	_flush_transform_notifications(); //transforms after world update, to avoid unnecesary enter/exit notifications
+	_flush_transform_notifications(); // transforms after world update, to avoid unnecesary enter/exit notifications
 	call_group(GROUP_CALL_REALTIME, "_viewports", "update_worlds");
 
 	root_lock--;
@@ -549,7 +549,7 @@ void SceneTree::finish() {
 
 	if (root) {
 		root->_set_tree(NULL);
-		memdelete(root); //delete root
+		memdelete(root); // delete root
 	}
 }
 
@@ -805,8 +805,8 @@ void SceneTree::_call_input_pause(const StringName &p_group, const StringName &p
 
 	_update_group_order(g);
 
-	//copy, so copy on write happens in case something is removed from process while being called
-	//performance is not lost because only if something is added/removed the vector is copied.
+	// copy, so copy on write happens in case something is removed from process while being called
+	// performance is not lost because only if something is added/removed the vector is copied.
 	Vector<Node *> nodes_copy = g.nodes;
 
 	int node_count = nodes_copy.size();
@@ -831,7 +831,7 @@ void SceneTree::_call_input_pause(const StringName &p_group, const StringName &p
 
 		Variant::CallError ce;
 		n->call_multilevel(p_method, (const Variant **)v, 1);
-		//ERR_FAIL_COND(node_count != g.nodes.size());
+		// ERR_FAIL_COND(node_count != g.nodes.size());
 	}
 
 	call_lock--;
@@ -850,8 +850,8 @@ void SceneTree::_notify_group_pause(const StringName &p_group, int p_notificatio
 
 	_update_group_order(g);
 
-	//copy, so copy on write happens in case something is removed from process while being called
-	//performance is not lost because only if something is added/removed the vector is copied.
+	// copy, so copy on write happens in case something is removed from process while being called
+	// performance is not lost because only if something is added/removed the vector is copied.
 	Vector<Node *> nodes_copy = g.nodes;
 
 	int node_count = nodes_copy.size();
@@ -869,7 +869,7 @@ void SceneTree::_notify_group_pause(const StringName &p_group, int p_notificatio
 			continue;
 
 		n->notification(p_notification);
-		//ERR_FAIL_COND(node_count != g.nodes.size());
+		// ERR_FAIL_COND(node_count != g.nodes.size());
 	}
 
 	call_lock--;
@@ -928,7 +928,7 @@ Array SceneTree::_get_nodes_in_group(const StringName &p_group) {
 	if (!E)
 		return ret;
 
-	_update_group_order(E->get()); //update order just in case
+	_update_group_order(E->get()); // update order just in case
 	int nc = E->get().nodes.size();
 	if (nc == 0)
 		return ret;
@@ -954,7 +954,7 @@ void SceneTree::get_nodes_in_group(const StringName &p_group, List<Node *> *p_li
 	if (!E)
 		return;
 
-	_update_group_order(E->get()); //update order just in case
+	_update_group_order(E->get()); // update order just in case
 	int nc = E->get().nodes.size();
 	if (nc == 0)
 		return;
@@ -1022,10 +1022,10 @@ void SceneTree::_update_root_rect() {
 
 		root->set_rect(visible_rectangle);
 
-		return; //user will take care
+		return; // user will take care
 	}
 
-	//actual screen video mode
+	// actual screen video mode
 	Size2 video_mode = Size2(OS::get_singleton()->get_video_mode().width, OS::get_singleton()->get_video_mode().height);
 	Size2 desired_res = stretch_min;
 
@@ -1036,7 +1036,7 @@ void SceneTree::_update_root_rect() {
 	float video_mode_aspect = video_mode.get_aspect();
 
 	if (stretch_aspect == STRETCH_ASPECT_IGNORE || ABS(viewport_aspect - video_mode_aspect) < CMP_EPSILON) {
-		//same aspect or ignore aspect
+		// same aspect or ignore aspect
 		viewport_size = desired_res;
 		screen_size = video_mode;
 	} else if (viewport_aspect < video_mode_aspect) {
@@ -1044,28 +1044,28 @@ void SceneTree::_update_root_rect() {
 
 		if (stretch_aspect == STRETCH_ASPECT_KEEP_HEIGHT || stretch_aspect == STRETCH_ASPECT_EXPAND) {
 
-			//will stretch horizontally
+			// will stretch horizontally
 			viewport_size.x = desired_res.y * video_mode_aspect;
 			viewport_size.y = desired_res.y;
 			screen_size = video_mode;
 
 		} else {
-			//will need black bars
+			// will need black bars
 			viewport_size = desired_res;
 			screen_size.x = video_mode.y * viewport_aspect;
 			screen_size.y = video_mode.y;
 		}
 	} else {
-		//screen ratio is smaller horizontally
+		// screen ratio is smaller horizontally
 		if (stretch_aspect == STRETCH_ASPECT_KEEP_WIDTH || stretch_aspect == STRETCH_ASPECT_EXPAND) {
 
-			//will stretch horizontally
+			// will stretch horizontally
 			viewport_size.x = desired_res.x;
 			viewport_size.y = desired_res.x / video_mode_aspect;
 			screen_size = video_mode;
 
 		} else {
-			//will need black bars
+			// will need black bars
 			viewport_size = desired_res;
 			screen_size.x = video_mode.x;
 			screen_size.y = video_mode.x / viewport_aspect;
@@ -1077,7 +1077,7 @@ void SceneTree::_update_root_rect() {
 
 	Size2 margin;
 	Size2 offset;
-	//black bars and margin
+	// black bars and margin
 	if (stretch_aspect != STRETCH_ASPECT_EXPAND && screen_size.x < video_mode.x) {
 		margin.x = Math::round((video_mode.x - screen_size.x) / 2.0);
 		VisualServer::get_singleton()->black_bars_set_margins(margin.x, 0, margin.x, 0);
@@ -1235,7 +1235,7 @@ void SceneTree::_live_edit_node_set_func(int p_id, const StringName &p_prop, con
 
 	Map<String, Set<Node *> >::Element *E = live_scene_edit_cache.find(live_edit_scene);
 	if (!E)
-		return; //scene not editable
+		return; // scene not editable
 
 	for (Set<Node *>::Element *F = E->get().front(); F; F = F->next()) {
 
@@ -1271,7 +1271,7 @@ void SceneTree::_live_edit_node_call_func(int p_id, const StringName &p_method, 
 
 	Map<String, Set<Node *> >::Element *E = live_scene_edit_cache.find(live_edit_scene);
 	if (!E)
-		return; //scene not editable
+		return; // scene not editable
 
 	for (Set<Node *>::Element *F = E->get().front(); F; F = F->next()) {
 
@@ -1341,7 +1341,7 @@ void SceneTree::_live_edit_create_node_func(const NodePath &p_parent, const Stri
 
 	Map<String, Set<Node *> >::Element *E = live_scene_edit_cache.find(live_edit_scene);
 	if (!E)
-		return; //scene not editable
+		return; // scene not editable
 
 	for (Set<Node *>::Element *F = E->get().front(); F; F = F->next()) {
 
@@ -1376,7 +1376,7 @@ void SceneTree::_live_edit_instance_node_func(const NodePath &p_parent, const St
 
 	Map<String, Set<Node *> >::Element *E = live_scene_edit_cache.find(live_edit_scene);
 	if (!E)
-		return; //scene not editable
+		return; // scene not editable
 
 	for (Set<Node *>::Element *F = E->get().front(); F; F = F->next()) {
 
@@ -1403,7 +1403,7 @@ void SceneTree::_live_edit_remove_node_func(const NodePath &p_at) {
 
 	Map<String, Set<Node *> >::Element *E = live_scene_edit_cache.find(live_edit_scene);
 	if (!E)
-		return; //scene not editable
+		return; // scene not editable
 
 	for (Set<Node *>::Element *F = E->get().front(); F;) {
 
@@ -1431,7 +1431,7 @@ void SceneTree::_live_edit_remove_and_keep_node_func(const NodePath &p_at, Objec
 
 	Map<String, Set<Node *> >::Element *E = live_scene_edit_cache.find(live_edit_scene);
 	if (!E)
-		return; //scene not editable
+		return; // scene not editable
 
 	for (Set<Node *>::Element *F = E->get().front(); F;) {
 
@@ -1462,7 +1462,7 @@ void SceneTree::_live_edit_restore_node_func(ObjectID p_id, const NodePath &p_at
 
 	Map<String, Set<Node *> >::Element *E = live_scene_edit_cache.find(live_edit_scene);
 	if (!E)
-		return; //scene not editable
+		return; // scene not editable
 
 	for (Set<Node *>::Element *F = E->get().front(); F;) {
 
@@ -1505,7 +1505,7 @@ void SceneTree::_live_edit_duplicate_node_func(const NodePath &p_at, const Strin
 
 	Map<String, Set<Node *> >::Element *E = live_scene_edit_cache.find(live_edit_scene);
 	if (!E)
-		return; //scene not editable
+		return; // scene not editable
 
 	for (Set<Node *>::Element *F = E->get().front(); F; F = F->next()) {
 
@@ -1535,7 +1535,7 @@ void SceneTree::_live_edit_reparent_node_func(const NodePath &p_at, const NodePa
 
 	Map<String, Set<Node *> >::Element *E = live_scene_edit_cache.find(live_edit_scene);
 	if (!E)
-		return; //scene not editable
+		return; // scene not editable
 
 	for (Set<Node *>::Element *F = E->get().front(); F; F = F->next()) {
 
@@ -1571,7 +1571,7 @@ void SceneTree::drop_files(const Vector<String> &p_files, int p_from_screen) {
 
 void SceneTree::_bind_methods() {
 
-	//ObjectTypeDB::bind_method(_MD("call_group","call_flags","group","method","arg1","arg2"),&SceneMainLoop::_call_group,DEFVAL(Variant()),DEFVAL(Variant()));
+	// ObjectTypeDB::bind_method(_MD("call_group","call_flags","group","method","arg1","arg2"),&SceneMainLoop::_call_group,DEFVAL(Variant()),DEFVAL(Variant()));
 	ObjectTypeDB::bind_method(_MD("notify_group", "call_flags", "group", "notification"), &SceneTree::notify_group);
 	ObjectTypeDB::bind_method(_MD("set_group", "call_flags", "group", "property", "value"), &SceneTree::set_group);
 
@@ -1677,6 +1677,7 @@ SceneTree::SceneTree() {
 	collision_debug_contacts = GLOBAL_DEF("debug/collision_max_contacts_displayed", 10000);
 
 	tree_version = 1;
+	use_font_oversampling = true;
 	fixed_process_time = 1;
 	idle_process_time = 1;
 	last_id = 1;
@@ -1691,12 +1692,12 @@ SceneTree::SceneTree() {
 	root_lock = 0;
 	node_count = 0;
 
-	//create with mainloop
+	// create with mainloop
 
 	root = memnew(Viewport);
 	root->set_name("root");
 	root->set_world(Ref<World>(memnew(World)));
-	//root->set_world_2d( Ref<World2D>( memnew( World2D )));
+	// root->set_world_2d( Ref<World2D>( memnew( World2D )));
 	root->set_as_audio_listener(true);
 	root->set_as_audio_listener_2d(true);
 	current_scene = NULL;

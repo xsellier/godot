@@ -137,6 +137,9 @@ if profile:
 
 opts = Variables(customs, ARGUMENTS)
 
+opts.Add('build_steam', "Build for the steam platform", 'no')
+opts.Add('build_gog', "Build for the gog platform", 'no')
+
 # Target build options
 opts.Add('arch', "Platform-dependent architecture (arm/arm64/x86/x64/mips/etc)", '')
 opts.Add('bits', "Target platform bits (default/32/64)", 'default')
@@ -367,7 +370,7 @@ if selected_platform in platform_list:
         sys.path.append(tmppath)
         env.current_module = x
         import config
-        if (config.can_build(selected_platform)):
+        if (config.can_build(selected_platform, env)):
             config.configure(env)
             env.module_list.append(x)
         sys.path.remove(tmppath)

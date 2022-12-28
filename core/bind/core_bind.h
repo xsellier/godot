@@ -445,6 +445,7 @@ public:
 
 	void store_string(const String &p_string);
 	void store_line(const String &p_string);
+	void store_dictionary(const Dictionary &p_dictionary);
 
 	virtual void store_pascal_string(const String &p_string);
 	virtual String get_pascal_string();
