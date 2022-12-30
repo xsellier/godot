@@ -346,13 +346,14 @@ void RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int 
 									cw = tab_size * font->get_char_size(' ').width;
 								}
 
-								if (underline) {
-									Color uc = color;
-									uc.a *= 0.5;
-									int uy = y + lh - fh + ascent + 2;
-									VS::get_singleton()->canvas_item_add_line(ci, p_ofs + Point2(align_ofs + pofs, uy), p_ofs + Point2(align_ofs + pofs + cw, uy), uc);
-								}
 								ofs += cw;
+							}
+
+							if (underline) {
+								Color uc = color;
+								uc.a *= 0.5;
+								int uy = y + lh - fh + ascent + 2;
+								VS::get_singleton()->canvas_item_add_line(ci, p_ofs + Point2(align_ofs + wofs, uy), p_ofs + Point2(align_ofs + wofs + w, uy), uc);
 							}
 						}
 					}
@@ -459,7 +460,7 @@ void RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int 
 
 					for (int i = 0; i < table->columns.size(); i++) {
 						table->columns[i].width = table->columns[i].min_width;
-						if (table->columns[i].expand)
+						if (table->columns[i].expand && total_ratio > 0)
 							table->columns[i].width += table->columns[i].expand_ratio * remaining_width / total_ratio;
 						table->total_width += table->columns[i].width + hseparation;
 					}
@@ -500,7 +501,7 @@ void RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int 
 					int lines_h = frame->lines[frame->lines.size() - 1].height_accum_cache - (frame->lines[0].height_accum_cache - frame->lines[0].height_cache);
 					int lines_ofs = p_ofs.y + offset.y + draw_ofs.y;
 
-					bool visible = lines_ofs < get_size().height && lines_ofs + lines_h >= 0;
+					bool visible = lines_ofs < get_size().height && lines_ofs + get_size().height >= 0;
 
 					for (int i = 0; i < frame->lines.size(); i++) {
 
