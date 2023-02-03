@@ -1,4 +1,4 @@
-# Godot Engine
+# Godot Engine for Nintendo Switch
 
 <p align="center">
   <a href="https://godotengine.org">
@@ -6,73 +6,55 @@
   </a>
 </p>
 
-## 2D and 3D cross-platform game engine
+## Build Instructions
 
-**[Godot Engine](https://godotengine.org) is a feature-packed, cross-platform
-game engine to create 2D and 3D games from a unified interface.** It provides a
-comprehensive set of [common tools](https://godotengine.org/features), so that
-users can focus on making games without having to reinvent the wheel. Games can
-be exported with one click to a number of platforms, including the major desktop
-platforms (Linux, macOS, Windows), mobile platforms (Android, iOS), as well as
-Web-based platforms and [consoles](https://docs.godotengine.org/en/latest/tutorials/platform/consoles.html).
+First make sure you have a valid Nintendo SDK (at least version 15) install, which should also add the environment variable ```NINTENDO_SDK_ROOT```. Make sure that is set because it is required both for building Godot as well as when exporting from the editor. This instruction guide also assumes you have a recent MSVC (tested with 2022) environment and a console already configured for its use.
 
-## Free, open source and community-driven
+Multiple builds must be done before Godot can be used for Nintendo Switch development.  Clone this repo, change into the directory and build the following configurations:
 
-Godot is completely free and open source under the very permissive [MIT license](https://godotengine.org/license).
-No strings attached, no royalties, nothing. The users' games are theirs, down
-to the last line of engine code. Godot's development is fully independent and
-community-driven, empowering users to help shape their engine to match their
-expectations. It is supported by the [Godot Foundation](https://godot.foundation/)
-not-for-profit.
+```scons platform=windows target=editor```
 
-Before being open sourced in [February 2014](https://github.com/godotengine/godot/commit/0b806ee0fc9097fa7bda7ac0109191c9c5e0a1ac),
-Godot had been developed by [Juan Linietsky](https://github.com/reduz) and
-[Ariel Manzur](https://github.com/punto-) (both still maintaining the project)
-for several years as an in-house engine, used to publish several work-for-hire
-titles.
+```scons platform=nx target=template_release arch=arm64```
 
-![Screenshot of a 3D scene in the Godot Engine editor](https://raw.githubusercontent.com/godotengine/godot-design/master/screenshots/editor_tps_demo_1920x1080.jpg)
+```scons platform=nx target=template_debug debug_symbols=yes arch=arm64```
 
-## Getting the engine
+```scons platform=nx target=template_release arch=arm32```
 
-### Binary downloads
+```scons platform=nx target=template_debug debug_symbols=yes arch=arm32```
 
-Official binaries for the Godot editor and the export templates can be found
-[on the Godot website](https://godotengine.org/download).
+You don't necessarily need to build for all 4 device configurations but these are all the potential export templates.  The Windows build provides the editor and exporter for the NX.
 
-### Compiling from source
+Once the export templates are generated you need to deploy your local export templates folder. There is a scripted provided to do this for you:
 
-[See the official docs](https://docs.godotengine.org/en/latest/engine_details/development/compiling)
-for compilation instructions for every supported platform.
+```python misc/scripts/export_nx_templates.py```
 
-## Community and contributing
+If you make any changes to this project you need to build and redeploy the export templates.
 
-Godot is not only an engine but an ever-growing community of users and engine
-developers. The main community channels are listed [on the homepage](https://godotengine.org/community).
+## Export and Deployment
 
-The best way to get in touch with the core engine developers is to join the
-[Godot Contributors Chat](https://chat.godotengine.org).
+Run the Godot editor project you built for Windows.  
 
-To get started contributing to the project, see the [contributing guide](CONTRIBUTING.md).
-This document also includes guidelines for reporting bugs.
+To export an ```.nsp``` file for your project open the export dialog from the file menu:
 
-## Documentation and demos
+```Project->Exports...```
 
-The official documentation is hosted on [Read the Docs](https://docs.godotengine.org).
-It is maintained by the Godot community in its own [GitHub repository](https://github.com/godotengine/godot-docs).
+Click the ```Add...``` button and Select ```Nintendo Switch```.  Now click on ```Nintendo Switch``` which enables you to apply your export settings. It is important that you set a Name and Icon for your project.  Icon's must be 1024x1024 in size, and be either a JPEG or 24-bit BMP file.  This is very important because ```.nsp``` generation will fail if the Icon file is not one of these very specific formats!
 
-The [class reference](https://docs.godotengine.org/en/latest/classes/)
-is also accessible from the Godot editor.
+Now click ```Export Project``` to generate and save an ```.nsp``` file. This is the final file you install to your development hardware.  It's also possible to debug your game by opening and launching this ```.nsp``` file in Visual Studio.
 
-We also maintain official demos in their own [GitHub repository](https://github.com/godotengine/godot-demo-projects)
-as well as a list of [awesome Godot community resources](https://github.com/godotengine/awesome-godot).
+It is also possible to launch your Game directly from Godot provided you have already set valid export settings. To do this click the Nintendo Switch icon in the top right corner of the editor.
 
-There are also a number of other
-[learning resources](https://docs.godotengine.org/en/latest/community/tutorials.html)
-provided by the community, such as text and video tutorials, demos, etc.
-Consult the [community channels](https://godotengine.org/community)
-for more information.
+## Debugging
 
-[![Code Triagers Badge](https://www.codetriage.com/godotengine/godot/badges/users.svg)](https://www.codetriage.com/godotengine/godot)
-[![Translate on Weblate](https://hosted.weblate.org/widgets/godot-engine/-/godot/svg-badge.svg)](https://hosted.weblate.org/engage/godot-engine/?utm_source=widget)
-[![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/godotengine/godot)](https://www.tickgit.com/browse?repo=github.com/godotengine/godot)
+### C/C++
+To debug your game and the Godot engine itself, open the ```.nsp``` file you exported in Visual Studio.  Launch this file in debug mode, and associate Visual Studio with the Godot source code directory when necessary.
+
+### Godot Remote Debugging/Profiling
+It is possible to remotely debug your game running on the development hardware via the network. Make sure that you have a local network connection configured on your development hardware, then configure the Godot Editor with the expected IP address of your device like you would when remote debugging in Godot.  The steps necessary in the editor to achieve this are to first enable ```Deploy with Remote debug``` in the ```Debug``` menu. Then in the ```Editor Settings...``` dialog accessed through the ```Editor``` menu, In the ```Network->Debug``` setting set the remote host to be your local network ip address.  The default is ```127.0.0.1``` which will not work because you are not running on the same machine. Instead it needs to be an IP address that is accessible on the same network you have connected your development hardware to.
+
+When the game is launched in remote debugging mode, Godot should connect to the device and allow you to break and step through Godot Script code, As well as profile and monitor the contents performance on the hardware.  In addition you should be able to remotely modify your scene on the device by changing properties in the Remote scene editor.
+
+### RenderDoc
+RenderDoc is included in the Nintendo SDK. To be able to attach to a running game for capturing frames, Enable the Renderdoc checkbox in the debug section of the Nintendo Switch Export options. When this checkbox is enabled, your game will be linked against the modified OpenGL libraries necessary to capture with RenderDoc. When it's working you will see additional text at the top left for your game window.
+
+Once this is working, you can connect to the game session running on the hardware by running the version of RenderDoc that comes with the Nintendo SDK. Then you just need to capture a frame from the RenderDoc interface to inspect the state of the graphics pipeline when rendering the captured frame. For more details consult the Nintendo SDK documentation on RenderDoc.
