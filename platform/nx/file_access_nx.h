@@ -12,6 +12,7 @@ class FileAccessNX : public FileAccess {
 	String path;
 	String path_src;
 	bool is_writable_user_data;
+	bool is_writable_cache_data;
     mutable int64_t offset;
     void _close(); ///< close a file
 

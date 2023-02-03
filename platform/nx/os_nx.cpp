@@ -64,6 +64,17 @@ void OS_NX::unmountRom() {
 	memdelete_arr(romCacheBuffer);
 }
 
+void OS_NX::mountCache() {
+	NN_LOG("Mount cache data\n");
+	nn::Result result = nn::fs::MountCacheStorage("cache");
+	NN_ABORT_UNLESS_RESULT_SUCCESS(result);
+}
+
+void OS_NX::unmountCache() {
+	NN_LOG("Unmount cache data\n");
+	nn::fs::Unmount("cache");
+}
+
 void OS_NX::getTouchscreenEvents()
 {
     nn::hid::GetTouchScreenState(&state);
@@ -245,6 +256,7 @@ void OS_NX::process_input() {
 	for (int i = 0; i < event_count; i++)
 		Input::get_singleton()->parse_input_event(event_queue[i]);
 	event_count = 0;
+	Input::get_singleton()->flush_buffered_events();
 }
 
 void OS_NX::process_joy_buttons(int deviceIndex, const nn::hid::NpadButtonSet& currentState) {
@@ -375,13 +387,19 @@ void OS_NX::initialize() {
 	// mount rom
 	mountRom();
 
+	// mount cache (if used)
+	// if (ProjectSettings::get_singleton()->get("rendering/shader_compiler/shader_cache/enabled")) {
+	// 	mountCache();
+	// }
 
 	// mount savedata
 
 	FileAccess::make_default<FileAccessNX>(FileAccess::ACCESS_RESOURCES);
 	FileAccess::make_default<FileAccessNX>(FileAccess::ACCESS_USERDATA);
+	FileAccess::make_default<FileAccessNX>(FileAccess::ACCESS_FILESYSTEM);
 	DirAccess::make_default<DirAccessNX>(DirAccess::ACCESS_RESOURCES);
 	DirAccess::make_default<DirAccessNX>(DirAccess::ACCESS_USERDATA);
+	DirAccess::make_default<DirAccessNX>(DirAccess::ACCESS_FILESYSTEM);
 
 	npadIdCountMax = sizeof(s_NpadIds) / sizeof(nn::hid::NpadIdType);
 	nn::hid::InitializeTouchScreen();
@@ -451,6 +469,9 @@ void OS_NX::finalize() {
 }
 
 void OS_NX::finalize_core() {
+	// if (ProjectSettings::get_singleton()->get("rendering/shader_compiler/shader_cache/enabled")) {
+	// 	unmountCache();
+	// }
     unmountRom();
 }
 
@@ -626,4 +647,9 @@ String OS_NX::get_user_data_dir() const {
 String OS_NX::get_resource_dir() const {
 	// ROM directory
 	return "res://";
+}
+
+String OS_NX::get_cache_path() const {
+	// CACHE directory
+	return "cache://";
 }

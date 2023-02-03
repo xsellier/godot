@@ -36,10 +36,17 @@ Error FileAccessNX::FileAccessNX::open_internal(const String &p_path, int p_mode
 
     // If mode is write, and to user data, flag for special close handling
     const String user_data_path = OS::get_singleton()->get_user_data_dir();
-    if ((p_mode_flags & WRITE) && p_path.begins_with(user_data_path)) {
-        is_writable_user_data = true;
-    } else {
-        is_writable_user_data = false;
+    if (p_mode_flags & WRITE) {
+        if (p_path.begins_with(user_data_path)) {
+            is_writable_user_data = true;
+        } else {
+            is_writable_user_data = false;
+        }
+        if (p_path.begins_with(OS::get_singleton()->get_cache_path())) {
+            is_writable_cache_data = true;
+        } else {
+            is_writable_cache_data = false;
+        }
     }
 
 	// If mode is write, and the file does not exist, create it
@@ -87,6 +94,9 @@ void FileAccessNX::_close()
     if (is_writable_user_data) {
         NN_LOG("Committing user save data");
         nn::fs::Commit("user");
+    } else if (is_writable_cache_data) {
+        NN_LOG("Committing cache data");
+        nn::fs::Commit("cache");
     }
 
     f.handle = NULL;
@@ -227,6 +237,7 @@ FileAccessNX::FileAccessNX()
     : flags(0)
 	, last_error(OK)
     , is_writable_user_data(false)
+    , is_writable_cache_data(false)
     , offset(0)
 {
     f.handle = NULL;

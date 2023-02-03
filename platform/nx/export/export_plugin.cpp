@@ -310,6 +310,8 @@ Error EditorExportPlatformNX::export_project(const Ref<EditorExportPreset> &p_pr
 		}
 	}
 
+	// ### Enable cache if shader cache is enabled
+
 	// Write out newNmetaString
 	String nmetaOutputFile = dest_dir + binary_name + "/" + binary_name + ".nmeta";
 	f = FileAccess::open(nmetaOutputFile, FileAccess::WRITE, &err);

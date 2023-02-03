@@ -66,6 +66,9 @@ class OS_NX : public OS {
 	void unmountRom();
 	size_t romCacheSize = 0;
     char* romCacheBuffer = nullptr;
+	void mountCache();
+	void unmountCache();
+
 
 	void getTouchscreenEvents();
 	void getNpadEvents();
@@ -126,6 +129,7 @@ public:
 
 	String get_user_data_dir() const override;
 	String get_resource_dir() const override;
+	String get_cache_path() const override;
 
     OS_NX();
     void run();
