@@ -25,20 +25,29 @@ extern "C" void nnMain()
 	nn::Result result;
     // Initialize the account library.
     nn::account::Initialize();
-    // Display the user account selection screen and make the user select a user account.
-    // nn::account::ResultCancelledByUser is returned if the process is canceled by user operation.
-    nn::account::Uid user;
-    result = nn::account::ShowUserSelector(&user);
-    if( nn::account::ResultCancelledByUser::Includes(result) )
-    {
-        NN_LOG("The user selection was canceled.\n");
-        return;
-    }
-    NN_ABORT_UNLESS_RESULT_SUCCESS(result);
-    // Open the user selected at application startup.
-    // Keep it open for the duration of user operations.
+
+    // First try and find a preselected user account
+    // Open the preselected user instead of selecting one after launching the game.
     nn::account::UserHandle userHandle;
-    NN_ABORT_UNLESS_RESULT_SUCCESS(nn::account::OpenUser(&userHandle, user));
+    nn::account::Uid user;
+    if ( nn::account::TryOpenPreselectedUser(&userHandle) ) {
+        result = nn::account::GetUserId(&user, userHandle);
+        NN_ABORT_UNLESS_RESULT_SUCCESS(result);
+    } else {
+        // Display the user account selection screen and make the user select a user account.
+        // nn::account::ResultCancelledByUser is returned if the process is canceled by user operation.
+        result = nn::account::ShowUserSelector(&user);
+        if( nn::account::ResultCancelledByUser::Includes(result) ) {
+            NN_LOG("The user selection was canceled.\n");
+            return;
+        }
+        NN_ABORT_UNLESS_RESULT_SUCCESS(result);
+        // Open the user selected at application startup.
+        // Keep it open for the duration of user operations.
+        result = nn::account::OpenUser(&userHandle, user);
+        NN_ABORT_UNLESS_RESULT_SUCCESS(result);
+    }
+
     NN_UTIL_SCOPE_EXIT
     {
         nn::account::CloseUser(userHandle);
