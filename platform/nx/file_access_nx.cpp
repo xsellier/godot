@@ -6,6 +6,10 @@
 
 Error FileAccessNX::FileAccessNX::open_internal(const String &p_path, int p_mode_flags)
 {
+    nx_cache_start_pos = -1;
+    nx_cache_end_pos = -1;
+    nx_file_size = 0;
+
     _close();
 
     offset = 0;
@@ -136,10 +140,15 @@ uint64_t FileAccessNX::get_length() const
 {
     ERR_FAIL_COND_V(!f.handle, NULL);
 
+    if (flags & READ) {
+		if (nx_file_size > 0) {
+			return nx_file_size;
+		}
+	}
+
     nn::Result result;
-    int64_t size;
-    result = nn::fs::GetFileSize(&size, f);
-    return size;
+    result = nn::fs::GetFileSize(&nx_file_size, f);
+    return uint64_t(nx_file_size);
 }
 
 bool FileAccessNX::eof_reached() const
@@ -150,17 +159,31 @@ bool FileAccessNX::eof_reached() const
 uint8_t FileAccessNX::get_8() const
 {
     ERR_FAIL_COND_V(!f.handle, NULL);
-    uint8_t value;
+    int64_t return_pos;
     // Check for eof
     if (offset >= get_length()) {
         last_error = ERR_FILE_EOF;
         return '\0';
     }
 
-    nn::fs::ReadFile(f, offset, &value, 1);
+    // We use a small read cache to avoid thousands of 1 byte reads.
+	// Solves issue with lot check (FS Logging)
+	if(offset >= nx_cache_end_pos) {
+		size_t length = NX_CACHE_SIZE;
+        const uint64_t realLength = get_length();
+        if (length + offset >= realLength) {
+            length = realLength - offset;
+        }
+        nn::fs::ReadFile(f, offset, nx_cache, length);
+
+        nx_cache_start_pos = offset;
+		nx_cache_end_pos = nx_cache_start_pos + length;
+	}
+
+	return_pos = offset - nx_cache_start_pos;
 
     offset += 1;
-    return value;
+	return nx_cache[return_pos];
 }
 	
 uint64_t FileAccessNX::get_buffer(uint8_t *p_dst, uint64_t p_length) const

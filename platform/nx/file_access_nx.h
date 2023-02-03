@@ -4,6 +4,8 @@
 #include <nn/os.h>
 #include <nn/fs.h>
 
+#define NX_CACHE_SIZE 8192
+
 class FileAccessNX : public FileAccess {
 
     nn::fs::FileHandle f;
@@ -14,6 +16,11 @@ class FileAccessNX : public FileAccess {
 	bool is_writable_user_data;
 	bool is_writable_cache_data;
     mutable int64_t offset;
+	mutable int64_t nx_file_size;
+	mutable uint8_t nx_cache[NX_CACHE_SIZE];
+	mutable int64_t nx_cache_start_pos;
+	mutable int64_t nx_cache_end_pos;
+
     void _close(); ///< close a file
 
 protected:
