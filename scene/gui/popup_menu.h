@@ -42,6 +42,7 @@ class PopupMenu : public Popup {
 	OBJ_TYPE(PopupMenu, Popup);
 
 	struct Item {
+		bool icon_scale;
 		Ref<Texture> icon;
 		String text;
 		bool checked;
@@ -60,6 +61,7 @@ class PopupMenu : public Popup {
 			checked = false;
 			checkable = false;
 			separator = false;
+			icon_scale = true;
 			accel = 0;
 			disabled = false;
 			_ofs_cache = 0;
@@ -122,6 +124,9 @@ public:
 	void set_item_as_checkable(int p_idx, bool p_checkable);
 	void set_item_tooltip(int p_idx, const String &p_tooltip);
 	void set_item_shortcut(int p_idx, const Ref<ShortCut> &p_shortcut);
+
+	void set_item_icon_scale(int p_idx, bool p_icon_scale);
+	bool is_item_icon_scaling(int p_idx) const;
 
 	void toggle_item_checked(int p_idx);
 

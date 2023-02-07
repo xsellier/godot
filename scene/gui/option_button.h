@@ -42,6 +42,7 @@ class OptionButton : public Button {
 
 	PopupMenu *popup;
 	int current;
+	bool check_items;
 
 	void _selected(int p_which);
 	void _select(int p_which, bool p_emit = false);
@@ -67,6 +68,9 @@ public:
 	void set_item_ID(int p_idx, int p_ID);
 	void set_item_metadata(int p_idx, const Variant &p_metadata);
 	void set_item_disabled(int p_idx, bool p_disabled);
+
+	void _set_check_items(bool p_check);
+	bool is_check_item() const;
 
 	String get_item_tooltip(int p_idx) const;
 	String get_item_text(int p_idx) const;

@@ -85,6 +85,16 @@ void OptionButton::_selected(int p_which) {
 	}
 }
 
+void OptionButton::_set_check_items(bool p_check) {
+
+	check_items = p_check;
+}
+
+bool OptionButton::is_check_item() const {
+
+	return check_items;
+}
+
 void OptionButton::pressed() {
 
 	Size2 size = get_size();
@@ -96,15 +106,27 @@ void OptionButton::pressed() {
 
 void OptionButton::add_icon_item(const Ref<Texture> &p_icon, const String &p_label, int p_ID) {
 
-	popup->add_icon_check_item(p_icon, p_label, p_ID);
-	if (popup->get_item_count() == 1)
+	if (is_check_item()) {
+		popup->add_icon_check_item(p_icon, p_label, p_ID);
+	} else {
+		popup->add_icon_item(p_icon, p_label, p_ID);
+	}
+
+	if (popup->get_item_count() == 1) {
 		select(0);
+	}
 }
 void OptionButton::add_item(const String &p_label, int p_ID) {
 
-	popup->add_check_item(p_label, p_ID);
-	if (popup->get_item_count() == 1)
+	if (is_check_item()) {
+		popup->add_check_item(p_label, p_ID);
+	} else {
+		popup->add_item(p_label, p_ID);
+	}
+
+	if (popup->get_item_count() == 1) {
 		select(0);
+	}
 }
 
 void OptionButton::set_item_tooltip(int p_idx, const String &p_tooltip) {
@@ -307,11 +329,14 @@ void OptionButton::_bind_methods() {
 	ObjectTypeDB::bind_method(_MD("get_selected_metadata"), &OptionButton::get_selected_metadata);
 	ObjectTypeDB::bind_method(_MD("remove_item", "idx"), &OptionButton::remove_item);
 	ObjectTypeDB::bind_method(_MD("_select_int"), &OptionButton::_select_int);
+	ObjectTypeDB::bind_method(_MD("_set_check_items"), &OptionButton::_set_check_items);
+	ObjectTypeDB::bind_method(_MD("is_check_item"), &OptionButton::is_check_item);
 
 	ObjectTypeDB::bind_method(_MD("_set_items"), &OptionButton::_set_items);
 	ObjectTypeDB::bind_method(_MD("_get_items"), &OptionButton::_get_items);
 
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "selected"), _SCS("_select_int"), _SCS("get_selected"));
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "check_items"), _SCS("_set_check_items"), _SCS("is_check_item"));
 	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "items", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR), _SCS("_set_items"), _SCS("_get_items"));
 	ADD_SIGNAL(MethodInfo("item_selected", PropertyInfo(Variant::INT, "ID")));
 }
@@ -325,6 +350,7 @@ OptionButton::OptionButton() {
 	popup->connect("item_pressed", this, "_selected");
 
 	current = -1;
+	check_items = true;
 	set_text_align(ALIGN_LEFT);
 }
 

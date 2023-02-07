@@ -80,10 +80,18 @@ Size2 PopupMenu::get_minimum_size() const {
 
 		Size2 size;
 		if (!items[i].icon.is_null()) {
-
 			Size2 icon_size = items[i].icon->get_size();
-			size.height = MAX(icon_size.height, font_h);
-			size.width += icon_size.width;
+
+			if (items[i].icon_scale) {
+				float icon_scale = font_h / icon_size.height;
+
+				size.height = font_h;
+				size.width += icon_size.width * icon_scale;
+
+			} else {
+				size.height = MAX(icon_size.height, font_h);
+				size.width += icon_size.width;
+			}
 			size.width += hseparation;
 		} else {
 
@@ -145,9 +153,14 @@ int PopupMenu::_get_mouse_over(const Point2 &p_over) const {
 		float h;
 
 		if (!items[i].icon.is_null()) {
+			if (items[i].icon_scale) {
+				h = font_h;
 
-			Size2 icon_size = items[i].icon->get_size();
-			h = MAX(icon_size.height, font_h);
+			} else {
+				Size2 icon_size = items[i].icon->get_size();
+
+				h = MAX(icon_size.height, font_h);
+			}
 		} else {
 
 			h = font_h;
@@ -421,12 +434,19 @@ void PopupMenu::_notification(int p_what) {
 					ofs.y += vseparation;
 				Point2 item_ofs = ofs;
 				float h;
+				float icon_scale = 1.0;
 				Size2 icon_size;
 
 				if (!items[i].icon.is_null()) {
-
 					icon_size = items[i].icon->get_size();
-					h = MAX(icon_size.height, font_h);
+
+					if (items[i].icon_scale) {
+						icon_scale = font_h / icon_size.height;
+						h = font_h;
+					} else {
+						h = MAX(icon_size.height, font_h);
+					}
+
 				} else {
 
 					h = font_h;
@@ -454,8 +474,9 @@ void PopupMenu::_notification(int p_what) {
 				}
 
 				if (!items[i].icon.is_null()) {
-					items[i].icon->draw(ci, item_ofs + Point2(0, Math::floor((h - icon_size.height) / 2.0)));
-					item_ofs.x += items[i].icon->get_width();
+					Point2 offset = item_ofs + Point2(0, Math::floor((h - icon_size.height * icon_scale) / 2.0));
+					items[i].icon->draw_rect(ci, Rect2(offset, icon_size * icon_scale));
+					item_ofs.x += icon_size.width * icon_scale;
 					item_ofs.x += hseparation;
 				}
 
@@ -766,6 +787,16 @@ void PopupMenu::set_item_tooltip(int p_idx, const String &p_tooltip) {
 	update();
 }
 
+void PopupMenu::set_item_icon_scale(int p_idx, bool p_icon_scale) {
+	ERR_FAIL_INDEX(p_idx, items.size());
+	items[p_idx].icon_scale = p_icon_scale;
+}
+
+bool PopupMenu::is_item_icon_scaling(int p_idx) const {
+	ERR_FAIL_INDEX_V(p_idx, items.size(), false);
+	return items[p_idx].icon_scale;
+}
+
 void PopupMenu::set_item_shortcut(int p_idx, const Ref<ShortCut> &p_shortcut) {
 	ERR_FAIL_INDEX(p_idx, items.size());
 	if (items[p_idx].shortcut.is_valid()) {
@@ -1045,6 +1076,9 @@ void PopupMenu::_bind_methods() {
 	ObjectTypeDB::bind_method(_MD("set_item_as_checkable", "idx", "enable"), &PopupMenu::set_item_as_checkable);
 	ObjectTypeDB::bind_method(_MD("set_item_tooltip", "idx", "tooltip"), &PopupMenu::set_item_tooltip);
 	ObjectTypeDB::bind_method(_MD("set_item_shortcut", "idx", "shortcut:ShortCut"), &PopupMenu::set_item_shortcut);
+
+	ObjectTypeDB::bind_method(_MD("set_item_icon_scale", "idx", "scale"), &PopupMenu::set_item_icon_scale);
+	ObjectTypeDB::bind_method(_MD("is_item_icon_scaling", "idx"), &PopupMenu::is_item_icon_scaling);
 
 	ObjectTypeDB::bind_method(_MD("toggle_item_checked", "idx"), &PopupMenu::toggle_item_checked);
 
