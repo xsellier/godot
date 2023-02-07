@@ -1,12 +1,22 @@
 #include "export_plugin.h"
-
 #include "editor/editor_paths.h"
+
+#include "modules/modules_enabled.gen.h"
+#ifdef MODULE_SVG_ENABLED
+#include "modules/svg/image_loader_svg.h"
+#endif
 
 EditorExportPlatformNX::EditorExportPlatformNX() 
 {
-    Ref<Image> img = memnew(Image(_nx_logo));
-    m_logo.instantiate();
-	m_logo->create_from_image(img);
+#ifdef MODULE_SVG_ENABLED
+	Ref<Image> img = memnew(Image);
+	const bool upsample = !Math::is_equal_approx(Math::round(EDSCALE), EDSCALE);
+
+	ImageLoaderSVG img_loader;
+	img_loader.create_image_from_string(img, _nx_logo_svg, EDSCALE, upsample, false);
+	m_logo = ImageTexture::create_from_image(img);
+
+#endif
 
     release_file_32 = "godot_nx.nx.template_release.arm32.nss";
     debug_file_32   = "godot_nx.nx.template_debug.arm32.nss";
