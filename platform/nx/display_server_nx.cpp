@@ -9,7 +9,7 @@
 
 #include <stdlib.h>
 
-const size_t gfxMemSize = 512 * 1024 * 1024;
+const size_t gfxMemSize = 8 * 1024 * 1024;
 
 static void *NvAllocateFunction(size_t size, size_t alignment, void *userPtr)
 {
