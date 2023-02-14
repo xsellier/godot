@@ -583,6 +583,7 @@ struct _VariantCall {
 	VCALL_LOCALMEM1(IntArray, append);
 	VCALL_LOCALMEM1(IntArray, append_array);
 	VCALL_LOCALMEM0(IntArray, invert);
+	VCALL_LOCALMEM0(IntArray, sort);
 
 	VCALL_LOCALMEM0R(RealArray, size);
 	VCALL_LOCALMEM2(RealArray, set);
@@ -1624,6 +1625,7 @@ void register_variant_methods() {
 	ADDFUNC2(INT_ARRAY, INT, IntArray, insert, INT, "idx", INT, "integer", varray());
 	ADDFUNC1(INT_ARRAY, NIL, IntArray, resize, INT, "idx", varray());
 	ADDFUNC0(INT_ARRAY, NIL, IntArray, invert, varray());
+	ADDFUNC0(INT_ARRAY, NIL, IntArray, sort, varray());
 
 	ADDFUNC0(REAL_ARRAY, INT, RealArray, size, varray());
 	ADDFUNC2(REAL_ARRAY, NIL, RealArray, set, INT, "idx", REAL, "value", varray());

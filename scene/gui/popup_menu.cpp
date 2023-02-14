@@ -43,24 +43,6 @@ String PopupMenu::_get_accel_text(int p_item) const {
 	else if (items[p_item].accel)
 		return keycode_get_string(items[p_item].accel);
 	return String();
-
-	/*
-	String atxt;
-	if (p_accel&KEY_MASK_SHIFT)
-		atxt+="Shift+";
-	if (p_accel&KEY_MASK_ALT)
-		atxt+="Alt+";
-	if (p_accel&KEY_MASK_CTRL)
-		atxt+="Ctrl+";
-	if (p_accel&KEY_MASK_META)
-		atxt+="Meta+";
-
-	p_accel&=KEY_CODE_MASK;
-
-	atxt+=String::chr(p_accel).to_upper();
-
-	return atxt;
-*/
 }
 
 Size2 PopupMenu::get_minimum_size() const {
@@ -464,13 +446,27 @@ void PopupMenu::_notification(int p_what) {
 				}
 
 				if (items[i].checkable) {
+					float check_scale = 1.0;
 
-					if (items[i].checked)
-						check->draw(ci, item_ofs + Point2(0, Math::floor((h - check->get_height()) / 2.0)));
-					else
-						uncheck->draw(ci, item_ofs + Point2(0, Math::floor((h - check->get_height()) / 2.0)));
+					if (items[i].checked) {
+						Size2 check_size = check->get_size();
 
-					item_ofs.x += check->get_width() + hseparation;
+						check_scale = font_h / check_size.height;
+
+						Point2 offset = item_ofs + Point2(0, Math::floor((h - check->get_height() * check_scale) / 2.0));
+
+						check->draw_rect(ci, Rect2(offset, check_size * check_scale));
+					} else {
+						Size2 uncheck_size = uncheck->get_size();
+
+						check_scale = font_h / uncheck_size.height;
+
+						Point2 offset = item_ofs + Point2(0, Math::floor((h - uncheck->get_height() * check_scale) / 2.0));
+
+						uncheck->draw_rect(ci, Rect2(offset, uncheck_size * check_scale));
+					}
+
+					item_ofs.x += check->get_width() * check_scale + hseparation;
 				}
 
 				if (!items[i].icon.is_null()) {
@@ -481,7 +477,12 @@ void PopupMenu::_notification(int p_what) {
 				}
 
 				if (items[i].submenu != "") {
-					submenu->draw(ci, Point2(size.width - style->get_margin(MARGIN_RIGHT) - submenu->get_width(), item_ofs.y + Math::floor(h - submenu->get_height()) / 2));
+					Size2 submenu_size = submenu->get_size();
+					float submenu_scale = font_h / submenu_size.height;
+
+					Point2 offset = Point2(size.width - style->get_margin(MARGIN_RIGHT) - submenu->get_width() * submenu_scale, item_ofs.y + Math::floor(h - submenu->get_height() * submenu_scale) / 2);
+
+					submenu->draw_rect(ci, Rect2(offset, submenu_size * submenu_scale));
 				}
 
 				item_ofs.y += font->get_ascent();

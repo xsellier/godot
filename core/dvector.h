@@ -32,6 +32,7 @@
 #define DVECTOR_H
 
 #include "os/memory.h"
+#include "core/sort.h"
 
 /**
 	@author Juan Linietsky <reduzio@gmail.com>
@@ -272,6 +273,7 @@ public:
 	Error resize(int p_size);
 
 	void invert();
+	void sort();
 
 	void operator=(const DVector &p_dvector) { reference(p_dvector); }
 	DVector() {}
@@ -410,6 +412,18 @@ void DVector<T>::invert() {
 		w[i] = w[s - i - 1];
 		w[s - i - 1] = temp;
 	}
+}
+
+template <class T>
+void DVector<T>::sort() {
+	int len = size();
+	if (len == 0) {
+		return;
+	}
+
+	Write w = write();
+	SortArray<T> sorter;
+	sorter.sort(w.ptr(), len);
 }
 
 #endif
