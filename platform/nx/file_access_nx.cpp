@@ -231,6 +231,11 @@ void FileAccessNX::store_buffer(const uint8_t *p_src, uint64_t p_length)
     offset += p_length;
 }
 
+void FileAccessNX::close()
+{
+    _close();
+}
+
 bool FileAccessNX::file_exists(const String &p_path)
 {
     nn::fs::DirectoryEntryType directoryEntryType;

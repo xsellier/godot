@@ -51,6 +51,8 @@ public:
 	void store_8(uint8_t p_dest) override; ///< store a byte
 	void store_buffer(const uint8_t *p_src, uint64_t p_length) override; ///< store an array of bytes
 
+	void close() override; ///< close a file
+
 	bool file_exists(const String &p_path) override; ///< return true if a file exists
 
 
