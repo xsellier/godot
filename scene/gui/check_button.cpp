@@ -37,19 +37,32 @@ void CheckButton::_notification(int p_what) {
 
 	if (p_what == NOTIFICATION_DRAW) {
 
-		RID ci = get_canvas_item();
+		RID canvas_item = get_canvas_item();
 
-		Ref<Texture> on = Control::get_icon("on");
-		Ref<Texture> off = Control::get_icon("off");
+		Ref<Texture> on_texture = Control::get_icon("on");
+		Ref<Texture> off_texture = Control::get_icon("off");
+		float style_maximum_size = get_stylebox("normal")->get_margin(MARGIN_LEFT);
 
-		Vector2 ofs;
-		ofs.x = get_size().width - on->get_width();
-		ofs.y = int((get_size().height - on->get_height()) / 2);
+		Vector2 offset;
 
-		if (is_pressed())
-			on->draw(ci, ofs);
-		else
-			off->draw(ci, ofs);
+		if (is_pressed()) {
+			Size2 icon_size = on_texture->get_size();
+			float icon_scale = MIN(1.0, MIN(get_size().height, style_maximum_size) / icon_size.height);
+
+			offset.x = get_size().width - on_texture->get_width() * icon_scale;
+			offset.y = int((get_size().height - on_texture->get_height() * icon_scale) / 2);
+
+			on_texture->draw_rect(canvas_item, Rect2(offset, icon_size * icon_scale));
+
+		} else {
+			Size2 icon_size = off_texture->get_size();
+			float icon_scale = MIN(1.0, MIN(get_size().height, style_maximum_size) / icon_size.height);
+
+			offset.x = get_size().width - off_texture->get_width() * icon_scale;
+			offset.y = int((get_size().height - off_texture->get_height() * icon_scale) / 2);
+
+			off_texture->draw_rect(canvas_item, Rect2(offset, icon_size * icon_scale));
+		}
 	}
 }
 

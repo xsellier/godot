@@ -37,19 +37,29 @@ void CheckBox::_notification(int p_what) {
 
 	if (p_what == NOTIFICATION_DRAW) {
 
-		RID ci = get_canvas_item();
+		RID canvas_item = get_canvas_item();
 
-		Ref<Texture> on = Control::get_icon(is_radio() ? "radio_checked" : "checked");
-		Ref<Texture> off = Control::get_icon(is_radio() ? "radio_unchecked" : "unchecked");
+		Ref<Texture> on_texture = Control::get_icon(is_radio() ? "radio_checked" : "checked");
+		Ref<Texture> off_texture = Control::get_icon(is_radio() ? "radio_unchecked" : "unchecked");
+		float style_maximum_size = get_stylebox("normal")->get_margin(MARGIN_LEFT);
 
-		Vector2 ofs;
-		ofs.x = 0;
-		ofs.y = int((get_size().height - on->get_height()) / 2);
+		Vector2 offset;
+		offset.x = 0;
 
-		if (is_pressed())
-			on->draw(ci, ofs);
-		else
-			off->draw(ci, ofs);
+		if (is_pressed()) {
+			Size2 icon_size = on_texture->get_size();
+			float icon_scale = MIN(1.0, MIN(get_size().height, style_maximum_size) / icon_size.height);
+
+			offset.y = int((get_size().height - icon_scale * on_texture->get_height()) / 2);
+			on_texture->draw_rect(canvas_item, Rect2(offset, icon_size * icon_scale));
+
+		} else {
+			Size2 icon_size = off_texture->get_size();
+			float icon_scale = MIN(1.0, MIN(get_size().height, style_maximum_size) / icon_size.height);
+
+			offset.y = int((get_size().height - icon_scale * off_texture->get_height()) / 2);
+			off_texture->draw_rect(canvas_item, Rect2(offset, icon_size * icon_scale));
+		}
 	}
 }
 
