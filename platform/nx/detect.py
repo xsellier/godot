@@ -95,15 +95,14 @@ def configure(env):
     ## check if compiler has moved (SDK 17.1.0+)
     nx_toolchain_path = env["NINTENDO_SDK_ROOT"] + "/Compilers/NintendoClang/bin/"
     is_sdk17 = os.path.exists(nx_toolchain_path)
-    ld_command = nx_toolchain_path + nx_toolchain_prefix + 'ld.gold.exe'
-    if is_sdk17:
-        ld_command = nx_toolchain_path + 'ld.lld.exe'
+    ld_command = nx_toolchain_path + 'ld.lld.exe'
 
     # aarch64
     if (env["arch"] == "arm64"):
         if not is_sdk17:
             nx_toolchain_path = env["NINTENDO_SDK_ROOT"] + "/Compilers/NX/nx/aarch64/bin/"
             nx_toolchain_prefix = "aarch64-nintendo-nx-elf-"
+            ld_command = nx_toolchain_path + nx_toolchain_prefix + 'ld.gold.exe'
         
         env.Append(CPPFLAGS=[
             '-mcpu=cortex-a57+fp+simd+crypto+crc',
@@ -151,6 +150,7 @@ def configure(env):
         if not is_sdk17:
             nx_toolchain_path = env["NINTENDO_SDK_ROOT"] + "/Compilers/NX/nx/armv7l/bin/"
             nx_toolchain_prefix = "armv7l-nintendo-nx-eabihf-"
+            ld_command = nx_toolchain_path + nx_toolchain_prefix + 'ld.gold.exe'
 
         env.Append(CPPFLAGS=[
             '-mabi=aapcs-linux',
