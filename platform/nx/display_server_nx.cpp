@@ -320,6 +320,10 @@ void DisplayServerNX::window_move_to_foreground(WindowID p_window) {
     // not supported
 }
 
+bool DisplayServerNX::window_is_focused(WindowID p_window) const {
+    return true;
+}
+
 bool DisplayServerNX::window_can_draw(WindowID p_window) const {
     return true;
 }

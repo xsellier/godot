@@ -110,7 +110,7 @@ class EditorExportPlatformNX : public EditorExportPlatform {
 
 protected:
     void get_preset_features(const Ref<EditorExportPreset> &p_preset, List<String> *r_features) const override;
-    void get_export_options(List<ExportOption> *r_options) override;
+    void get_export_options(List<ExportOption> *r_options) const override;
 
 
 public:
@@ -129,7 +129,7 @@ public:
 
 	Error run(const Ref<EditorExportPreset> &p_preset, int p_device, int p_debug_flags);
 
-    bool has_valid_export_configuration(const Ref<EditorExportPreset> &p_preset, String &r_error, bool &r_missing_templates) const override;
+    bool has_valid_export_configuration(const Ref<EditorExportPreset> &p_preset, String &r_error, bool &r_missing_templates, bool p_debug = false) const override;
 	bool has_valid_project_configuration(const Ref<EditorExportPreset> &p_preset, String &r_error) const override;
 
     List<String> get_binary_extensions(const Ref<EditorExportPreset> &p_preset) const override;

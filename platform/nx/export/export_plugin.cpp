@@ -34,7 +34,7 @@ EditorExportPlatformNX::~EditorExportPlatformNX()
 	device_thread.wait_to_finish();
 }
 
-void EditorExportPlatformNX::get_export_options(List<ExportOption> *r_options)
+void EditorExportPlatformNX::get_export_options(List<ExportOption> *r_options) const
 {
 
 	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "custom_package/debug", PROPERTY_HINT_GLOBAL_FILE, "*.nss"), ""));
@@ -76,7 +76,7 @@ Ref<Texture2D> EditorExportPlatformNX::get_logo() const
     return m_logo;
 }
 
-bool EditorExportPlatformNX::has_valid_export_configuration(const Ref<EditorExportPreset> &p_preset, String &r_error, bool &r_missing_templates) const
+bool EditorExportPlatformNX::has_valid_export_configuration(const Ref<EditorExportPreset> &p_preset, String &r_error, bool &r_missing_templates, bool p_debug) const
 {
     String err;
 	bool valid = true;
