@@ -28,6 +28,8 @@ elif env["builtin_wslay"]:
 
     if env["platform"] == "windows":
         env_ws.Append(CPPDEFINES=["HAVE_WINSOCK2_H"])
+    elif env["platform"] == "nx":
+        env_ws.Append(CPPDEFINES=["HAVE_ARPA_INET_H"])
     else:
         env_ws.Append(CPPDEFINES=["HAVE_NETINET_IN_H"])
 

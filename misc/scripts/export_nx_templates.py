@@ -4,7 +4,7 @@
 import os
 
 #version_string = version.major + '.' + version.minor + '.' + version.patch + '.' + version.status
-version_string = '4.0.stable'
+version_string = '4.0.4.stable'
 appdata_dir = os.getenv('APPDATA')
 target_dir = appdata_dir + '\\Godot\\export_templates\\' + version_string + '\\'
 

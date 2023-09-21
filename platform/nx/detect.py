@@ -44,6 +44,7 @@ def configure(env):
     nx_toolchain_path = ""
     nx_toolchain_prefix = ""
     nx_library_path = ""
+    is_sdk17 = False
 
     # common C++ flags
     env.Append(CPPFLAGS=[
@@ -91,21 +92,35 @@ def configure(env):
         print("Nintendo Switch: Unsupported architecture: " + env["arch"])
         sys.exit()
 
+    ## check if compiler has moved (SDK 17.1.0+)
+    nx_toolchain_path = env["NINTENDO_SDK_ROOT"] + "/Compilers/NintendoClang/bin/"
+    is_sdk17 = os.path.exists(nx_toolchain_path)
+    ld_command = nx_toolchain_path + nx_toolchain_prefix + 'ld.gold.exe'
+    if is_sdk17:
+        ld_command = nx_toolchain_path + 'ld.lld.exe'
+
     # aarch64
     if (env["arch"] == "arm64"):
-        nx_toolchain_path = env["NINTENDO_SDK_ROOT"] + "/Compilers/NX/nx/aarch64/bin/"
-        nx_toolchain_prefix = "aarch64-nintendo-nx-elf-"
+        if not is_sdk17:
+            nx_toolchain_path = env["NINTENDO_SDK_ROOT"] + "/Compilers/NX/nx/aarch64/bin/"
+            nx_toolchain_prefix = "aarch64-nintendo-nx-elf-"
+        
         env.Append(CPPFLAGS=[
             '-mcpu=cortex-a57+fp+simd+crypto+crc',
         ])
-        env.Prepend(CPPPATH=[env["NINTENDO_SDK_ROOT"] + '/TargetSpecificInclude/NX-NXFP2-a64/'])
+        if is_sdk17:
+            env.Append(CPPFLAGS=[
+                '--target=aarch64-nintendo-nx-elf'
+            ])
 
+        env.Prepend(CPPPATH=[env["NINTENDO_SDK_ROOT"] + '/TargetSpecificInclude/NX-NXFP2-a64/'])
+        
         # aarch64 specific shared lib link flags
         env.Append(SHLINKFLAGS=[
             '-mcpu=cortex-a57+fp+simd+crypto+crc',
             '-Wl,-T',
             env["NINTENDO_SDK_ROOT"] + "/Resources/SpecFiles/RoModule.aarch64.lp64.ldscript",
-            '-fuse-ld=' + nx_toolchain_path + nx_toolchain_prefix + 'ld.gold.exe',
+            '-fuse-ld=' + ld_command,
         ])
 
         # aarch64 specific application link flags
@@ -113,8 +128,16 @@ def configure(env):
             '-mcpu=cortex-a57+fp+simd+crypto+crc',
             '-Wl,-T',
             env["NINTENDO_SDK_ROOT"] + "/Resources/SpecFiles/Application.aarch64.lp64.ldscript",
-            '-fuse-ld=' + nx_toolchain_path + nx_toolchain_prefix + 'ld.gold.exe',
+            '-fuse-ld=' + ld_command,
         ])
+
+        if is_sdk17:
+            env.Append(SHLINKFLAGS=[
+                '--target=aarch64-nintendo-nx-elf'
+            ])
+            env.Append(LINKFLAGS=[
+                '--target=aarch64-nintendo-nx-elf'
+            ])
 
         if (env["target"] == "template_release"):
             # release
@@ -125,14 +148,21 @@ def configure(env):
 
     # armv7l
     if (env["arch"] == "arm32"):
-        nx_toolchain_path = env["NINTENDO_SDK_ROOT"] + "/Compilers/NX/nx/armv7l/bin/"
-        nx_toolchain_prefix = "armv7l-nintendo-nx-eabihf-"
+        if not is_sdk17:
+            nx_toolchain_path = env["NINTENDO_SDK_ROOT"] + "/Compilers/NX/nx/armv7l/bin/"
+            nx_toolchain_prefix = "armv7l-nintendo-nx-eabihf-"
+
         env.Append(CPPFLAGS=[
             '-mabi=aapcs-linux',
             '-mcpu=cortex-a57',
             '-mfpu=crypto-neon-fp-armv8',
             '-mfloat-abi=hard',
         ])
+        if is_sdk17:
+            env.Append(CPPFLAGS=[
+                '--target=armv7l-nintendo-nx-eabihf'
+            ])
+
         env.Prepend(CPPPATH=[env["NINTENDO_SDK_ROOT"] + '/TargetSpecificInclude/NX-NXFP2-a32/'])
 
         # arm specific shared lib link flags
@@ -144,7 +174,7 @@ def configure(env):
             '-Wl,--target2=got-rel',
             '-Wl,-T',
             env["NINTENDO_SDK_ROOT"] + "/Resources/SpecFiles/RoModule.arm.ilp32.ldscript",
-            '-fuse-ld=' + nx_toolchain_path + nx_toolchain_prefix + 'ld.gold.exe',
+            '-fuse-ld=' + ld_command,
         ])
 
         # arm specific applicaiton link flags
@@ -156,8 +186,16 @@ def configure(env):
             '-Wl,--target2=got-rel',
             '-Wl,-T',
             env["NINTENDO_SDK_ROOT"] + "/Resources/SpecFiles/Application.arm.ilp32.ldscript",
-            '-fuse-ld=' + nx_toolchain_path + nx_toolchain_prefix + 'ld.gold.exe',
+            '-fuse-ld=' + ld_command,
         ])
+
+        if is_sdk17:
+            env.Append(SHLINKFLAGS=[
+                '--target=armv7l-nintendo-nx-eabihf'
+            ])
+            env.Append(LINKFLAGS=[
+                '--target=armv7l-nintendo-nx-eabihf'
+            ])
         
         if (env["target"] == "template_release"):
             # release
@@ -187,6 +225,10 @@ def configure(env):
             ])
     
     ## Compiler configuration
+
+    if is_sdk17:
+        # now nx_toolchain_prefix should be set
+        nx_toolchain_prefix = 'llvm-'
 
     env['CC'] = nx_toolchain_path + 'clang'
     env['CXX'] = nx_toolchain_path + 'clang++'
