@@ -217,7 +217,8 @@ def configure(env):
     elif (env["target"] == "template_debug"):
         env.Append(CPPFLAGS=[
             '-g',
-            '-O0',
+            # '-O0',
+            '-O3',
             '-fno-omit-frame-pointer',
             '-DNN_SDK_BUILD_DEBUG', 
             '-DDEBUG_ENABLED', 
