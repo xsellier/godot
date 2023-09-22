@@ -249,18 +249,6 @@ uint64_t FileAccessNX::_get_modified_time(const String &p_file)
     return 0;
 }
 
-uint32_t FileAccessNX::_get_unix_permissions(const String &p_file)
-{
-    // Not supported
-    return 0;
-}
-
-Error FileAccessNX::_set_unix_permissions(const String &p_file, uint32_t p_permissions) 
-{
-    // Not supported
-    return FAILED;
-}
-
 FileAccessNX::FileAccessNX() 
     : flags(0)
 	, last_error(OK)
