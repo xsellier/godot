@@ -335,3 +335,14 @@ bool DisplayServerNX::can_any_window_draw() const {
 void DisplayServerNX::process_events() {
 
 }
+
+void DisplayServerNX::_dispatch_input_event(const Ref<InputEvent> &p_event) {
+	Callable cb = get_singleton()->input_event_callback;
+	if (!cb.is_null()) {
+		Variant ev = p_event;
+		Variant *evp = &ev;
+		Variant ret;
+		Callable::CallError ce;
+		cb.callp((const Variant **)&evp, 1, ret, ce);
+	}
+}

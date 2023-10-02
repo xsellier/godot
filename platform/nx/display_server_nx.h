@@ -32,6 +32,8 @@ class DisplayServerNX : public DisplayServer {
 	Callable input_text_callback;
 
 public:
+	static void _dispatch_input_event(const Ref<InputEvent> &p_event);
+
     String rendering_driver;
 
     static DisplayServerNX *get_singleton();
