@@ -189,22 +189,27 @@ Error ConfigFile::save_encrypted_pass(const String &p_path, const String &p_pass
 
 Error ConfigFile::_internal_save(Ref<FileAccess> file) {
 	bool first = true;
+
+	String nx_buffer;
+	nx_buffer = "";
+
 	for (const KeyValue<String, HashMap<String, Variant>> &E : values) {
 		if (first) {
 			first = false;
 		} else {
-			file->store_string("\n");
+			nx_buffer += "\n";
 		}
 		if (!E.key.is_empty()) {
-			file->store_string("[" + E.key.replace("]", "\\]") + "]\n\n");
+			nx_buffer += "[" + E.key.replace("]", "\\]") + "]\n\n";
 		}
 
 		for (const KeyValue<String, Variant> &F : E.value) {
 			String vstr;
 			VariantWriter::write_to_string(F.value, vstr);
-			file->store_string(F.key.property_name_encode() + "=" + vstr + "\n");
+			nx_buffer += F.key.property_name_encode() + "=" + vstr + "\n";
 		}
 	}
+	file->store_string(nx_buffer);
 
 	return OK;
 }
