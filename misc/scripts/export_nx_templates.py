@@ -2,9 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 
-#version_string = version.major + '.' + version.minor + '.' + version.patch + '.' + version.status
-version_string = '4.2.1.stable'
+sys.path.append('.')
+import version
+version_string = str(version.major) + '.' + str(version.minor) + '.' + str(version.patch) + '.' + str(version.status)
 appdata_dir = os.getenv('APPDATA')
 target_dir = appdata_dir + '\\Godot\\export_templates\\' + version_string + '\\'
 
