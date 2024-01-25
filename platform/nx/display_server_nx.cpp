@@ -346,3 +346,8 @@ void DisplayServerNX::_dispatch_input_event(const Ref<InputEvent> &p_event) {
 		cb.callp((const Variant **)&evp, 1, ret, ce);
 	}
 }
+
+DisplayServer::VSyncMode DisplayServerNX::window_get_vsync_mode(WindowID p_vsync_mode) const {
+    return DisplayServer::VSYNC_ENABLED;
+}
+
