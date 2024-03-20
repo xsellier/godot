@@ -119,6 +119,8 @@ DisplayServerNX::DisplayServerNX(const String &p_rendering_driver, DisplayServer
     }
 
     r_error = OK;
+	
+	Input::get_singleton()->set_event_dispatch_function(_dispatch_input_event);
 }
 DisplayServerNX::~DisplayServerNX() {
 
