@@ -315,6 +315,11 @@ Error EditorExportPlatformNX::export_project(const Ref<EditorExportPreset> &p_pr
 			newNmetaString += lines[i].replace("./NintendoSDK_Application.bmp", appIconTarget) + "\n";
 		} else if (lines[i].find("<DisplayVersion>1.0.0</DisplayVersion>") != -1) {
 			newNmetaString += lines[i].replace("1.0.0", p_preset->get("application/version")) + "\n";
+#ifdef NX_USE_PRESELECTED_USER
+			// Added in <Application>, after <DisplayVersion> or <CacheStorageJournalSize>
+			newNmetaString += "<StartupUserAccount>Required</StartupUserAccount>\n";
+			newNmetaString += "<UserAccountSwitchLock>Enable</UserAccountSwitchLock>\n";
+#endif
 		} else {
 			newNmetaString += lines[i] + "\n";
 		}
