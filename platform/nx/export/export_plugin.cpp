@@ -1,5 +1,6 @@
 #include "export_plugin.h"
 #include "editor/editor_paths.h"
+#include "core/config/project_settings.h"
 
 #include "modules/modules_enabled.gen.h"
 #ifdef MODULE_SVG_ENABLED
@@ -167,6 +168,12 @@ List<String> EditorExportPlatformNX::get_binary_extensions(const Ref<EditorExpor
 
 Error EditorExportPlatformNX::export_project(const Ref<EditorExportPreset> &p_preset, bool p_debug, const String &p_path, int p_flags)
 {
+	String terminate_cmd = OS::get_singleton()->get_environment("NINTENDO_SDK_ROOT") + "/Tools/CommandLineTools/ControlTarget.exe";
+	List<String> terminate_args;
+	terminate_args.push_back("terminate");
+	Error err_cmd = OS::get_singleton()->execute(terminate_cmd, terminate_args);
+	ERR_FAIL_COND_V(err_cmd, err_cmd);
+	
 	ExportNotifier notifier(*this, p_preset, p_debug, p_path, p_flags);
 
 	EditorProgress ep("export", "Exporting for Nintendo Switch", 5, true);
@@ -315,6 +322,23 @@ Error EditorExportPlatformNX::export_project(const Ref<EditorExportPreset> &p_pr
 			newNmetaString += lines[i].replace("./NintendoSDK_Application.bmp", appIconTarget) + "\n";
 		} else if (lines[i].find("<DisplayVersion>1.0.0</DisplayVersion>") != -1) {
 			newNmetaString += lines[i].replace("1.0.0", p_preset->get("application/version")) + "\n";
+/*			// Not currently used.
+			// Added in <Application>, after <DisplayVersion>
+			// Cache partition is only used when "read_only_cache" is off.
+			// Using the cache partition requires a special permission by Nintendo.
+			if(GLOBAL_GET("rendering/shader_compiler/shader_cache/enabled") && !GLOBAL_GET("rendering/shader_compiler/shader_cache/read_only")){
+				// FIXME: shader_cache_size_mb does not exist in Godot 4.x. Hardcoded 128MB
+				// int64_t shader_cache_size = (int)GLOBAL_GET("rendering/gles3/shaders/shader_cache_size_mb.mobile") * 1024 * 1024;
+				int64_t shader_cache_size = 128 * 1024 * 1024;
+				String hex = String::num_int64(shader_cache_size, 16, true);
+				String value;
+				for(int i = 0; i<16-hex.length(); i++)
+					value +="0";
+				value += hex;
+				newNmetaString += "<CacheStorageSize>0x"+value+"</CacheStorageSize>\n";
+				newNmetaString += "<CacheStorageJournalSize>0x"+value+"</CacheStorageJournalSize>\n";
+			}
+*/
 #ifdef NX_USE_PRESELECTED_USER
 			// Added in <Application>, after <DisplayVersion> or <CacheStorageJournalSize>
 			newNmetaString += "<StartupUserAccount>Required</StartupUserAccount>\n";
