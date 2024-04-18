@@ -362,6 +362,29 @@ void OS_NX::process_joy_buttons(int deviceIndex, const nn::hid::NpadButtonSet& c
 	} else {
 		input->joy_button(deviceIndex, JoyButton::DPAD_DOWN, false);	
 	}
+	
+	if (currentState.Test<nn::hid::NpadJoyButton::LeftSL>()) {
+		input->joy_button(deviceIndex, JoyButton::PADDLE1, true);
+	} else {
+		input->joy_button(deviceIndex, JoyButton::PADDLE1, false);	
+	}
+	
+	if (currentState.Test<nn::hid::NpadJoyButton::LeftSR>()) {
+		input->joy_button(deviceIndex, JoyButton::PADDLE2, true);
+	} else {
+		input->joy_button(deviceIndex, JoyButton::PADDLE2, false);	
+	}
+	
+	if (currentState.Test<nn::hid::NpadJoyButton::RightSL>()) {
+		input->joy_button(deviceIndex, JoyButton::PADDLE3, true);
+	} else {
+		input->joy_button(deviceIndex, JoyButton::PADDLE3, false);	
+	}
+	if (currentState.Test<nn::hid::NpadJoyButton::RightSR>()) {
+		input->joy_button(deviceIndex, JoyButton::PADDLE4, true);
+	} else {
+		input->joy_button(deviceIndex, JoyButton::PADDLE4, false);	
+	}
 }
 
 void OS_NX::process_joy_axis(int deviceIndex, const nn::hid::AnalogStickState &leftStick, const nn::hid::AnalogStickState &rightStick) {
