@@ -6,6 +6,7 @@
 #include "display_server_nx.h"
 
 #include "main/main.h"
+#include "core/config/project_settings.h"
 
 #include <assert.h>
 #include <signal.h>
@@ -651,5 +652,10 @@ String OS_NX::get_resource_dir() const {
 
 String OS_NX::get_cache_path() const {
 	// CACHE directory
-	return "cache://";
+	
+	if(!GLOBAL_GET("rendering/shader_compiler/shader_cache/read_only")) {
+		return get_user_data_dir();
+	} else {
+		return get_resource_dir();
+	}
 }

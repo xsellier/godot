@@ -1,6 +1,7 @@
 #include "file_access_nx.h"
 
 #include "core/os/os.h"
+#include "core/config/project_settings.h"
 
 #include <nn/nn_Result.h>
 
@@ -46,7 +47,7 @@ Error FileAccessNX::FileAccessNX::open_internal(const String &p_path, int p_mode
         } else {
             is_writable_user_data = false;
         }
-        if (p_path.begins_with(OS::get_singleton()->get_cache_path())) {
+        if (p_path.begins_with(OS::get_singleton()->get_cache_path()) && !GLOBAL_GET("rendering/shader_compiler/shader_cache/read_only")) {
             is_writable_cache_data = true;
         } else {
             is_writable_cache_data = false;

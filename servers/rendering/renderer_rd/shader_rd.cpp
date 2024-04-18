@@ -39,6 +39,8 @@
 
 #define ENABLE_SHADER_CACHE 1
 
+#include "core/config/project_settings.h"
+
 void ShaderRD::_add_stage(const char *p_code, StageType p_stage_type) {
 	Vector<String> lines = String(p_code).split("\n");
 
@@ -276,24 +278,24 @@ Vector<String> ShaderRD::_build_variant_stage_sources(uint32_t p_variant, Compil
 		StringBuilder builder;
 		_build_variant_code(builder, p_variant, p_data.version, stage_templates[STAGE_TYPE_COMPUTE]);
 		stage_sources.write[RD::SHADER_STAGE_COMPUTE] = builder.as_string();
-	} else {
+		} else {
 		{
 			// Vertex stage.
 			StringBuilder builder;
 			_build_variant_code(builder, p_variant, p_data.version, stage_templates[STAGE_TYPE_VERTEX]);
 			stage_sources.write[RD::SHADER_STAGE_VERTEX] = builder.as_string();
-		}
+	}
 
 		{
 			// Fragment stage.
-			StringBuilder builder;
+		StringBuilder builder;
 			_build_variant_code(builder, p_variant, p_data.version, stage_templates[STAGE_TYPE_FRAGMENT]);
 			stage_sources.write[RD::SHADER_STAGE_FRAGMENT] = builder.as_string();
 		}
 	}
 
 	return stage_sources;
-}
+	}
 
 void ShaderRD::_compile_variant(uint32_t p_variant, CompileData p_data) {
 	uint32_t variant = group_to_variant_map[p_data.group][p_variant];
@@ -444,8 +446,9 @@ bool ShaderRD::_load_from_cache(Version *p_version, int p_group) {
 	}
 
 	if (f.is_null()) {
-		const String &sha1 = _version_get_sha1(p_version);
-		print_verbose(vformat("Shader cache miss for %s", name.path_join(group_sha256[p_group]).path_join(sha1)));
+		if(GLOBAL_GET("rendering/shader_compiler/shader_cache/read_only")) {
+			print_verbose("Could not load cached shader (!exist): sha1 " + sha1 + ", path " + path);
+		}
 		return false;
 	}
 
@@ -455,6 +458,7 @@ bool ShaderRD::_load_from_cache(Version *p_version, int p_group) {
 
 	uint32_t file_version = f->get_32();
 	if (file_version != cache_file_version) {
+		print_verbose("Could not load cached shader (!version): sha1 " + sha1 + ", path " + path);
 		return false; // wrong version
 	}
 
@@ -505,6 +509,7 @@ bool ShaderRD::_load_from_cache(Version *p_version, int p_group) {
 	}
 
 	p_version->valid = true;
+	print_verbose("Loaded cached shader: sha1 " + sha1 + ", path " + path);
 	return true;
 }
 
@@ -856,18 +861,18 @@ void ShaderRD::_initialize_cache() {
 				ERR_FAIL_MSG(vformat("Unable to open shader cache directory at %s.", shader_cache_user_dir));
 			}
 
-			if (d->change_dir(name) != OK) {
-				Error err = d->make_dir(name);
+		if (d->change_dir(name) != OK) {
+			Error err = d->make_dir(name);
 				if (err != OK) {
 					shader_cache_user_dir_valid = false;
 					ERR_FAIL_MSG(vformat("Unable to create shader cache directory %s at %s.", name, shader_cache_user_dir));
 				}
 
-				d->change_dir(name);
-			}
+			d->change_dir(name);
+		}
 
-			if (d->change_dir(group_sha256[E.key]) != OK) {
-				Error err = d->make_dir(group_sha256[E.key]);
+		if (d->change_dir(group_sha256[E.key]) != OK) {
+			Error err = d->make_dir(group_sha256[E.key]);
 				if (err != OK) {
 					shader_cache_user_dir_valid = false;
 					ERR_FAIL_MSG(vformat("Unable to create shader cache directory %s/%s at %s.", name, group_sha256[E.key], shader_cache_user_dir));
