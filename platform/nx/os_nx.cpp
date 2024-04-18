@@ -263,13 +263,13 @@ void OS_NX::process_input() {
 void OS_NX::process_joy_buttons(int deviceIndex, const nn::hid::NpadButtonSet& currentState) {
     auto input = Input::get_singleton();
 
-	if (currentState.Test<nn::hid::NpadJoyButton::A>()) {
+	if (currentState.Test<nn::hid::NpadJoyButton::B>()) {
 		input->joy_button(deviceIndex, JoyButton::A, true);
 	} else {
 		input->joy_button(deviceIndex, JoyButton::A, false);
 	} 
 	
-	if (currentState.Test<nn::hid::NpadJoyButton::B>()) {
+	if (currentState.Test<nn::hid::NpadJoyButton::A>()) {
 		input->joy_button(deviceIndex, JoyButton::B, true);
 	} else {
 		input->joy_button(deviceIndex, JoyButton::B, false);
