@@ -833,13 +833,23 @@ bool FileAccess::store_var(const Variant &p_var, bool p_full_objects) {
 	ERR_FAIL_COND_V_MSG(err != OK, false, "Error when trying to encode Variant.");
 
 	Vector<uint8_t> buff;
-	buff.resize(len);
+
+	// NX: Updated this method to store the lenght with the buffer at the same time.
+	// (RIP big-endianness)
+	buff.resize(len + 4);
 
 	uint8_t *w = buff.ptrw();
-	err = encode_variant(p_var, &w[0], len, p_full_objects);
-	ERR_FAIL_COND_V_MSG(err != OK, false, "Error when trying to encode Variant.");
 
-	return store_32(uint32_t(len)) && store_buffer(buff);
+	uint32_t my_len = (uint32_t)len;
+	w[0] = my_len & 0xFF;
+	w[1] = (my_len >> 8) & 0xFF;
+	w[2] = (my_len >> 16) & 0xFF;
+	w[3] = (my_len >> 24) & 0xFF;
+
+	err = encode_variant(p_var, &w[4], len, p_full_objects);
+	ERR_FAIL_COND_MSG(err != OK, "Error when trying to encode Variant.");
+
+	return store_buffer(buff);
 }
 
 Vector<uint8_t> FileAccess::get_file_as_bytes(const String &p_path, Error *r_error) {
