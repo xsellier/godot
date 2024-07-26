@@ -55,10 +55,29 @@ void EditorExportPlatformNX::get_export_options(List<ExportOption> *r_options) c
 	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "texture_format/etc"), false));
 	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "texture_format/etc2"), false));
 	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "debug/renderdoc"), false));
+	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "debug/log_verbose"), false));
 }
 
-void EditorExportPlatformNX::get_preset_features(const Ref<EditorExportPreset> &p_preset, List<String> *r_features) const
-{
+Error EditorExportPlatformNX::execute_cmd(const String &p_path, const List<String> &p_arguments, bool p_log_verbose) const {
+	String pipe;
+	if (p_log_verbose) {
+		print_line("[EditorExportPlatformNX] Executing:", p_path);
+	}
+	Error err = OS::get_singleton()->execute(p_path, p_arguments, &pipe);
+	PackedStringArray lines = pipe.split("\n\r", false);
+	String error_string = "Error:";
+	for (int i = 0; i < lines.size(); i++) {
+		String line = lines[i];
+		if (error_string.is_subsequence_of(line)) {
+			print_error(line.strip_edges());
+		} else if (p_log_verbose) {
+			print_line(line.strip_edges());
+		}
+	}
+	return err;
+}
+
+void EditorExportPlatformNX::get_preset_features(const Ref<EditorExportPreset> &p_preset, List<String> *r_features) const {
     if (p_preset->get("texture_format/s3tc")) {
 		r_features->push_back("s3tc");
 	}
@@ -82,7 +101,7 @@ bool EditorExportPlatformNX::has_valid_export_configuration(const Ref<EditorExpo
     String err;
 	bool valid = true;
 	bool use64 = p_preset->get("binary_format/64_bits");
-
+	
 #ifndef WINDOWS_ENABLED
     // Can only export on windows
     valid = false;
@@ -168,10 +187,11 @@ List<String> EditorExportPlatformNX::get_binary_extensions(const Ref<EditorExpor
 
 Error EditorExportPlatformNX::export_project(const Ref<EditorExportPreset> &p_preset, bool p_debug, const String &p_path, int p_flags)
 {
+	bool log_verbose = p_preset->get("debug/log_verbose");
 	String terminate_cmd = OS::get_singleton()->get_environment("NINTENDO_SDK_ROOT") + "/Tools/CommandLineTools/ControlTarget.exe";
 	List<String> terminate_args;
 	terminate_args.push_back("terminate");
-	Error err_cmd = OS::get_singleton()->execute(terminate_cmd, terminate_args);
+	Error err_cmd = execute_cmd(terminate_cmd, terminate_args, log_verbose);
 	ERR_FAIL_COND_V(err_cmd, err_cmd);
 	
 	ExportNotifier notifier(*this, p_preset, p_debug, p_path, p_flags);
@@ -276,7 +296,7 @@ Error EditorExportPlatformNX::export_project(const Ref<EditorExportPreset> &p_pr
 	makenso_args.push_back(src_pkg_name);
 	//makenso_args.push_back(dest_dir + binary_name + "/code/" + binary_name + ".nso");
 	makenso_args.push_back(dest_dir + binary_name + "/code/" + "main");
-	err = OS::get_singleton()->execute(makenso_command, makenso_args);
+	err = execute_cmd(makenso_command, makenso_args, log_verbose);
 	ERR_FAIL_COND_V(err, err);
 
 	// Special preprocessing for application icon
@@ -373,7 +393,7 @@ Error EditorExportPlatformNX::export_project(const Ref<EditorExportPreset> &p_pr
 	makemeta_args.push_back("-o");
 	//makemeta_args.push_back(dest_dir + binary_name + "/code/" + binary_name + ".npdm");
 	makemeta_args.push_back(dest_dir + binary_name + "/code/" + "main.npdm");
-	err = OS::get_singleton()->execute(makemeta_command, makemeta_args);
+	err = execute_cmd(makemeta_command, makemeta_args, log_verbose);
 	ERR_FAIL_COND_V(err, err);
 
 	// Fill Code Region Directory
@@ -424,7 +444,7 @@ Error EditorExportPlatformNX::export_project(const Ref<EditorExportPreset> &p_pr
 	creatensp_args.push_back("--program");
 	creatensp_args.push_back(dest_dir + binary_name + "/code/");
 	creatensp_args.push_back(dest_dir + binary_name + "/data/");
-	err = OS::get_singleton()->execute(authoring_tool_command, creatensp_args);
+	err = execute_cmd(authoring_tool_command, creatensp_args, log_verbose);
 	ERR_FAIL_COND_V(err, err);
 
     return OK;

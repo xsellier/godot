@@ -108,6 +108,8 @@ class EditorExportPlatformNX : public EditorExportPlatform {
 		}
 	}
 
+	Error execute_cmd(const String &p_path, const List<String> &p_arguments, bool p_log_all_output) const;
+
 protected:
     void get_preset_features(const Ref<EditorExportPreset> &p_preset, List<String> *r_features) const override;
     void get_export_options(List<ExportOption> *r_options) const override;
