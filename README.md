@@ -44,17 +44,33 @@ Now click ```Export Project``` to generate and save an ```.nsp``` file. This is 
 
 It is also possible to launch your Game directly from Godot provided you have already set valid export settings. To do this click the Nintendo Switch icon in the top right corner of the editor.
 
+## Important Notes for Exporting to Nintendo Switch
+
+Please use Nintendo SDK version 17.x. Exporting with version 18.x may result in errors.
+
+Currently, Godot NX 4.x only supports Vulkan. To ensure proper functionality, follow these steps:
+
+1. Go to ```Project->Project Setting->Renderer...```
+2. Set Rendering Method to ```mobile```
+3. Set Rendering Method.mobile to ```mobile```
+4. Set Rendering Method.web to ```gl_compatibility```
+
+Important: If you set Rendering Method/Rendering Method.mobile to ```gl_compatibility```, the exported file will crash when executed.
+
 ## Debugging
 
 ### C/C++
+
 To debug your game and the Godot engine itself, open the ```.nsp``` file you exported in Visual Studio.  Launch this file in debug mode, and associate Visual Studio with the Godot source code directory when necessary.
 
 ### Godot Remote Debugging/Profiling
+
 It is possible to remotely debug your game running on the development hardware via the network. Make sure that you have a local network connection configured on your development hardware, then configure the Godot Editor with the expected IP address of your device like you would when remote debugging in Godot.  The steps necessary in the editor to achieve this are to first enable ```Deploy with Remote debug``` in the ```Debug``` menu. Then in the ```Editor Settings...``` dialog accessed through the ```Editor``` menu, In the ```Network->Debug``` setting set the remote host to be your local network ip address.  The default is ```127.0.0.1``` which will not work because you are not running on the same machine. Instead it needs to be an IP address that is accessible on the same network you have connected your development hardware to.
 
 When the game is launched in remote debugging mode, Godot should connect to the device and allow you to break and step through Godot Script code, As well as profile and monitor the contents performance on the hardware.  In addition you should be able to remotely modify your scene on the device by changing properties in the Remote scene editor.
 
 ### RenderDoc
+
 RenderDoc is included in the Nintendo SDK. To be able to attach to a running game for capturing frames, Enable the Renderdoc checkbox in the debug section of the Nintendo Switch Export options. When this checkbox is enabled, your game will be linked against the modified OpenGL libraries necessary to capture with RenderDoc. When it's working you will see additional text at the top left for your game window.
 
 Once this is working, you can connect to the game session running on the hardware by running the version of RenderDoc that comes with the Nintendo SDK. Then you just need to capture a frame from the RenderDoc interface to inspect the state of the graphics pipeline when rendering the captured frame. For more details consult the Nintendo SDK documentation on RenderDoc.
