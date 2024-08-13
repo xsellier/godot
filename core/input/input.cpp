@@ -149,6 +149,7 @@ void Input::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_vector", "negative_x", "positive_x", "negative_y", "positive_y", "deadzone"), &Input::get_vector, DEFVAL(-1.0f));
 	ClassDB::bind_method(D_METHOD("add_joy_mapping", "mapping", "update_existing"), &Input::add_joy_mapping, DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("remove_joy_mapping", "guid"), &Input::remove_joy_mapping);
+	ClassDB::bind_method(D_METHOD("is_joy_auto_mapped", "device"), &Input::is_joy_auto_mapped);
 	ClassDB::bind_method(D_METHOD("is_joy_known", "device"), &Input::is_joy_known);
 	ClassDB::bind_method(D_METHOD("get_joy_axis", "device", "axis"), &Input::get_joy_axis);
 	ClassDB::bind_method(D_METHOD("get_joy_name", "device"), &Input::get_joy_name);
@@ -1745,11 +1746,82 @@ void Input::set_fallback_mapping(const String &p_guid) {
 	}
 }
 
+void Input::set_unknown_gamepad_auto_mapped(bool p_auto) {
+	unknown_gamepad_auto_mapped = p_auto;
+}
+
+bool Input::is_unknown_gamepad_auto_mapped() {
+	return unknown_gamepad_auto_mapped;
+}
+
+void Input::unknown_gamepad_auto_map(const StringName &p_guid, const String &p_name, const int *p_key_map, const int *p_axis_map, bool p_trigger_is_key) {
+	JoyDeviceMapping mapping;
+	mapping.auto_generated = true;
+	mapping.uid = p_guid;
+	mapping.name = p_name;
+
+	for (int i = 0; i < int(JoyButton::SDL_MAX); i++) {
+		JoyBinding binding;
+
+		binding.outputType = TYPE_BUTTON;
+		binding.output.button = JoyButton(i);
+
+		binding.inputType = TYPE_BUTTON;
+		binding.input.button = JoyButton(p_key_map[i]);
+
+		mapping.bindings.push_back(binding);
+	}
+
+	for (int i = 0; i < int(JoyAxis::SDL_MAX); i++) {
+		JoyBinding binding;
+
+		binding.outputType = TYPE_AXIS;
+		binding.output.axis.axis = JoyAxis(i);
+		binding.output.axis.range = JoyAxisRange::FULL_AXIS;
+
+		if (p_trigger_is_key && i >= int(JoyAxis::SDL_MAX) - 2) {
+			binding.inputType = TYPE_BUTTON;
+			binding.input.button = JoyButton(p_axis_map[i]);
+		} else {
+			binding.inputType = TYPE_AXIS;
+			binding.input.axis.axis = JoyAxis(p_axis_map[i]);
+			binding.input.axis.range = JoyAxisRange::FULL_AXIS;
+			binding.input.axis.invert = false;
+		}
+
+		mapping.bindings.push_back(binding);
+	}
+
+	map_db.push_back(mapping);
+}
+
+bool Input::is_mapping_known(const StringName &p_guid) {
+	for (const JoyDeviceMapping &map : map_db) {
+		if (map.uid == p_guid) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Input::is_joy_auto_mapped(int p_device) {
+	if (!joy_names.has(p_device)) {
+		return false;
+	}
+
+	int mapping = joy_names[p_device].mapping;
+	if (mapping == -1) {
+		return false;
+	}
+
+	return map_db[mapping].auto_generated;
+}
+
 //platforms that use the remapping system can override and call to these ones
 bool Input::is_joy_known(int p_device) {
 	if (joy_names.has(p_device)) {
 		int mapping = joy_names[p_device].mapping;
-		if (mapping != -1 && mapping != fallback_mapping) {
+		if (mapping != -1 && mapping != fallback_mapping && !map_db[mapping].auto_generated) {
 			return true;
 		}
 	}

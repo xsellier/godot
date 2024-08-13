@@ -186,6 +186,8 @@ private:
 
 	int fallback_mapping = -1;
 
+	bool unknown_gamepad_auto_mapped = true;
+
 	CursorShape default_shape = CURSOR_ARROW;
 
 	enum JoyType {
@@ -238,6 +240,7 @@ private:
 	};
 
 	struct JoyDeviceMapping {
+		bool auto_generated = false;
 		String uid;
 		String name;
 		Vector<JoyBinding> bindings;
@@ -368,9 +371,14 @@ public:
 
 	void add_joy_mapping(const String &p_mapping, bool p_update_existing = false);
 	void remove_joy_mapping(const String &p_guid);
+	void set_unknown_gamepad_auto_mapped(bool p_auto);
+	bool is_unknown_gamepad_auto_mapped();
+	void unknown_gamepad_auto_map(const StringName &p_guid, const String &p_name, const int *p_key_map, const int *p_axis_map, bool p_trigger_is_key);
 
 	int get_unused_joy_id();
 
+	bool is_mapping_known(const StringName &p_guid);
+	bool is_joy_auto_mapped(int p_device);
 	bool is_joy_known(int p_device);
 	String get_joy_guid(int p_device) const;
 	bool should_ignore_device(int p_vendor_id, int p_product_id) const;
