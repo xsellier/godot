@@ -47,6 +47,7 @@ public:
 
 	bool eof_reached() const override; ///< reading passed EOF
 
+	virtual Error resize(int64_t p_length) override { return ERR_UNAVAILABLE; }
 	uint8_t get_8() const override; ///< get a byte
 	uint64_t get_buffer(uint8_t *p_dst, uint64_t p_length) const override;
 

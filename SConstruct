@@ -1092,157 +1092,16 @@ for name, path in modules_detected.items():
 env.module_list = modules_enabled
 methods.sort_module_list(env)
 
+if env["nx_use_preselected_user"]:
+    env.Append(CPPDEFINES=["NX_USE_PRESELECTED_USER"])
+
 if env.editor_build:
     # Add editor-specific dependencies to the dependency graph.
     env.module_add_dependencies("editor", ["freetype", "regex", "svg"])
 
-    if env.editor_build:
-        # Add editor-specific dependencies to the dependency graph.
-        env.module_add_dependencies("editor", ["freetype", "svg"])
-
-        # And check if they are met.
-        if not env.module_check_dependencies("editor"):
-            print("Not all modules required by editor builds are enabled.")
-            Exit(255)
-
-    methods.generate_version_header(env.module_version_string)
-
-    env["PROGSUFFIX_WRAP"] = suffix + env.module_version_string + ".console" + env["PROGSUFFIX"]
-    env["PROGSUFFIX"] = suffix + env.module_version_string + env["PROGSUFFIX"]
-    env["OBJSUFFIX"] = suffix + env["OBJSUFFIX"]
-    # (SH)LIBSUFFIX will be used for our own built libraries
-    # LIBSUFFIXES contains LIBSUFFIX and SHLIBSUFFIX by default,
-    # so we need to append the default suffixes to keep the ability
-    # to link against thirdparty libraries (.a, .so, .lib, etc.).
-    if os.name == "nt":
-        # On Windows, only static libraries and import libraries can be
-        # statically linked - both using .lib extension
-        env["LIBSUFFIXES"] += [env["LIBSUFFIX"]]
-    else:
-        env["LIBSUFFIXES"] += [env["LIBSUFFIX"], env["SHLIBSUFFIX"]]
-    env["LIBSUFFIX"] = suffix + env["LIBSUFFIX"]
-    env["SHLIBSUFFIX"] = suffix + env["SHLIBSUFFIX"]
-
-    env["OBJPREFIX"] = env["object_prefix"]
-    env["SHOBJPREFIX"] = env["object_prefix"]
-
-    if env["disable_3d"]:
-        if env.editor_build:
-            print("Build option 'disable_3d=yes' cannot be used for editor builds, only for export template builds.")
-            Exit(255)
-        else:
-            env.Append(CPPDEFINES=["_3D_DISABLED"])
-    if env["disable_advanced_gui"]:
-        if env.editor_build:
-            print(
-                "Build option 'disable_advanced_gui=yes' cannot be used for editor builds, "
-                "only for export template builds."
-            )
-            Exit(255)
-        else:
-            env.Append(CPPDEFINES=["ADVANCED_GUI_DISABLED"])
-    if env["minizip"]:
-        env.Append(CPPDEFINES=["MINIZIP_ENABLED"])
-    if env["nx_use_preselected_user"]:
-        env.Append(CPPDEFINES=["NX_USE_PRESELECTED_USER"])
-    if env["brotli"]:
-        env.Append(CPPDEFINES=["BROTLI_ENABLED"])
-
-    if not env["verbose"]:
-        methods.no_verbose(sys, env)
-
-    GLSL_BUILDERS = {
-        "RD_GLSL": env.Builder(
-            action=env.Run(glsl_builders.build_rd_headers, 'Building RD_GLSL header: "$TARGET"'),
-            suffix="glsl.gen.h",
-            src_suffix=".glsl",
-        ),
-        "GLSL_HEADER": env.Builder(
-            action=env.Run(glsl_builders.build_raw_headers, 'Building GLSL header: "$TARGET"'),
-            suffix="glsl.gen.h",
-            src_suffix=".glsl",
-        ),
-        "GLES3_GLSL": env.Builder(
-            action=env.Run(gles3_builders.build_gles3_headers, 'Building GLES3 GLSL header: "$TARGET"'),
-            suffix="glsl.gen.h",
-            src_suffix=".glsl",
-        ),
-    }
-    env.Append(BUILDERS=GLSL_BUILDERS)
-
-    scons_cache_path = os.environ.get("SCONS_CACHE")
-    if scons_cache_path != None:
-        CacheDir(scons_cache_path)
-        print("Scons cache enabled... (path: '" + scons_cache_path + "')")
-
-    if env["vsproj"]:
-        env.vs_incs = []
-        env.vs_srcs = []
-
-    if env["compiledb"]:
-        # Generating the compilation DB (`compile_commands.json`) requires SCons 4.0.0 or later.
-        from SCons import __version__ as scons_raw_version
-
-        scons_ver = env._get_major_minor_revision(scons_raw_version)
-
-        if scons_ver < (4, 0, 0):
-            print("The `compiledb=yes` option requires SCons 4.0 or later, but your version is %s." % scons_raw_version)
-            Exit(255)
-
-        env.Tool("compilation_db")
-        env.Alias("compiledb", env.CompilationDatabase())
-
-    Export("env")
-
-    # Build subdirs, the build order is dependent on link order.
-    SConscript("core/SCsub")
-    SConscript("servers/SCsub")
-    SConscript("scene/SCsub")
-    if env.editor_build:
-        SConscript("editor/SCsub")
-    SConscript("drivers/SCsub")
-
-    SConscript("platform/SCsub")
-    SConscript("modules/SCsub")
-    if env["tests"]:
-        SConscript("tests/SCsub")
-    SConscript("main/SCsub")
-
-    SConscript("platform/" + selected_platform + "/SCsub")  # Build selected platform.
-
-    # Microsoft Visual Studio Project Generation
-    if env["vsproj"]:
-        if os.name != "nt":
-            print("Error: The `vsproj` option is only usable on Windows with Visual Studio.")
-            Exit(255)
-        env["CPPPATH"] = [Dir(path) for path in env["CPPPATH"]]
-        methods.generate_vs_project(env, ARGUMENTS, env["vsproj_name"])
-        methods.generate_cpp_hint_file("cpp.hint")
-
-    # Check for the existence of headers
-    conf = Configure(env)
-    if "check_c_headers" in env:
-        headers = env["check_c_headers"]
-        for header in headers:
-            if conf.CheckCHeader(header):
-                env.AppendUnique(CPPDEFINES=[headers[header]])
-
-elif selected_platform != "":
-    if selected_platform == "list":
-        print("The following platforms are available:\n")
-    else:
-        print('Invalid target platform "' + selected_platform + '".')
-        print("The following platforms were detected:\n")
-
-    for x in platform_list:
-        print("\t" + x)
-
-    print("\nPlease run SCons again and select a valid platform: platform=<string>")
-
-    if selected_platform == "list":
-        # Exit early to suppress the rest of the built-in SCons messages
-        Exit()
-    else:
+    # And check if they are met.
+    if not env.module_check_dependencies("editor"):
+        print_error("Not all modules required by editor builds are enabled.")
         Exit(255)
 
 env["PROGSUFFIX_WRAP"] = suffix + env.module_version_string + ".console" + env["PROGSUFFIX"]

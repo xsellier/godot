@@ -4,7 +4,7 @@
 #include "core/input/input.h"
 #include "core/os/os.h"
 #include "servers/audio_server.h"
-#include "drivers/vulkan/rendering_device_vulkan.h"
+#include "drivers/vulkan/rendering_device_driver_vulkan.h"
 #include "vulkan_context_nx.h"
 
 #include "audio_driver_nx.h"
@@ -59,7 +59,6 @@ class OS_NX : public OS {
 	Vector2 last_touch_pos[nn::hid::TouchStateCountMax];
 
     String stdin_buf;
-	int roModuleCount = 0;
 
 	// File System Data
 	void mountRom();
@@ -130,6 +129,8 @@ public:
 	String get_user_data_dir() const override;
 	String get_resource_dir() const override;
 	String get_cache_path() const override;
+	
+	int get_process_exit_code(const ProcessID &p_pid) const override;
 
     OS_NX();
     void run();

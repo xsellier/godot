@@ -13,7 +13,7 @@ public:
     ~NetSocket_NX();
 
     Error open(Type p_type, IP::Type &ip_type) override;
-	void close() override;
+	virtual void close() override;
 	Error bind(IPAddress p_addr, uint16_t p_port) override;
 	Error listen(int p_max_pending) override;
 	Error connect_to_host(IPAddress p_addr, uint16_t p_port) override;
@@ -28,13 +28,13 @@ public:
 	int get_available_bytes() const override;
     Error get_socket_address(IPAddress *r_ip, uint16_t *r_port) const override;
 
-	Error set_broadcasting_enabled(bool p_enabled) override;
+	virtual Error set_broadcasting_enabled(bool p_enabled) override;
 	void set_blocking_enabled(bool p_enabled) override;
 	void set_ipv6_only_enabled(bool p_enabled) override;
 	void set_tcp_no_delay_enabled(bool p_enabled) override;
 	void set_reuse_address_enabled(bool p_enabled) override;
-	Error join_multicast_group(const IPAddress &p_multi_address, String p_if_name) override;
-	Error leave_multicast_group(const IPAddress &p_multi_address, String p_if_name) override;
+	virtual Error join_multicast_group(const IPAddress &p_multi_address, const String &p_if_name) override;
+	virtual Error leave_multicast_group(const IPAddress &p_multi_address, const String &p_if_name) override;
 
 protected:
 	static NetSocket *_create_func();

@@ -447,7 +447,7 @@ bool ShaderRD::_load_from_cache(Version *p_version, int p_group) {
 
 	if (f.is_null()) {
 		if(GLOBAL_GET("rendering/shader_compiler/shader_cache/read_only")) {
-			print_verbose("Could not load cached shader (!exist): sha1 " + sha1 + ", path " + path);
+			print_verbose("Could not load cached shader (!exist): path " + path);
 		}
 		return false;
 	}
@@ -458,7 +458,7 @@ bool ShaderRD::_load_from_cache(Version *p_version, int p_group) {
 
 	uint32_t file_version = f->get_32();
 	if (file_version != cache_file_version) {
-		print_verbose("Could not load cached shader (!version): sha1 " + sha1 + ", path " + path);
+		print_verbose("Could not load cached shader (!version): path " + path);
 		return false; // wrong version
 	}
 
@@ -509,7 +509,7 @@ bool ShaderRD::_load_from_cache(Version *p_version, int p_group) {
 	}
 
 	p_version->valid = true;
-	print_verbose("Loaded cached shader: sha1 " + sha1 + ", path " + path);
+	print_verbose("Loaded cached shader: path " + path);
 	return true;
 }
 

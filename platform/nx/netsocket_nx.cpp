@@ -364,11 +364,11 @@ void NetSocket_NX::set_reuse_address_enabled(bool p_enabled) {
 	}
 }
 
-Error NetSocket_NX::join_multicast_group(const IPAddress &p_multi_address, String p_if_name) {
+Error NetSocket_NX::join_multicast_group(const IPAddress &p_multi_address, const String &p_if_name) {
 	return _change_multicast_group(p_multi_address, p_if_name, true);
 }
 	
-Error NetSocket_NX::leave_multicast_group(const IPAddress &p_multi_address, String p_if_name) {
+Error NetSocket_NX::leave_multicast_group(const IPAddress &p_multi_address, const String &p_if_name) {
 	return _change_multicast_group(p_multi_address, p_if_name, false);
 }
 

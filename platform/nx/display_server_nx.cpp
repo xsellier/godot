@@ -49,7 +49,7 @@ void DisplayServerNX::register_nx_driver() {
     register_create_function("nx", create_func, get_rendering_drivers_func);
 }
 
-DisplayServer *DisplayServerNX::create_func(const String &p_rendering_driver, WindowMode p_mode, DisplayServer::VSyncMode p_vsync_mode, uint32_t p_flags, const Vector2i *p_position, const Vector2i &p_resolution, int p_screen, Error &r_error) {
+DisplayServer *DisplayServerNX::create_func(const String &p_rendering_driver, DisplayServer::WindowMode p_mode, DisplayServer::VSyncMode p_vsync_mode, uint32_t p_flags, const Vector2i *p_position, const Vector2i &p_resolution, int p_screen, Context p_context, Error &r_error) {
     return memnew(DisplayServerNX(p_rendering_driver, p_mode, p_vsync_mode, p_flags, p_position, p_resolution, p_screen, r_error));
 }
 
@@ -99,14 +99,35 @@ DisplayServerNX::DisplayServerNX(const String &p_rendering_driver, DisplayServer
             // if (!result.IsSuccess())
             //     OS::get_singleton()->alert("Failed to set layer scaling mode");
 
-            if (context_vulkan->window_create(MAIN_WINDOW_ID, p_vsync_mode, viLayer, p_resolution.width, p_resolution.height) != OK) {
+			union {
+#ifdef VULKAN_ENABLED
+				VulkanContextNX::WindowPlatformData vulkan;
+#endif
+			} wpd;
+		
+			wpd.vulkan.viLayer = viLayer;
+
+			if (context_vulkan->window_create(MAIN_WINDOW_ID, &wpd) != OK) {
 			    memdelete(context_vulkan);
 			    context_vulkan = nullptr;
 			    ERR_FAIL_MSG("Failed to create Vulkan window.");
 		    }
 
-            rendering_device_vulkan = memnew(RenderingDeviceVulkan);
-		    rendering_device_vulkan->initialize(context_vulkan);
+            rendering_device_vulkan = memnew(RenderingDevice);
+		    
+			if (rendering_device_vulkan->initialize(context_vulkan, MAIN_WINDOW_ID) != OK) {
+				rendering_device_vulkan = nullptr;
+				memdelete(context_vulkan);
+				context_vulkan = nullptr;
+				r_error = ERR_UNAVAILABLE;
+				ERR_FAIL_MSG("Failed to initialize Vulkan rendering device.");
+				return;
+			}
+			
+			context_vulkan->window_set_size(MAIN_WINDOW_ID, p_resolution.width, p_resolution.height);
+			context_vulkan->window_set_vsync_mode(MAIN_WINDOW_ID, p_vsync_mode);
+
+			rendering_device_vulkan->screen_create(MAIN_WINDOW_ID);
 
 		    RendererCompositorRD::make_current();
             resolution = Size2i(p_resolution.width, p_resolution.height);

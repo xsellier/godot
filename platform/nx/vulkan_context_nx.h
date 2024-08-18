@@ -1,15 +1,22 @@
 #ifndef VULKAN_DEVICE_NX_H
 #define VULKAN_DEVICE_NX_H
 
-#include "drivers/vulkan/vulkan_context.h"
+#include "drivers/vulkan/rendering_context_driver_vulkan.h"
 #include <nn/vi.h>
 
+struct ANativeWindow;
 
-class VulkanContextNX : public VulkanContext {
-	virtual const char *_get_platform_surface_extension() const;
+class VulkanContextNX : public RenderingContextDriverVulkan {
+	virtual const char *_get_platform_surface_extension() const override final;
 
+protected:
+	SurfaceID surface_create(const void *p_platform_data) override final;
+	
 public:
-	int window_create(DisplayServer::WindowID p_window_id, DisplayServer::VSyncMode p_vsync_mode, nn::vi::Layer* p_layer, int p_width, int p_height);
+	struct WindowPlatformData {
+		ANativeWindow *window;
+		nn::vi::Layer *viLayer;
+	};
 
 	VulkanContextNX();
 	~VulkanContextNX();

@@ -9,7 +9,7 @@
 #include "platform/nx/export/logo_svg.gen.h"
 #include "scene/resources/texture.h"
 #include "core/error/error_list.h"
-#include "editor/editor_scale.h"
+#include "editor/themes/editor_scale.h"
 
 class EditorExportPlatformNX : public EditorExportPlatform {
     GDCLASS(EditorExportPlatformNX, EditorExportPlatform);

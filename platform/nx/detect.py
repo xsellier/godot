@@ -305,4 +305,5 @@ def configure(env):
         'NX_ENABLED',
         'UNIX_SOCKET_UNAVAILABLE',
         'VULKAN_ENABLED',
+        'RD_ENABLED',
         ])

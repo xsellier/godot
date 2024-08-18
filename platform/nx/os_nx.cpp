@@ -682,3 +682,7 @@ String OS_NX::get_cache_path() const {
 		return get_resource_dir();
 	}
 }
+
+int OS_NX::get_process_exit_code(const ProcessID &p_pid) const {
+	return -1;
+}
