@@ -80,8 +80,8 @@ extern "C" void nnMain()
         NN_LOG("nnMain failed to setup Main\n");
 		return;
     }
-
-	if (Main::start())
+	
+	if (Main::start() == EXIT_SUCCESS)
 		os.run(); // it is actually the OS that decides how to run
 	Main::cleanup();
 
