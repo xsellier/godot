@@ -62,6 +62,7 @@ static const WORD MAX_CONSOLE_LINES = 1500;
 extern "C" {
 __declspec(dllexport) DWORD NvOptimusEnablement = 1;
 __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+__declspec(dllexport) void NoHotPatch() {} // Disable Nahimic code injection.
 }
 
 // Workaround mingw-w64 < 4.0 bug
@@ -173,7 +174,7 @@ void OS_Windows::initialize_core() {
 
 	last_button_state = 0;
 
-	//RedirectIOToConsole();
+	// RedirectIOToConsole();
 	maximized = false;
 	minimized = false;
 	borderless = false;
@@ -185,7 +186,7 @@ void OS_Windows::initialize_core() {
 	FileAccess::make_default<FileAccessWindows>(FileAccess::ACCESS_RESOURCES);
 	FileAccess::make_default<FileAccessWindows>(FileAccess::ACCESS_USERDATA);
 	FileAccess::make_default<FileAccessWindows>(FileAccess::ACCESS_FILESYSTEM);
-	//FileAccessBufferedFA<FileAccessWindows>::make_default();
+	// FileAccessBufferedFA<FileAccessWindows>::make_default();
 	DirAccess::make_default<DirAccessWindows>(DirAccess::ACCESS_RESOURCES);
 	DirAccess::make_default<DirAccessWindows>(DirAccess::ACCESS_USERDATA);
 	DirAccess::make_default<DirAccessWindows>(DirAccess::ACCESS_FILESYSTEM);
@@ -350,7 +351,7 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 		{
 			if (main_loop)
 				main_loop->notification(MainLoop::NOTIFICATION_WM_QUIT_REQUEST);
-			//force_quit=true;
+			// force_quit=true;
 			return 0; // Jump Back
 		}
 		case WM_MOUSELEAVE: {
@@ -364,7 +365,7 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 		case WM_MOUSEMOVE: {
 
 			if (outside) {
-				//mouse enter
+				// mouse enter
 
 				if (main_loop && mouse_mode != MOUSE_MODE_CAPTURED)
 					main_loop->notification(MainLoop::NOTIFICATION_WM_MOUSE_ENTER);
@@ -374,7 +375,7 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 				set_cursor_shape(c);
 				outside = false;
 
-				//Once-Off notification, must call again....
+				// Once-Off notification, must call again....
 				TRACKMOUSEEVENT tme;
 				tme.cbSize = sizeof(TRACKMOUSEEVENT);
 				tme.dwFlags = TME_LEAVE;
@@ -565,7 +566,7 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 				mb.mod.control = (wParam & MK_CONTROL) != 0;
 				mb.mod.shift = (wParam & MK_SHIFT) != 0;
 				mb.mod.alt = alt_mem;
-				//mb.mod.alt=(wParam&MK_MENU)!=0;
+				// mb.mod.alt=(wParam&MK_MENU)!=0;
 				mb.button_mask |= (wParam & MK_LBUTTON) ? (1 << 0) : 0;
 				mb.button_mask |= (wParam & MK_RBUTTON) ? (1 << 1) : 0;
 				mb.button_mask |= (wParam & MK_MBUTTON) ? (1 << 2) : 0;
@@ -615,7 +616,7 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 				if (main_loop) {
 					input->parse_input_event(event);
 					if (mb.pressed && mb.button_index > 3) {
-						//send release for mouse wheel
+						// send release for mouse wheel
 						mb.pressed = false;
 						event.ID = ++last_id;
 						input->parse_input_event(event);
@@ -631,7 +632,7 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 				video_mode.width = window_w;
 				video_mode.height = window_h;
 			}
-			//return 0;								// Jump Back
+			// return 0;								// Jump Back
 		} break;
 
 		case WM_ENTERSIZEMOVE: {
@@ -664,10 +665,10 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 					gr_mem = alt_mem;
 			}
 
-			//if (wParam==VK_WIN) TODO wtf is this?
+			// if (wParam==VK_WIN) TODO wtf is this?
 			//	meta_mem=uMsg==WM_KEYDOWN;
 
-		} //fallthrough
+		} // fallthrough
 		case WM_CHAR: {
 
 			ERR_BREAK(key_event_pos >= KEY_EVENT_BUFFER_SIZE);
@@ -713,7 +714,7 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 				if (GetTouchInputInfo((HTOUCHINPUT)lParam, cInputs, pInputs, sizeof(TOUCHINPUT))) {
 					for (UINT i = 0; i < cInputs; i++) {
 						TOUCHINPUT ti = pInputs[i];
-						//do something with each touch input entry
+						// do something with each touch input entry
 						if (ti.dwFlags & TOUCHEVENTF_MOVE) {
 
 							_drag_event(ti.x / 100, ti.y / 100, ti.dwID);
@@ -746,7 +747,7 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
 			if (LOWORD(lParam) == HTCLIENT) {
 				if (window_has_focus && (mouse_mode == MOUSE_MODE_HIDDEN || mouse_mode == MOUSE_MODE_CAPTURED)) {
-					//Hide the cursor
+					// Hide the cursor
 					if (hCursor == NULL)
 						hCursor = SetCursor(NULL);
 					else
@@ -836,7 +837,7 @@ void OS_Windows::process_key_events() {
 					input->parse_input_event(event);
 				}
 
-				//do nothing
+				// do nothing
 			} break;
 			case WM_KEYUP:
 			case WM_KEYDOWN: {
@@ -960,7 +961,7 @@ void OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int 
 	}
 
 	video_mode = p_desired;
-	//printf("**************** desired %s, mode %s\n", p_desired.fullscreen?"true":"false", video_mode.fullscreen?"true":"false");
+	// printf("**************** desired %s, mode %s\n", p_desired.fullscreen?"true":"false", video_mode.fullscreen?"true":"false");
 	RECT WindowRect;
 
 	WindowRect.left = 0;
@@ -978,10 +979,10 @@ void OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int 
 	wc.lpfnWndProc = (WNDPROC)::WndProc;
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
-	//wc.hInstance = hInstance;
+	// wc.hInstance = hInstance;
 	wc.hInstance = godot_hinstance ? godot_hinstance : GetModuleHandle(NULL);
 	wc.hIcon = LoadIcon(NULL, IDI_WINLOGO);
-	wc.hCursor = NULL; //LoadCursor(NULL, IDC_ARROW);
+	wc.hCursor = NULL; // LoadCursor(NULL, IDC_ARROW);
 	wc.hbrBackground = NULL;
 	wc.lpszMenuName = NULL;
 	wc.lpszClassName = L"Engine";
@@ -1168,7 +1169,7 @@ void OS_Windows::set_clipboard(const String &p_text) {
 	};
 	LPWSTR lptstrCopy = (LPWSTR)GlobalLock(mem);
 	memcpy(lptstrCopy, p_text.c_str(), (p_text.length() + 1) * sizeof(CharType));
-	//memset((lptstrCopy + p_text.length()), 0, sizeof(CharType));
+	// memset((lptstrCopy + p_text.length()), 0, sizeof(CharType));
 	GlobalUnlock(mem);
 
 	SetClipboardData(CF_UNICODETEXT, mem);
@@ -1274,9 +1275,9 @@ void OS_Windows::finalize() {
 	spatial_sound_2d_server->finish();
 	memdelete(spatial_sound_2d_server);
 
-	//if (debugger_connection_console) {
+	// if (debugger_connection_console) {
 	//		memdelete(debugger_connection_console);
-	//}
+	// }
 
 	memdelete(sample_manager);
 
@@ -1326,7 +1327,7 @@ void OS_Windows::vprint(const char *p_format, va_list p_list, bool p_stderr) {
 		wprintf(L"%ls", wbuf);
 
 #ifdef STDOUT_FILE
-//vwfprintf(stdo,p_format,p_list);
+// vwfprintf(stdo,p_format,p_list);
 #endif
 	free(wbuf);
 
@@ -1626,9 +1627,9 @@ void OS_Windows::set_window_fullscreen(bool p_enabled) {
 
 		if (pre_fs_valid) {
 			GetWindowRect(hWnd, &pre_fs_rect);
-			//print_line("A: "+itos(pre_fs_rect.left)+","+itos(pre_fs_rect.top)+","+itos(pre_fs_rect.right-pre_fs_rect.left)+","+itos(pre_fs_rect.bottom-pre_fs_rect.top));
-			//MapWindowPoints(hWnd, GetParent(hWnd), (LPPOINT) &pre_fs_rect, 2);
-			//print_line("B: "+itos(pre_fs_rect.left)+","+itos(pre_fs_rect.top)+","+itos(pre_fs_rect.right-pre_fs_rect.left)+","+itos(pre_fs_rect.bottom-pre_fs_rect.top));
+			// print_line("A: "+itos(pre_fs_rect.left)+","+itos(pre_fs_rect.top)+","+itos(pre_fs_rect.right-pre_fs_rect.left)+","+itos(pre_fs_rect.bottom-pre_fs_rect.top));
+			// MapWindowPoints(hWnd, GetParent(hWnd), (LPPOINT) &pre_fs_rect, 2);
+			// print_line("B: "+itos(pre_fs_rect.left)+","+itos(pre_fs_rect.top)+","+itos(pre_fs_rect.right-pre_fs_rect.left)+","+itos(pre_fs_rect.bottom-pre_fs_rect.top));
 		}
 
 		int cs = get_current_screen();
@@ -1802,7 +1803,7 @@ void OS_Windows::print_error(const char *p_function, const char *p_file, int p_l
 
 	} else {
 
-		CONSOLE_SCREEN_BUFFER_INFO sbi; //original
+		CONSOLE_SCREEN_BUFFER_INFO sbi; // original
 		GetConsoleScreenBufferInfo(hCon, &sbi);
 
 		WORD current_fg = sbi.wAttributes & (FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
@@ -2010,7 +2011,7 @@ void OS_Windows::set_cursor_shape(CursorShape p_shape) {
 	static const LPCTSTR win_cursors[CURSOR_MAX] = {
 		IDC_ARROW,
 		IDC_IBEAM,
-		IDC_HAND, //finger
+		IDC_HAND, // finger
 		IDC_CROSS,
 		IDC_WAIT,
 		IDC_APPSTARTING,
@@ -2212,8 +2213,8 @@ Error OS_Windows::execute(const String &p_path, const List<String> &p_arguments,
 		}
 
 		//		print_line("ARGS: "+argss);
-		//argss+"\"";
-		//argss+=" 2>nul";
+		// argss+"\"";
+		// argss+=" 2>nul";
 
 		FILE *f = _wpopen(argss.c_str(), L"r");
 
@@ -2241,7 +2242,7 @@ Error OS_Windows::execute(const String &p_path, const List<String> &p_arguments,
 		I = I->next();
 	};
 
-	//cmdline+="\"";
+	// cmdline+="\"";
 
 	ProcessInfo pi;
 	ZeroMemory(&pi.si, sizeof(pi.si));
@@ -2250,7 +2251,7 @@ Error OS_Windows::execute(const String &p_path, const List<String> &p_arguments,
 	LPSTARTUPINFOW si_w = (LPSTARTUPINFOW)&pi.si;
 
 	print_line("running cmdline: " + cmdline);
-	Vector<CharType> modstr; //windows wants to change this no idea why
+	Vector<CharType> modstr; // windows wants to change this no idea why
 	modstr.resize(cmdline.size());
 	for (int i = 0; i < cmdline.size(); i++)
 		modstr[i] = cmdline[i];
