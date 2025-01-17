@@ -341,6 +341,19 @@ void EditorNode::_update_title() {
 	}
 }
 
+void EditorNode::input(const Ref<InputEvent> &p_event) {
+	// EditorNode::get_singleton()->set_process_input is set to true in ProgressDialog
+	// only when the progress dialog is visible.
+	// We need to discard all key events to disable all shortcuts while the progress
+	// dialog is displayed, simulating an exclusive popup. Mouse events are
+	// captured by a full-screen container in front of the EditorNode in ProgressDialog,
+	// allowing interaction with the actual dialog where a Cancel button may be visible.
+	Ref<InputEventKey> k = p_event;
+	if (k.is_valid()) {
+		get_tree()->get_root()->set_input_as_handled();
+	}
+}
+
 void EditorNode::shortcut_input(const Ref<InputEvent> &p_event) {
 	ERR_FAIL_COND(p_event.is_null());
 
@@ -3974,7 +3987,7 @@ Error EditorNode::load_scene(const String &p_scene, bool p_ignore_broken_deps, b
 		return OK;
 	}
 
-	String lpath = ResourceUID::ensure_path(p_scene);
+	String lpath = ProjectSettings::get_singleton()->localize_path(ResourceUID::ensure_path(p_scene));
 	if (!p_set_inherited) {
 		for (int i = 0; i < editor_data.get_edited_scene_count(); i++) {
 			if (editor_data.get_scene_path(i) == lpath) {
@@ -3992,7 +4005,6 @@ Error EditorNode::load_scene(const String &p_scene, bool p_ignore_broken_deps, b
 		}
 	}
 
-	lpath = ProjectSettings::get_singleton()->localize_path(lpath);
 	if (!lpath.begins_with("res://")) {
 		show_accept(TTR("Error loading scene, it must be inside the project path. Use 'Import' to open the scene, then save it inside the project path."), TTR("OK"));
 		opening_prev = false;
@@ -5961,8 +5973,11 @@ void EditorNode::_notify_nodes_scene_reimported(Node *p_node, Array p_reimported
 
 void EditorNode::reload_scene(const String &p_path) {
 	int scene_idx = -1;
+
+	String lpath = ProjectSettings::get_singleton()->localize_path(p_path);
+
 	for (int i = 0; i < editor_data.get_edited_scene_count(); i++) {
-		if (editor_data.get_scene_path(i) == p_path) {
+		if (editor_data.get_scene_path(i) == lpath) {
 			scene_idx = i;
 			break;
 		}
@@ -6559,7 +6574,7 @@ Vector<Ref<EditorResourceConversionPlugin>> EditorNode::find_resource_conversion
 Vector<Ref<EditorResourceConversionPlugin>> EditorNode::find_resource_conversion_plugin_for_type_name(const String &p_type) {
 	Vector<Ref<EditorResourceConversionPlugin>> ret;
 
-	if (ClassDB::can_instantiate(p_type)) {
+	if (ClassDB::class_exists(p_type) && ClassDB::can_instantiate(p_type)) {
 		Ref<Resource> temp = Object::cast_to<Resource>(ClassDB::instantiate(p_type));
 		if (temp.is_valid()) {
 			for (Ref<EditorResourceConversionPlugin> resource_conversion_plugin : resource_conversion_plugins) {
@@ -7077,7 +7092,7 @@ EditorNode::EditorNode() {
 	resource_preview = memnew(EditorResourcePreview);
 	add_child(resource_preview);
 	progress_dialog = memnew(ProgressDialog);
-	progress_dialog->set_unparent_when_invisible(true);
+	add_child(progress_dialog);
 	progress_dialog->connect(SceneStringName(visibility_changed), callable_mp(this, &EditorNode::_progress_dialog_visibility_changed));
 
 	gui_base = memnew(Panel);
