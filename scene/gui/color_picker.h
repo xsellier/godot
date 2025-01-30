@@ -38,6 +38,7 @@
 class AspectRatioContainer;
 class ColorMode;
 class ColorPickerShape;
+class FileDialog;
 class GridContainer;
 class HSlider;
 class Label;
@@ -49,7 +50,6 @@ class PopupMenu;
 class SpinBox;
 class StyleBoxFlat;
 class TextureRect;
-class FileDialog;
 
 class ColorPresetButton : public BaseButton {
 	GDCLASS(ColorPresetButton, BaseButton);
@@ -104,7 +104,7 @@ public:
 		SHAPE_MAX
 	};
 
-	static const int SLIDER_COUNT = 4;
+	static const int SLIDER_COUNT = 3;
 
 private:
 	enum class MenuOption {
@@ -157,6 +157,7 @@ private:
 	Control *wheel = nullptr;
 	Control *wheel_uv = nullptr;
 	TextureRect *sample = nullptr;
+	VBoxContainer *swatches_vbc = nullptr;
 	GridContainer *preset_container = nullptr;
 	HBoxContainer *recent_preset_hbc = nullptr;
 	Button *btn_add_preset = nullptr;

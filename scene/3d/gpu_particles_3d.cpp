@@ -92,7 +92,7 @@ void GPUParticles3D::set_one_shot(bool p_one_shot) {
 
 	if (is_emitting()) {
 		if (!one_shot) {
-			restart();
+			RenderingServer::get_singleton()->particles_restart(particles);
 		}
 	}
 }
