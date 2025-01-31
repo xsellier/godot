@@ -262,5 +262,5 @@ DirAccessNX::DirAccessNX()
 
 DirAccessNX::~DirAccessNX()
 {
-
+    list_dir_end();
 }
