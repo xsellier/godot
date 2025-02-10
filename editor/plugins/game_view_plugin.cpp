@@ -223,13 +223,15 @@ void GameView::_instance_starting(int p_idx, List<String> &r_arguments) {
 	if (!is_feature_enabled) {
 		return;
 	}
-	if (p_idx == 0 && embed_on_play && make_floating_on_play && !window_wrapper->get_window_enabled() && _get_embed_available() == EMBED_AVAILABLE) {
+	if (p_idx == 0 && embed_on_play && make_floating_on_play && window_wrapper->is_window_available() && !window_wrapper->get_window_enabled() && _get_embed_available() == EMBED_AVAILABLE) {
 		// Set the Floating Window default title. Always considered in DEBUG mode, same as in Window::set_title.
 		String appname = GLOBAL_GET("application/config/name");
 		appname = vformat("%s (DEBUG)", TranslationServer::get_singleton()->translate(appname));
 		window_wrapper->set_window_title(appname);
 
 		_show_update_window_wrapper();
+
+		embedded_process->grab_focus();
 	}
 
 	_update_arguments_for_instance(p_idx, r_arguments);
@@ -431,7 +433,7 @@ GameView::EmbedAvailability GameView::_get_embed_available() {
 	if (!DisplayServer::get_singleton()->has_feature(DisplayServer::FEATURE_WINDOW_EMBEDDING)) {
 		return EMBED_NOT_AVAILABLE_FEATURE_NOT_SUPPORTED;
 	}
-	if (!EditorNode::get_singleton()->is_multi_window_enabled()) {
+	if (get_tree()->get_root()->is_embedding_subwindows()) {
 		return EMBED_NOT_AVAILABLE_SINGLE_WINDOW_MODE;
 	}
 
@@ -505,11 +507,12 @@ void GameView::_update_ui() {
 }
 
 void GameView::_update_embed_menu_options() {
+	bool is_multi_window = window_wrapper->is_window_available();
 	PopupMenu *menu = embed_options_menu->get_popup();
 	menu->set_item_checked(menu->get_item_index(EMBED_RUN_GAME_EMBEDDED), embed_on_play);
-	menu->set_item_checked(menu->get_item_index(EMBED_MAKE_FLOATING_ON_PLAY), make_floating_on_play);
+	menu->set_item_checked(menu->get_item_index(EMBED_MAKE_FLOATING_ON_PLAY), make_floating_on_play && is_multi_window);
 
-	menu->set_item_disabled(menu->get_item_index(EMBED_MAKE_FLOATING_ON_PLAY), !embed_on_play);
+	menu->set_item_disabled(menu->get_item_index(EMBED_MAKE_FLOATING_ON_PLAY), !embed_on_play || !is_multi_window);
 
 	fixed_size_button->set_pressed(embed_size_mode == SIZE_MODE_FIXED);
 	keep_aspect_button->set_pressed(embed_size_mode == SIZE_MODE_KEEP_ASPECT);
@@ -795,16 +798,17 @@ void GameView::_window_close_request() {
 	// Before the parent window closed, we close the embedded game. That prevents
 	// the embedded game to be seen without a parent window for a fraction of second.
 	if (EditorRunBar::get_singleton()->is_playing() && (embedded_process->is_embedding_completed() || embedded_process->is_embedding_in_progress())) {
-		// Try to gracefully close the window. That way, the NOTIFICATION_WM_CLOSE_REQUEST
-		// notification should be propagated in the game process.
-		embedded_process->reset();
-
 		// When the embedding is not complete, we need to kill the process.
 		// If the game is paused, the close request will not be processed by the game, so it's better to kill the process.
 		if (paused || embedded_process->is_embedding_in_progress()) {
+			embedded_process->reset();
 			// Call deferred to prevent the _stop_pressed callback to be executed before the wrapper window
 			// actually closes.
 			callable_mp(EditorRunBar::get_singleton(), &EditorRunBar::stop_playing).call_deferred();
+		} else {
+			// Try to gracefully close the window. That way, the NOTIFICATION_WM_CLOSE_REQUEST
+			// notification should be propagated in the game process.
+			embedded_process->request_close();
 		}
 	}
 }
@@ -976,6 +980,11 @@ GameView::GameView(Ref<GameViewDebugger> p_debugger, WindowWrapper *p_wrapper) {
 	game_size_label = memnew(Label());
 	main_menu_hbox->add_child(game_size_label);
 	game_size_label->hide();
+	// Setting the minimum size prevents the game workspace from resizing indefinitely
+	// due to the label size oscillating by a few pixels when the game is in stretch mode
+	// and the game workspace is at its minimum size.
+	game_size_label->set_custom_minimum_size(Size2(80 * EDSCALE, 0));
+	game_size_label->set_horizontal_alignment(HorizontalAlignment::HORIZONTAL_ALIGNMENT_RIGHT);
 
 	panel = memnew(Panel);
 	add_child(panel);
