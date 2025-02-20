@@ -374,7 +374,7 @@ class EditorFileSystem : public Node {
 
 	void _update_file_icon_path(EditorFileSystemDirectory::FileInfo *file_info);
 	void _update_files_icon_path(EditorFileSystemDirectory *edp = nullptr);
-	void _remove_invalid_global_class_names(const HashSet<String> &p_existing_class_names);
+	bool _remove_invalid_global_class_names(const HashSet<String> &p_existing_class_names);
 	String _get_file_by_class_name(EditorFileSystemDirectory *p_dir, const String &p_class_name, EditorFileSystemDirectory::FileInfo *&r_file_info);
 
 	void _register_global_class_script(const String &p_search_path, const String &p_target_path, const ScriptClassInfoUpdate &p_script_update);
@@ -401,6 +401,7 @@ public:
 	EditorFileSystemDirectory *get_filesystem_path(const String &p_path);
 	String get_file_type(const String &p_file) const;
 	EditorFileSystemDirectory *find_file(const String &p_file, int *r_index) const;
+	ResourceUID::ID get_file_uid(const String &p_path) const;
 
 	void reimport_files(const Vector<String> &p_files);
 	Error reimport_append(const String &p_file, const HashMap<StringName, Variant> &p_custom_options, const String &p_custom_importer, Variant p_generator_parameters);
