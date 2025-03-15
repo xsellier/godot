@@ -3277,6 +3277,9 @@ Error RenderingDeviceDriverVulkan::swap_chain_resize(CommandQueueID p_cmd_queue,
 		case VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR:
 			swap_chain->pre_transform_rotation_degrees = 270;
 			break;
+		case VK_SURFACE_TRANSFORM_INHERIT_BIT_KHR:
+			swap_chain->pre_transform_rotation_degrees = 0;
+			break;
 		default:
 			WARN_PRINT("Unexpected swap_create_info.preTransform = " + itos(swap_create_info.preTransform) + ".");
 			swap_chain->pre_transform_rotation_degrees = 0;
