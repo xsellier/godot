@@ -61,7 +61,15 @@ void EditorExportPlatformNX::get_export_options(List<ExportOption> *r_options) c
 Error EditorExportPlatformNX::execute_cmd(const String &p_path, const List<String> &p_arguments, bool p_log_verbose) const {
 	String pipe;
 	if (p_log_verbose) {
-		print_line("[EditorExportPlatformNX] Executing:", p_path);
+		PackedStringArray parts;
+		parts.push_back("[EditorExportPlatformNX] Executing: ");
+		parts.push_back(p_path);
+		for (const String &argument : p_arguments) {
+			parts.push_back(" ");
+			parts.push_back(argument);
+		}
+
+		print_line(String().join(parts));
 	}
 	Error err = OS::get_singleton()->execute(p_path, p_arguments, &pipe);
 	PackedStringArray lines = pipe.split("\n\r", false);
