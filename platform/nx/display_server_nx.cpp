@@ -49,8 +49,8 @@ void DisplayServerNX::register_nx_driver() {
     register_create_function("nx", create_func, get_rendering_drivers_func);
 }
 
-DisplayServer *DisplayServerNX::create_func(const String &p_rendering_driver, DisplayServer::WindowMode p_mode, DisplayServer::VSyncMode p_vsync_mode, uint32_t p_flags, const Vector2i *p_position, const Vector2i &p_resolution, int p_screen, Context p_context, Error &r_error) {
-    return memnew(DisplayServerNX(p_rendering_driver, p_mode, p_vsync_mode, p_flags, p_position, p_resolution, p_screen, r_error));
+DisplayServer *DisplayServerNX::create_func(const String &p_rendering_driver, DisplayServer::WindowMode p_mode, DisplayServer::VSyncMode p_vsync_mode, uint32_t p_flags, const Vector2i *p_position, const Vector2i &p_resolution, int p_screen, Context p_context, int64_t p_parent_window, Error &r_error) {
+    return memnew(DisplayServerNX(p_rendering_driver, p_mode, p_vsync_mode, p_flags, p_position, p_resolution, p_screen, p_parent_window, r_error));
 }
 
 Vector<String> DisplayServerNX::get_rendering_drivers_func() {
@@ -61,7 +61,7 @@ Vector<String> DisplayServerNX::get_rendering_drivers_func() {
 	return drivers;
 }
 
-DisplayServerNX::DisplayServerNX(const String &p_rendering_driver, DisplayServer::WindowMode p_mode, DisplayServer::VSyncMode p_vsync_mode, uint32_t p_flags, const Vector2i *p_position, const Vector2i &p_resolution, int p_screen, Error &r_error)
+DisplayServerNX::DisplayServerNX(const String &p_rendering_driver, DisplayServer::WindowMode p_mode, DisplayServer::VSyncMode p_vsync_mode, uint32_t p_flags, const Vector2i *p_position, const Vector2i &p_resolution, int p_screen, int64_t p_parent_window, Error &r_error)
 {
     rendering_driver = p_rendering_driver;
 

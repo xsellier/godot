@@ -185,7 +185,7 @@ List<String> EditorExportPlatformNX::get_binary_extensions(const Ref<EditorExpor
     return extensions;
 }
 
-Error EditorExportPlatformNX::export_project(const Ref<EditorExportPreset> &p_preset, bool p_debug, const String &p_path, int p_flags)
+Error EditorExportPlatformNX::export_project(const Ref<EditorExportPreset> &p_preset, bool p_debug, const String &p_path, BitField<EditorExportPlatform::DebugFlags> p_flags)
 {
 	bool log_verbose = p_preset->get("debug/log_verbose");
 	String terminate_cmd = OS::get_singleton()->get_environment("NINTENDO_SDK_ROOT") + "/Tools/CommandLineTools/ControlTarget.exe";
@@ -245,7 +245,7 @@ Error EditorExportPlatformNX::export_project(const Ref<EditorExportPreset> &p_pr
 		}
 	}
 
-	gen_export_flags(cl, p_flags);
+	cl.append_array(gen_export_flags(p_flags));
 
 	// Create a new folder to create package in (removing old one if necessary)
 	Ref<DirAccess> da = DirAccess::create(DirAccess::ACCESS_FILESYSTEM);
@@ -509,8 +509,7 @@ Error EditorExportPlatformNX::run(const Ref<EditorExportPreset> &p_preset, int p
 {
 	ERR_FAIL_INDEX_V(p_device, devices.size(), ERR_INVALID_PARAMETER);
 
-	Vector<String> device_arguments;
-	gen_export_flags(device_arguments, p_debug_flags);
+	PackedStringArray device_arguments = gen_export_flags(p_debug_flags);
 
 	String can_export_error;
 	bool can_export_missing_templates;

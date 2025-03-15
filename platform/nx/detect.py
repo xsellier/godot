@@ -13,6 +13,8 @@ def get_name():
 def can_build():
     return ("NINTENDO_SDK_ROOT" in os.environ)
 
+def get_tools(env: "SConsEnvironment"):
+     return ["clang", "clang++", "as", "ar", "link"]
 
 def get_opts():
     return [
@@ -45,6 +47,7 @@ def configure(env):
     nx_toolchain_prefix = ""
     nx_library_path = ""
     is_sdk17 = False
+    nintendo_sdk_root = env["NINTENDO_SDK_ROOT"].replace("\\", "/")
 
     # common C++ flags
     env.Append(CPPFLAGS=[
@@ -58,7 +61,7 @@ def configure(env):
     env.Append(CXXFLAGS=[
         '-std=gnu++17'
     ])
-    env.Prepend(CPPPATH=[env["NINTENDO_SDK_ROOT"] + '/Include'])
+    env.Prepend(CPPPATH=[nintendo_sdk_root + '/Include'])
 
     # Application link flags
     env.Append(LINKFLAGS=[
@@ -93,14 +96,14 @@ def configure(env):
         sys.exit()
 
     ## check if compiler has moved (SDK 17.1.0+)
-    nx_toolchain_path = env["NINTENDO_SDK_ROOT"] + "/Compilers/NintendoClang/bin/"
+    nx_toolchain_path = nintendo_sdk_root + "/Compilers/NintendoClang/bin/"
     is_sdk17 = os.path.exists(nx_toolchain_path)
     ld_command = nx_toolchain_path + 'ld.lld.exe'
 
     # aarch64
     if (env["arch"] == "arm64"):
         if not is_sdk17:
-            nx_toolchain_path = env["NINTENDO_SDK_ROOT"] + "/Compilers/NX/nx/aarch64/bin/"
+            nx_toolchain_path = nintendo_sdk_root + "/Compilers/NX/nx/aarch64/bin/"
             nx_toolchain_prefix = "aarch64-nintendo-nx-elf-"
             ld_command = nx_toolchain_path + nx_toolchain_prefix + 'ld.gold.exe'
         
@@ -112,13 +115,13 @@ def configure(env):
                 '--target=aarch64-nintendo-nx-elf'
             ])
 
-        env.Prepend(CPPPATH=[env["NINTENDO_SDK_ROOT"] + '/TargetSpecificInclude/NX-NXFP2-a64/'])
+        env.Prepend(CPPPATH=[nintendo_sdk_root + '/TargetSpecificInclude/NX-NXFP2-a64/'])
         
         # aarch64 specific shared lib link flags
         env.Append(SHLINKFLAGS=[
             '-mcpu=cortex-a57+fp+simd+crypto+crc',
             '-Wl,-T',
-            env["NINTENDO_SDK_ROOT"] + "/Resources/SpecFiles/RoModule.aarch64.lp64.ldscript",
+            nintendo_sdk_root + "/Resources/SpecFiles/RoModule.aarch64.lp64.ldscript",
             '-fuse-ld=' + ld_command,
         ])
 
@@ -126,7 +129,7 @@ def configure(env):
         env.Append(LINKFLAGS=[
             '-mcpu=cortex-a57+fp+simd+crypto+crc',
             '-Wl,-T',
-            env["NINTENDO_SDK_ROOT"] + "/Resources/SpecFiles/Application.aarch64.lp64.ldscript",
+            nintendo_sdk_root + "/Resources/SpecFiles/Application.aarch64.lp64.ldscript",
             '-fuse-ld=' + ld_command,
         ])
 
@@ -140,15 +143,15 @@ def configure(env):
 
         if (env["target"] == "template_release"):
             # release
-            nx_library_path = env["NINTENDO_SDK_ROOT"] + "/Libraries/NX-NXFP2-a64/Release"
+            nx_library_path = nintendo_sdk_root + "/Libraries/NX-NXFP2-a64/Release"
         else:
             # debug
-            nx_library_path = env["NINTENDO_SDK_ROOT"] + "/Libraries/NX-NXFP2-a64/Develop"
+            nx_library_path = nintendo_sdk_root + "/Libraries/NX-NXFP2-a64/Develop"
 
     # armv7l
     if (env["arch"] == "arm32"):
         if not is_sdk17:
-            nx_toolchain_path = env["NINTENDO_SDK_ROOT"] + "/Compilers/NX/nx/armv7l/bin/"
+            nx_toolchain_path = nintendo_sdk_root + "/Compilers/NX/nx/armv7l/bin/"
             nx_toolchain_prefix = "armv7l-nintendo-nx-eabihf-"
             ld_command = nx_toolchain_path + nx_toolchain_prefix + 'ld.gold.exe'
 
@@ -163,7 +166,7 @@ def configure(env):
                 '--target=armv7l-nintendo-nx-eabihf'
             ])
 
-        env.Prepend(CPPPATH=[env["NINTENDO_SDK_ROOT"] + '/TargetSpecificInclude/NX-NXFP2-a32/'])
+        env.Prepend(CPPPATH=[nintendo_sdk_root + '/TargetSpecificInclude/NX-NXFP2-a32/'])
 
         # arm specific shared lib link flags
         env.Append(SHLINKFLAGS=[
@@ -173,7 +176,7 @@ def configure(env):
             '-mfpu=crypto-neon-fp-armv8',
             '-Wl,--target2=got-rel',
             '-Wl,-T',
-            env["NINTENDO_SDK_ROOT"] + "/Resources/SpecFiles/RoModule.arm.ilp32.ldscript",
+            nintendo_sdk_root + "/Resources/SpecFiles/RoModule.arm.ilp32.ldscript",
             '-fuse-ld=' + ld_command,
         ])
 
@@ -185,7 +188,7 @@ def configure(env):
             '-mfpu=crypto-neon-fp-armv8',
             '-Wl,--target2=got-rel',
             '-Wl,-T',
-            env["NINTENDO_SDK_ROOT"] + "/Resources/SpecFiles/Application.arm.ilp32.ldscript",
+            nintendo_sdk_root + "/Resources/SpecFiles/Application.arm.ilp32.ldscript",
             '-fuse-ld=' + ld_command,
         ])
 
@@ -199,10 +202,10 @@ def configure(env):
         
         if (env["target"] == "template_release"):
             # release
-            nx_library_path = env["NINTENDO_SDK_ROOT"] + "/Libraries/NX-NXFP2-a32/Release"
+            nx_library_path = nintendo_sdk_root + "/Libraries/NX-NXFP2-a32/Release"
         else:
             # debug
-            nx_library_path = env["NINTENDO_SDK_ROOT"] + "/Libraries/NX-NXFP2-a32/Develop"
+            nx_library_path = nintendo_sdk_root + "/Libraries/NX-NXFP2-a32/Develop"
 
 
     ## Build type
@@ -306,4 +309,5 @@ def configure(env):
         'UNIX_SOCKET_UNAVAILABLE',
         'VULKAN_ENABLED',
         'RD_ENABLED',
+        'JPH_PLATFORM_BLUE', # For Bolt Physics.
         ])

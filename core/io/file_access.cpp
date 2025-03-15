@@ -847,7 +847,7 @@ bool FileAccess::store_var(const Variant &p_var, bool p_full_objects) {
 	w[3] = (my_len >> 24) & 0xFF;
 
 	err = encode_variant(p_var, &w[4], len, p_full_objects);
-	ERR_FAIL_COND_MSG(err != OK, "Error when trying to encode Variant.");
+	ERR_FAIL_COND_V_MSG(err != OK, false, "Error when trying to encode Variant.");
 
 	return store_buffer(buff);
 }

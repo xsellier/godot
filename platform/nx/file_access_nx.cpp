@@ -214,22 +214,24 @@ void FileAccessNX::flush()
     nn::fs::FlushFile(f);
 }
 	
-void FileAccessNX::store_8(uint8_t p_dest)
+bool FileAccessNX::store_8(uint8_t p_dest)
 {
-    ERR_FAIL_COND(!f.handle);
+    ERR_FAIL_COND_V(!f.handle, false);
 	nn::Result result = nn::fs::WriteFile(f, offset, &p_dest, 1, nn::fs::WriteOption::MakeValue(nn::fs::WriteOptionFlag_Flush));
 	if (nn::fs::ResultUsableSpaceNotEnough::Includes(result))
 		NN_LOG("Not enough usable space to write!!\n");
     offset += 1;
+    return true;
 }
 	
-void FileAccessNX::store_buffer(const uint8_t *p_src, uint64_t p_length)
+bool FileAccessNX::store_buffer(const uint8_t *p_src, uint64_t p_length)
 {
-    ERR_FAIL_COND(!f.handle);
+    ERR_FAIL_COND_V(!f.handle, false);
 	nn::Result result = nn::fs::WriteFile(f, offset, p_src, p_length, nn::fs::WriteOption::MakeValue(nn::fs::WriteOptionFlag_Flush));
 	if (nn::fs::ResultUsableSpaceNotEnough::Includes(result))
 		NN_LOG("Not enough usable space to write!!\n");
     offset += p_length;
+    return true;
 }
 
 void FileAccessNX::close()

@@ -450,6 +450,7 @@ void OS_NX::initialize() {
 	handHeldMode = nn::oe::GetOperationMode() == nn::oe::OperationMode_Handheld ? true : false;
 
     main_loop = nullptr;
+    _setup_clock();
 }
 
 void OS_NX::initialize_joypads() {
@@ -503,9 +504,17 @@ bool OS_NX::_check_internal_feature_support(const String &p_feature) {
     return p_feature == "mobile";
 }
 
-String OS_NX::get_stdin_string() {
-	char buff[1024];
-	return String::utf8(fgets(buff, 1024, stdin));
+String OS_NX::get_stdin_string(int64_t p_buffer_size) {
+	Vector<uint8_t> data;
+	data.resize(p_buffer_size);
+	return String::utf8(fgets((char *)data.ptrw(), p_buffer_size, stdin));
+}
+
+PackedByteArray OS_NX::get_stdin_buffer(int64_t p_buffer_size) {
+	Vector<uint8_t> data;
+	data.resize(p_buffer_size);
+	fgets((char *)data.ptrw(), p_buffer_size, stdin);
+	return data;
 }
 
 Vector<String> OS_NX::get_video_adapter_driver_info() const {

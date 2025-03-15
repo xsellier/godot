@@ -93,7 +93,8 @@ protected:
     bool _check_internal_feature_support(const String &p_feature) override;
 
 public:
-    String get_stdin_string() override;
+    String get_stdin_string(int64_t p_buffer_size = 1024) override;
+	PackedByteArray get_stdin_buffer(int64_t p_buffer_size = 1024) override;
 
 	Vector<String> get_video_adapter_driver_info() const override;
 
