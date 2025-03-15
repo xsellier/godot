@@ -188,11 +188,6 @@ List<String> EditorExportPlatformNX::get_binary_extensions(const Ref<EditorExpor
 Error EditorExportPlatformNX::export_project(const Ref<EditorExportPreset> &p_preset, bool p_debug, const String &p_path, BitField<EditorExportPlatform::DebugFlags> p_flags)
 {
 	bool log_verbose = p_preset->get("debug/log_verbose");
-	String terminate_cmd = OS::get_singleton()->get_environment("NINTENDO_SDK_ROOT") + "/Tools/CommandLineTools/ControlTarget.exe";
-	List<String> terminate_args;
-	terminate_args.push_back("terminate");
-	Error err_cmd = execute_cmd(terminate_cmd, terminate_args, log_verbose);
-	ERR_FAIL_COND_V(err_cmd, err_cmd);
 	
 	ExportNotifier notifier(*this, p_preset, p_debug, p_path, p_flags);
 
