@@ -436,6 +436,8 @@ Error EditorExportPlatformNX::export_project(const Ref<EditorExportPreset> &p_pr
 	creatensp_args.push_back(nmetaOutputFile);
 	creatensp_args.push_back("--type");
 	creatensp_args.push_back("Application");
+	creatensp_args.push_back("--nss");
+	creatensp_args.push_back(src_pkg_name);
 	creatensp_args.push_back("--program");
 	creatensp_args.push_back(dest_dir + binary_name + "/code/");
 	creatensp_args.push_back(dest_dir + binary_name + "/data/");
