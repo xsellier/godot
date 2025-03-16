@@ -50,6 +50,7 @@
 #include "core/object/script_language.h"
 #include "core/os/os.h"
 #include "core/os/time.h"
+#include "core/profiler/profiler_macros.h"
 #include "core/register_core_types.h"
 #include "core/string/translation_server.h"
 #include "core/version.h"
@@ -4720,6 +4721,7 @@ bool Main::iteration() {
 #endif // XR_DISABLED
 
 	for (int iters = 0; iters < advance.physics_steps; ++iters) {
+		PROF_PUSH_BLOCK("[Main::iteration::PhysicsProcess]");
 		if (Input::get_singleton()->is_agile_input_event_flushing()) {
 			Input::get_singleton()->flush_buffered_events();
 		}
@@ -4791,6 +4793,7 @@ bool Main::iteration() {
 		physics_process_max = MAX(OS::get_singleton()->get_ticks_usec() - physics_begin, physics_process_max);
 
 		Engine::get_singleton()->_in_physics = false;
+		PROF_POP_BLOCK();
 	}
 
 	if (Input::get_singleton()->is_agile_input_event_flushing()) {
@@ -4799,17 +4802,23 @@ bool Main::iteration() {
 
 	uint64_t process_begin = OS::get_singleton()->get_ticks_usec();
 
+	PROF_PUSH_BLOCK("[Main::iteration::IdleProcess]");
+
 	if (OS::get_singleton()->get_main_loop()->process(process_step * time_scale)) {
 		exit = true;
 	}
 	message_queue->flush();
 
+<<<<<<< HEAD
 #ifndef NAVIGATION_2D_DISABLED
 	NavigationServer2D::get_singleton()->process(process_step * time_scale);
 #endif // NAVIGATION_2D_DISABLED
 #ifndef NAVIGATION_3D_DISABLED
 	NavigationServer3D::get_singleton()->process(process_step * time_scale);
 #endif // NAVIGATION_3D_DISABLED
+=======
+	PROF_POP_BLOCK();
+>>>>>>> b309197f61 (NX: Integrate Nintendo CPU Profiler)
 
 	RenderingServer::get_singleton()->sync(); //sync if still drawing from previous frames.
 

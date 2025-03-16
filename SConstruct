@@ -189,6 +189,12 @@ opts.Add(BoolVariable("threads", "Enable threading support", True))
 # NX (Nintendo Switch) options
 opts.Add(BoolVariable("nx_use_preselected_user", "NX option: Use the currently opened user account, preselected in the Nintendo Switch OS", False))
 
+# General profiling options
+opts.Add(BoolVariable("use_profiler", "Enable profiler if implemented for the target platform. (See core/profiler_macros.h)", False))
+opts.Add(BoolVariable("profile_callables", "Hint to tell the current profiler (if enabled) if function calls made via ClassDB (GDScript methods, and calls to methods bound via ClassDB::bind_method) should be profiled.", True))
+opts.Add(BoolVariable("profile_signals", "Hint to tell the current profiler (if enabled) if signals should be profiled.", False))
+opts.Add(BoolVariable("profile_resource_load", "Hint to tell the current profiler (if enabled) if ResourceLoader::load should be profiled for each resource.", True))
+
 # Components
 opts.Add(BoolVariable("deprecated", "Enable compatibility code for deprecated and removed features", True))
 opts.Add(
@@ -531,6 +537,19 @@ else:
 # Renamed to `content-timestamp` in SCons >= 4.2, keeping MD5 for compat.
 env.Decider("MD5-timestamp")
 
+# Profiler defines.
+if env["use_profiler"]:
+    env.Append(CPPDEFINES=["PROFILER_ENABLED"])
+
+if env["profile_callables"]:
+    env.Append(CPPDEFINES=["PROFILE_CALLABLES"])
+
+if env["profile_signals"]:
+    env.Append(CPPDEFINES=["PROFILE_SIGNALS"])
+
+if env["profile_resource_load"]:
+    env.Append(CPPDEFINES=["PROFILE_RESOURCE_LOAD"])
+ 
 # SCons speed optimization controlled by the `fast_unsafe` option, which provide
 # more than 10 s speed up for incremental rebuilds.
 # Unsafe as they reduce the certainty of rebuilding all changed files, so it's

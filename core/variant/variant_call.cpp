@@ -36,7 +36,11 @@
 #include "core/io/marshalls.h"
 #include "core/object/class_db.h"
 #include "core/os/os.h"
+<<<<<<< HEAD
 #include "core/templates/a_hash_map.h"
+=======
+#include "core/profiler/profiler_macros.h"
+>>>>>>> b309197f61 (NX: Integrate Nintendo CPU Profiler)
 #include "core/templates/local_vector.h"
 
 typedef void (*VariantFunc)(Variant &r_ret, Variant &p_self, const Variant **p_args);
@@ -1355,6 +1359,9 @@ static void register_builtin_method(const Vector<String> &p_argnames, const Vect
 }
 
 void Variant::callp(const StringName &p_method, const Variant **p_args, int p_argcount, Variant &r_ret, Callable::CallError &r_error) {
+#ifdef PROFILE_CALLABLES
+ 	PROF_SCOPED_BLOCK(String(p_method).utf8().ptr());
+ #endif
 	if (type == Variant::OBJECT) {
 		//call object
 		Object *obj = _get_obj().obj;
@@ -1386,6 +1393,9 @@ void Variant::callp(const StringName &p_method, const Variant **p_args, int p_ar
 }
 
 void Variant::call_const(const StringName &p_method, const Variant **p_args, int p_argcount, Variant &r_ret, Callable::CallError &r_error) {
+#ifdef PROFILE_CALLABLES
+ 	PROF_SCOPED_BLOCK(String(p_method).utf8().ptr());
+ #endif
 	if (type == Variant::OBJECT) {
 		//call object
 		Object *obj = _get_obj().obj;
@@ -1423,6 +1433,9 @@ void Variant::call_const(const StringName &p_method, const Variant **p_args, int
 }
 
 void Variant::call_static(Variant::Type p_type, const StringName &p_method, const Variant **p_args, int p_argcount, Variant &r_ret, Callable::CallError &r_error) {
+#ifdef PROFILE_CALLABLES
+ 	PROF_SCOPED_BLOCK(String(p_method).utf8().ptr());
+ #endif
 	r_error.error = Callable::CallError::CALL_OK;
 
 	const VariantBuiltInMethodInfo *imf = builtin_method_info[p_type].getptr(p_method);

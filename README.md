@@ -74,3 +74,20 @@ When the game is launched in remote debugging mode, Godot should connect to the 
 RenderDoc is included in the Nintendo SDK. To be able to attach to a running game for capturing frames, Enable the Renderdoc checkbox in the debug section of the Nintendo Switch Export options. When this checkbox is enabled, your game will be linked against the modified OpenGL libraries necessary to capture with RenderDoc. When it's working you will see additional text at the top left for your game window.
 
 Once this is working, you can connect to the game session running on the hardware by running the version of RenderDoc that comes with the Nintendo SDK. Then you just need to capture a frame from the RenderDoc interface to inspect the state of the graphics pipeline when rendering the captured frame. For more details consult the Nintendo SDK documentation on RenderDoc.
+
+## Profiling
+By adding `use_profiler=true` to the build instruction, you can enable per-platform profiler integration. Only the Switch profiler (Nintendo CPU Profiler) is implemented at the moment. You can find the Nintendo CPU Profiler executable in the `<NINTENDO_SDK_ROOT>/Tools/NintendoCpuProfiler` directory.
+
+By default, this will enable per-frame markers (called heartbeats) in the profiler. You can further configure the integration with the following options.
+* `profile_callables` (default: `true`)
+  * Hint to tell the current profiler (if enabled) if function calls made via ClassDB (GDScript methods, and calls to methods bound via ClassDB::bind_method) should be profiled.
+  * Has some noticeable overhead, but still faster than using Godot's remote debugger.
+  * The default implementation uses the function name as the identifier. You can modify the source code to add more information (like prepending the script instance's name), but keep in mind this will only add to the profiling overhead. Plus, you can usually guess which script is being referenced by viewing the call stack in the profiler.
+* `profile_signals` (default: `false`)
+  * Hint to tell the current profiler (if enabled) if signals should be profiled.
+  * The default implementation only uses the signal name as the identifier. You can consider adding additional information like the number of listeners, etc, but again this means more overhead.
+* `profile_resource_load` (default: `true`)
+  * Hint to tell the current profiler (if enabled) if ResourceLoader::load should be profiled for each resource.
+  * Very useful for understanding load time bottlenecks. Usual culprits are large binaries like PNGs and WAVs.
+
+Note that Godot's threads can migrate, therefore in-process profiling won't be accurate (the profiler GUI will warn you). Remember to switch to **out-of-process profiling** before starting to sample from the profiler.

@@ -246,6 +246,11 @@ def configure(env):
     nx_c_runtime_nro = nx_library_path + "/rocrt_nro.o"
     nx_c_runtime_ro_end = nx_library_path + "/crtend.o"
     nx_nn_application = nx_library_path + "/nnApplication.o" + " " + nx_library_path + "/libnn_init_memory.a"
+    if env["use_profiler"]:
+        nx_nn_application += " " + nx_library_path + "/libnn_profiler.a" # link against NX profiler
+        print("[Info] NX Profiler Enabled")
+    else:
+        print("[Info] NX Profiler Disabled")
     
     nx_nn_sdk_lib = nx_library_path + "/nnSdk.nss"
     nx_opengl_lib = nx_library_path + "/opengl.nss"

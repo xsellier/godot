@@ -34,6 +34,11 @@
 static nn::socket::ConfigDefaultWithMemory s_SocketConfigWithMemory;
 #endif
 
+#ifdef PROFILER_ENABLED
+#include <nn/profiler.h>
+static char *profiler_buffer = nullptr;
+#endif
+
 /// Clock Setup function (used by get_ticks_usec)
 static nn::os::Tick _clock_start = nn::os::Tick();
 static void _setup_clock() {
@@ -408,6 +413,12 @@ void OS_NX::initialize() {
 	IP_NX::make_default();
 #endif
 
+#ifdef PROFILER_ENABLED
+    profiler_buffer = new char[nn::profiler::MinimumBufferSize];
+    nn::Result result = nn::profiler::Initialize(profiler_buffer, nn::profiler::MinimumBufferSize);
+    NN_ABORT_UNLESS_RESULT_SUCCESS(result);
+#endif
+
 	// mount rom
 	mountRom();
 
@@ -494,6 +505,20 @@ void OS_NX::finalize() {
 }
 
 void OS_NX::finalize_core() {
+#ifdef PROFILER_ENABLED
+    nn::profiler::ProfilerStatus status = nn::profiler::GetProfilerStatus();
+	while (status == nn::profiler::ProfilerStatus_Profiling ||
+        status == nn::profiler::ProfilerStatus_Transferring)
+    {
+		nn::os::SleepThread(nn::TimeSpan::FromMilliSeconds(1));
+		status = nn::profiler::GetProfilerStatus();
+	}
+	
+    // Finalize the profiler
+    nn::Result result = nn::profiler::Finalize();
+    NN_ABORT_UNLESS_RESULT_SUCCESS(result);
+	delete [] profiler_buffer;
+#endif
 	// if (ProjectSettings::get_singleton()->get("rendering/shader_compiler/shader_cache/enabled")) {
 	// 	unmountCache();
 	// }
@@ -653,7 +678,9 @@ void OS_NX::run() {
 	main_loop->initialize();
 
 	while (!force_quit) {
-
+#ifdef PROFILER_ENABLED
+		nn::profiler::RecordHeartbeat(nn::profiler::Heartbeats_Main);
+#endif
 		process_input();
 
 		if (Main::iteration() == true) 

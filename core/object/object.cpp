@@ -36,6 +36,7 @@
 #include "core/object/message_queue.h"
 #include "core/object/script_language.h"
 #include "core/os/os.h"
+#include "core/profiler/profiler_macros.h"
 #include "core/string/print_string.h"
 #include "core/string/translation_server.h"
 #include "core/variant/typed_array.h"
@@ -815,6 +816,9 @@ Variant Object::callv(const StringName &p_method, const Array &p_args) {
 }
 
 Variant Object::callp(const StringName &p_method, const Variant **p_args, int p_argcount, Callable::CallError &r_error) {
+#ifdef PROFILE_CALLABLES
+ 	PROF_SCOPED_BLOCK(String(p_method).utf8().ptr());
+ #endif
 	r_error.error = Callable::CallError::CALL_OK;
 
 	if (p_method == CoreStringName(free_)) {
@@ -878,6 +882,9 @@ Variant Object::callp(const StringName &p_method, const Variant **p_args, int p_
 }
 
 Variant Object::call_const(const StringName &p_method, const Variant **p_args, int p_argcount, Callable::CallError &r_error) {
+#ifdef PROFILE_CALLABLES
+ 	PROF_SCOPED_BLOCK(String(p_method).utf8().ptr());
+ #endif
 	r_error.error = Callable::CallError::CALL_OK;
 
 	if (p_method == CoreStringName(free_)) {
@@ -1208,6 +1215,9 @@ Error Object::_emit_signal(const Variant **p_args, int p_argcount, Callable::Cal
 }
 
 Error Object::emit_signalp(const StringName &p_name, const Variant **p_args, int p_argcount) {
+#ifdef PROFILE_SIGNALS
+ 	PROF_SCOPED_BLOCK(vformat("[Object::emit_signal] %s", String(p_name)).utf8().ptr());
+ #endif
 	if (_block_signals) {
 		return ERR_CANT_ACQUIRE_RESOURCE; //no emit, signals blocked
 	}

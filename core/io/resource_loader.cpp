@@ -39,6 +39,7 @@
 #include "core/os/condition_variable.h"
 #include "core/os/os.h"
 #include "core/os/safe_binary_mutex.h"
+#include "core/profiler/profiler_macros.h"
 #include "core/string/print_string.h"
 #include "core/string/translation_server.h"
 #include "core/templates/rb_set.h"
@@ -393,10 +394,17 @@ void ResourceLoader::_run_load_task(void *p_userdata) {
 	const String &remapped_path = _path_remap(load_task.local_path, &xl_remapped);
 
 	Error load_err = OK;
+#ifdef PROFILE_RESOURCE_LOAD
+	PROF_PUSH_BLOCK(vformat("[ResourceLoader::load] %s", remapped_path).utf8().ptr());
+#endif
 	Ref<Resource> res = _load(remapped_path, remapped_path != load_task.local_path ? load_task.local_path : String(), load_task.type_hint, load_task.cache_mode, &load_err, load_task.use_sub_threads, &load_task.progress);
 	if (MessageQueue::get_singleton() != MessageQueue::get_main_singleton()) {
 		MessageQueue::get_singleton()->flush();
 	}
+	
+#ifdef PROFILE_RESOURCE_LOAD
+	PROF_POP_BLOCK();
+#endif
 
 	thread_load_mutex.lock();
 

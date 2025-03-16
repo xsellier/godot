@@ -50,6 +50,7 @@
 #include "core/config/project_settings.h"
 #include "core/core_constants.h"
 #include "core/io/file_access.h"
+#include "core/profiler/profiler_macros.h"
 
 #include "scene/resources/packed_scene.h"
 #include "scene/scene_string_names.h"
@@ -2053,6 +2054,9 @@ void GDScriptInstance::_call_implicit_ready_recursively(GDScript *p_script) {
 }
 
 Variant GDScriptInstance::callp(const StringName &p_method, const Variant **p_args, int p_argcount, Callable::CallError &r_error) {
+#ifdef PROFILE_CALLABLES
+ 	PROF_SCOPED_BLOCK(String(p_method).utf8().ptr());
+ #endif
 	GDScript *sptr = script.ptr();
 	if (unlikely(p_method == SceneStringName(_ready))) {
 		// Call implicit ready first, including for the super classes recursively.
