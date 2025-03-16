@@ -1,4 +1,5 @@
 #include "export_plugin.h"
+#include "publishing_metadata_nx.h"
 #include "editor/editor_paths.h"
 #include "core/config/project_settings.h"
 
@@ -41,11 +42,7 @@ void EditorExportPlatformNX::get_export_options(List<ExportOption> *r_options) c
 	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "custom_package/debug", PROPERTY_HINT_GLOBAL_FILE, "*.nss"), ""));
 	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "custom_package/release", PROPERTY_HINT_GLOBAL_FILE, "*.nss"), ""));
 
-	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/name", PROPERTY_HINT_PLACEHOLDER_TEXT, "Game Name"), ""));
-	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/identifier", PROPERTY_HINT_PLACEHOLDER_TEXT, "0x01004b9000490000"), "0x01004b9000490000"));
-	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/publisher"), "Publisher"));
-	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/icon", PROPERTY_HINT_FILE, "*.bmp,*.jpg"), ""));
-	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/version"), "1.0.0"));
+	r_options->push_back(ExportOption(PropertyInfo(Variant::OBJECT, "application/metadata", PROPERTY_HINT_RESOURCE_TYPE, "PublishingMetadataNX"), (Object *) nullptr));
 
 	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "command_line/extra_args"), ""));
 
@@ -104,9 +101,8 @@ Ref<Texture2D> EditorExportPlatformNX::get_logo() const
     return m_logo;
 }
 
-bool EditorExportPlatformNX::has_valid_export_configuration(const Ref<EditorExportPreset> &p_preset, String &r_error, bool &r_missing_templates, bool p_debug) const
-{
-    String err;
+bool EditorExportPlatformNX::has_valid_export_configuration(const Ref<EditorExportPreset> &p_preset, String &r_error, bool &r_missing_templates, bool p_debug) const {
+	String err;
 	bool valid = true;
 	bool use64 = p_preset->get("binary_format/64_bits");
 	
@@ -120,34 +116,114 @@ bool EditorExportPlatformNX::has_valid_export_configuration(const Ref<EditorExpo
 #endif
 
 	// Must have valid:
-	String name = p_preset->get("application/name");
-	if (name.is_empty()) {
-		err += "An Application name must be provided";
+	Ref<PublishingMetadataNX> publishing_metadata = p_preset->get("application/metadata");
+	if (publishing_metadata.is_null()) {
+		err += "Publishing metadata must be provided";
 		valid = false;
-	}
-	String id = p_preset->get("application/identifier");
-	if (id.is_empty()) {
-		err += "An Application ID must be provided";
-		valid = false;
-	}
-	if (!id.is_valid_hex_number(true)) {
-		err += "Application ID must be hex number (0x000001)";
-		valid = false;
-	}
-	String publisher = p_preset->get("application/publisher");
-	if (publisher.is_empty()) {
-		err += "Publisher name must be provided";
-		valid = false;
-	}
-	String icon = p_preset->get("application/icon");
-	if (icon.is_empty()) {
-		err += "Icon is required for packaging";
-		valid = false;
-	}
-	String version = p_preset->get("application/version");
-	if (version.is_empty()) {
-		err += "Version must be provided";
-		valid = false;
+	} else {
+		String id = publishing_metadata->get_application_id();
+		if (id.is_empty()) {
+			err += "An Application ID must be provided";
+			valid = false;
+		}
+		if (!id.is_valid_hex_number(true)) {
+			err += "Application ID must be hex number (0x000001)";
+			valid = false;
+		}
+		String display_version = publishing_metadata->get_display_version();
+		if (display_version.is_empty()) {
+			err += "Display version must be provided";
+			valid = false;
+		}
+
+		if (publishing_metadata->get_localization_count() == 0) {
+			err += "At least 1 localization metadata is required";
+			valid = false;
+		}
+
+		HashSet<String> languages;
+		for (int i = 0; i < publishing_metadata->get_localization_count(); i++) {
+			Ref<LocalizationMetadataNX> localization = publishing_metadata->get_localization(i);
+			String language = localization->get_language();
+			if (language.is_empty()) {
+				err += "Language name is required for every localization metadata";
+				valid = false;
+				break;
+			}
+			if (!LocalizationMetadataNX::is_valid_language(language)) {
+				err += "\"" + language + "\" is not a valid language";
+				valid = false;
+				break;
+			}
+			if (languages.has(language)) {
+				err += "More than 1 localization metadata entry is found for \"" + language + "\"";
+				valid = false;
+				break;
+			}
+			languages.insert(language);
+			String application_name = localization->get_application_name();
+			if (application_name.is_empty()) {
+				err += language + ": Application name must be provided";
+				valid = false;
+			}
+			String publisher = localization->get_publisher();
+			if (publisher.is_empty()) {
+				err += language + ": Publisher name must be provided";
+				valid = false;
+			}
+			String icon = localization->get_icon_path();
+			if (icon.is_empty()) {
+				err += language + ": Icon is required for packaging";
+				valid = false;
+			}
+		}
+
+		HashSet<String> organizations;
+		for (int i = 0; i < publishing_metadata->get_rating_count(); i++) {
+			Ref<RatingMetadataNX> rating = publishing_metadata->get_rating(i);
+			String organization = rating->get_organization();
+			if (organization.is_empty()) {
+				err += "Organization name is required for every rating metadata";
+				valid = false;
+				break;
+			}
+			if (!RatingMetadataNX::is_valid_organization(organization)) {
+				err += "\"" + organization + "\" is not a valid organization";
+				valid = false;
+				break;
+			}
+			if (organizations.has(organization)) {
+				err += "More than 1 rating metadata entry is found for \"" + organization + "\"";
+				valid = false;
+				break;
+			}
+			organizations.insert(organization);
+		}
+
+		String age_for_china = publishing_metadata->get_appropriate_age_for_china();
+		if (!age_for_china.is_empty() && !publishing_metadata->is_valid_age_for_china(age_for_china)) {
+			err += "\"" + age_for_china + "\" is not a valid age for China";
+			valid = false;
+		}
+
+		String save_data_size = publishing_metadata->get_save_data_size();
+		if (save_data_size.is_empty()) {
+			err += "Save data size must be provided";
+			valid = false;
+		}
+		if (!save_data_size.is_valid_hex_number(true)) {
+			err += "Save data size must be hex number (0x0000000000400000)";
+			valid = false;
+		}
+		String save_data_journal_size = publishing_metadata->get_save_data_journal_size();
+		if (save_data_journal_size.is_empty()) {
+			err += "Save data journal size must be provided";
+			valid = false;
+		}
+		if (!save_data_journal_size.is_valid_hex_number(true)) {
+			err += "Save data journal size must be hex number (0x0000000000400000)";
+			valid = false;
+		}
 	}
 
 	if (use64 && (!exists_export_template(debug_file_64, &err) || !exists_export_template(release_file_64, &err))) {
@@ -302,10 +378,29 @@ Error EditorExportPlatformNX::export_project(const Ref<EditorExportPreset> &p_pr
 	err = execute_cmd(makenso_command, makenso_args, log_verbose);
 	ERR_FAIL_COND_V(err, err);
 
+	Ref<PublishingMetadataNX> publishing_metadata = p_preset->get("application/metadata");
+
 	// Special preprocessing for application icon
-	String appIconSource = p_preset->get("application/icon");
-	String appIconTarget = appIconSource.get_file();
-	copy_file(appIconSource, dest_dir + binary_name + "/" + appIconTarget);
+	HashSet<String> processed_icon_paths;
+	for (int j = 0; j < publishing_metadata->get_localization_count(); j++) {
+		Ref<LocalizationMetadataNX> localization = publishing_metadata->get_localization(j);
+		if (processed_icon_paths.has(localization->get_icon_path())) {
+			continue;
+		}
+		processed_icon_paths.insert(localization->get_icon_path());
+		String appIconSource = localization->get_icon_path();
+		String appIconTarget = appIconSource.get_file();
+		copy_file(appIconSource, dest_dir + binary_name + "/" + appIconTarget);
+	}
+	
+	// Special preprocessing for legal information
+	String legal_information_source = publishing_metadata->get_legal_information();
+	String legal_information_target = legal_information_source.get_file();
+	if (!legal_information_source.is_empty()) {
+		copy_file(legal_information_source, dest_dir + binary_name + "/" + legal_information_target);
+	} else {
+		WARN_PRINT_ED("Legal information not provided.");
+	}
 
 	// Create .nmeta file based on project properties
 	if (ep.step("Generating .nmeta information", 2))
@@ -330,21 +425,53 @@ Error EditorExportPlatformNX::export_project(const Ref<EditorExportPreset> &p_pr
 	String newNmetaString;
 	nmetaString.parse_utf8((const char *)data.ptr(), data.size());
 	Vector<String> lines = nmetaString.split("\n");
+	bool skip = false;
 	for (int i = 0; i < lines.size(); i++) {
 		if (lines[i].find("<Name>Application</Name>") != -1) {
 			newNmetaString += lines[i].replace("Application", binary_name) + "\n";
 		} else if (lines[i].find("<ApplicationId>0x01004b9000490000</ApplicationId>") != -1) {
-			newNmetaString += lines[i].replace("0x01004b9000490000", p_preset->get("application/identifier")) + "\n";
-		} else if (lines[i].find("<Name>Name</Name>") != -1) {
-			String app = ">" + (String)p_preset->get("application/name") + "<";
-			newNmetaString += lines[i].replace(">Name<", app) + "\n";
-		} else if (lines[i].find("<Publisher>Publisher</Publisher>") != -1) {
-			String publisher = ">" + (String)p_preset->get("application/publisher") + "<";
-			newNmetaString += lines[i].replace(">Publisher<", publisher) + "\n";
-		} else if (lines[i].find("<IconPath>./NintendoSDK_Application.bmp</IconPath>") != -1) {
-			newNmetaString += lines[i].replace("./NintendoSDK_Application.bmp", appIconTarget) + "\n";
+			newNmetaString += lines[i].replace("0x01004b9000490000", publishing_metadata->get_application_id()) + "\n";
+		} else if (lines[i].find("<Title>") != -1) {
+			skip = true;
+			for (int j = 0; j < publishing_metadata->get_localization_count(); j++) {
+				Ref<LocalizationMetadataNX> localization = publishing_metadata->get_localization(j);
+				newNmetaString += "<Title>\n";
+				newNmetaString += "\t<Language>"+localization->get_language()+"</Language>\n";
+				newNmetaString += "\t<Name>"+localization->get_application_name()+"</Name>\n";
+				newNmetaString += "\t<Publisher>"+localization->get_publisher()+"</Publisher>\n";
+				newNmetaString += "</Title>\n";
+			}
+		} else if (lines[i].find("</Title>") != -1) {
+			skip = false;
+		} else if (lines[i].find("<Icon>") != -1) {
+			skip = true;
+			for (int j = 0; j < publishing_metadata->get_localization_count(); j++) {
+				Ref<LocalizationMetadataNX> localization = publishing_metadata->get_localization(j);
+				newNmetaString += "<Icon>\n";
+				newNmetaString += "\t<Language>"+localization->get_language()+"</Language>\n";
+				newNmetaString += "\t<IconPath>"+localization->get_icon_path().get_file()+"</IconPath>\n";
+				newNmetaString += "</Icon>\n";
+			}
+		} else if (lines[i].find("</Icon>") != -1) {
+			skip = false;
+		} else if (lines[i].find("<SupportedLanguage>") != -1) {
+			for (int j = 0; j < publishing_metadata->get_localization_count(); j++) {
+				Ref<LocalizationMetadataNX> localization = publishing_metadata->get_localization(j);
+				newNmetaString += "<SupportedLanguage>"+localization->get_language()+"</SupportedLanguage>\n";
+			}
+		} else if (publishing_metadata->has_rating_metadata() && lines[i].find("<Rating>") != -1) {
+			skip = true;
+			for (int j = 0; j < publishing_metadata->get_rating_count(); j++) {
+				Ref<RatingMetadataNX> rating = publishing_metadata->get_rating(j);
+				newNmetaString += "<Rating>\n";
+				newNmetaString += "<Organization>"+rating->get_organization()+"</Organization>\n";
+				newNmetaString += "<Age>"+itos(rating->get_age())+"</Age>\n";
+				newNmetaString += "</Rating>\n";
+			}
+		} else if (publishing_metadata->has_rating_metadata() && lines[i].find("</Rating>") != -1) {
+			skip = false;
 		} else if (lines[i].find("<DisplayVersion>1.0.0</DisplayVersion>") != -1) {
-			newNmetaString += lines[i].replace("1.0.0", p_preset->get("application/version")) + "\n";
+			newNmetaString += lines[i].replace("1.0.0", publishing_metadata->get_display_version());
 /*			// Not currently used.
 			// Added in <Application>, after <DisplayVersion>
 			// Cache partition is only used when "read_only_cache" is off.
@@ -367,7 +494,32 @@ Error EditorExportPlatformNX::export_project(const Ref<EditorExportPreset> &p_pr
 			newNmetaString += "<StartupUserAccount>Required</StartupUserAccount>\n";
 			newNmetaString += "<UserAccountSwitchLock>Enable</UserAccountSwitchLock>\n";
 #endif
-		} else {
+			if (!legal_information_target.is_empty()) {
+				newNmetaString += "<LegalInformationFilePath>"+legal_information_target+"</LegalInformationFilePath>\n";
+			}
+
+			if (publishing_metadata->is_demo()) {
+				newNmetaString += "<Attribute>Demo</Attribute>\n";
+			}
+			
+			String appropriate_age_for_china = publishing_metadata->get_appropriate_age_for_china();
+			if (!appropriate_age_for_china.is_empty()) {
+				newNmetaString += "<AppropriateAgeForChina>"+appropriate_age_for_china+"</AppropriateAgeForChina>\n";
+			}
+
+			if (publishing_metadata->is_data_loss_confirmation_required()) {
+				newNmetaString += "<DataLossConfirmation>Required</DataLossConfirmation>\n";
+			} else {
+				newNmetaString += "<DataLossConfirmation>None</DataLossConfirmation>\n";
+			}
+
+		} else if (lines[i].find("<ReleaseVersion>0</ReleaseVersion>") != -1) {
+			newNmetaString += lines[i].replace("0", itos(publishing_metadata->get_release_version()));
+		} else if (lines[i].find("<UserAccountSaveDataSize>0x0000000000400000</UserAccountSaveDataSize>") != -1) {
+			newNmetaString += lines[i].replace("0x0000000000400000", publishing_metadata->get_save_data_size());
+		} else if (lines[i].find("<UserAccountSaveDataJournalSize>0x0000000000100000</UserAccountSaveDataJournalSize>") != -1) {
+			newNmetaString += lines[i].replace("0x0000000000100000", publishing_metadata->get_save_data_journal_size());
+		} else if (!skip) {
 			newNmetaString += lines[i] + "\n";
 		}
 	}

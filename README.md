@@ -38,7 +38,15 @@ To export an ```.nsp``` file for your project open the export dialog from the fi
 
 ```Project->Exports...```
 
-Click the ```Add...``` button and Select ```Nintendo Switch```.  Now click on ```Nintendo Switch``` which enables you to apply your export settings. It is important that you set a Name and Icon for your project.  Icon's must be 1024x1024 in size, and be either a JPEG or 24-bit BMP file.  This is very important because ```.nsp``` generation will fail if the Icon file is not one of these very specific formats!
+Click the ```Add...``` button and Select ```Nintendo Switch```.  Now click on ```Nintendo Switch``` which enables you to apply your export settings.
+
+Export settings for Nintendo Switch uses the `PublishingMetadataNX` resource. It is recommended that you do *not* save the resource as a file. (leave it embedded in the export preset)
+
+Options in `PublishingMetadataNX` correspond to NMETA entries. Please refer to the NintendoSDK documents (Features > Building > Creating Application Images > Writing the NMETA File) for more information. You must configure at least one localization (AmericanEnglish for example) and set the name and icon there.
+
+You don't need to fill every field in `PublishingMetadataNX` in order to export successfully. Just remember to fill out the rest when your game's ready for lotcheck.
+
+Icons must be 1024x1024 in size, and be either a JPEG or 24-bit BMP file.  This is very important because ```.nsp``` generation will fail if the Icon file is not one of these very specific formats!
 
 Now click ```Export Project``` to generate and save an ```.nsp``` file. This is the final file you install to your development hardware.  It's also possible to debug your game by opening and launching this ```.nsp``` file in Visual Studio.
 
@@ -46,7 +54,7 @@ It is also possible to launch your Game directly from Godot provided you have al
 
 ## Important Notes for Exporting to Nintendo Switch
 
-Please use Nintendo SDK version 17.x. Exporting with version 18.x may result in errors.
+Please use Nintendo SDK version 19.x.
 
 Currently, Godot NX 4.x only supports Vulkan. To ensure proper functionality, follow these steps:
 
