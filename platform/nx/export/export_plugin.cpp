@@ -71,9 +71,9 @@ Error EditorExportPlatformNX::execute_cmd(const String &p_path, const List<Strin
 
 		print_line(String().join(parts));
 	}
-	Error err = OS::get_singleton()->execute(p_path, p_arguments, &pipe);
+	Error err = OS::get_singleton()->execute(p_path, p_arguments, &pipe, nullptr, true);
 	PackedStringArray lines = pipe.split("\n\r", false);
-	String error_string = "Error:";
+	String error_string = "[Error]";
 	for (int i = 0; i < lines.size(); i++) {
 		String line = lines[i];
 		if (error_string.is_subsequence_of(line)) {
