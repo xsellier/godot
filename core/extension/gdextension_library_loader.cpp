@@ -35,6 +35,12 @@
 #include "core/version.h"
 #include "gdextension.h"
 
+#ifdef NX_ENABLED
+static String map_library_path_to_nx_module(const String &p_path) {
+	return "res:/.nro/extension" + p_path.trim_prefix("res:/").trim_suffix(p_path.get_extension()) + "nro";
+}
+#endif
+
 Vector<SharedObject> GDExtensionLibraryLoader::find_extension_dependencies(const String &p_path, Ref<ConfigFile> p_config, std::function<bool(String)> p_has_feature) {
 	Vector<SharedObject> dependencies_shared_objects;
 	if (p_config->has_section("dependencies")) {
@@ -179,12 +185,20 @@ Error GDExtensionLibraryLoader::open_library(const String &p_path) {
 		return err;
 	}
 
+#ifdef NX_ENABLED
+	String abs_path = map_library_path_to_nx_module(library_path);
+#else
 	String abs_path = ProjectSettings::get_singleton()->globalize_path(library_path);
+#endif
 
 	Vector<String> abs_dependencies_paths;
 	if (!library_dependencies.is_empty()) {
 		for (const SharedObject &dependency : library_dependencies) {
+#ifdef NX_ENABLED
+			abs_dependencies_paths.push_back(map_library_path_to_nx_module(dependency.path));
+#else
 			abs_dependencies_paths.push_back(ProjectSettings::get_singleton()->globalize_path(dependency.path));
+#endif
 		}
 	}
 

@@ -100,6 +100,10 @@ public:
 
 	Error get_entropy(uint8_t *r_buffer, int p_bytes) override;
 
+	Error open_dynamic_library(const String &p_path, void *&p_library_handle, GDExtensionData *p_data = nullptr) override;
+	Error close_dynamic_library(void *p_library_handle) override;
+	Error get_dynamic_library_symbol_handle(void *p_library_handle, const String &p_name, void *&p_symbol_handle, bool p_optional = false) override;
+
     Error execute(const String &p_path, const List<String> &p_arguments, String *r_pipe = nullptr, int *r_exitcode = nullptr, bool read_stderr = false, Mutex *p_pipe_mutex = nullptr, bool p_open_console = false) override;
 	Error create_process(const String &p_path, const List<String> &p_arguments, ProcessID *r_child_id = nullptr, bool p_open_console = false) override;
     Error kill(const ProcessID &p_pid) override;

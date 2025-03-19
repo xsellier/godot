@@ -39,6 +39,10 @@ static nn::socket::ConfigDefaultWithMemory s_SocketConfigWithMemory;
 static char *profiler_buffer = nullptr;
 #endif
 
+#define MAX_FILE_SIZE (0x400000)
+static uint8_t *core_dynamic_modules_nrr = nullptr;
+nn::ro::RegistrationInfo core_dynamic_modules_info;
+
 /// Clock Setup function (used by get_ticks_usec)
 static nn::os::Tick _clock_start = nn::os::Tick();
 static void _setup_clock() {
@@ -519,6 +523,13 @@ void OS_NX::finalize_core() {
     NN_ABORT_UNLESS_RESULT_SUCCESS(result);
 	delete [] profiler_buffer;
 #endif
+
+	if (core_dynamic_modules_nrr) {
+		nn::ro::UnregisterModuleInfo(&core_dynamic_modules_info);
+		nn::ro::Finalize();
+		free(core_dynamic_modules_nrr);
+		core_dynamic_modules_nrr = nullptr;
+	}
 	// if (ProjectSettings::get_singleton()->get("rendering/shader_compiler/shader_cache/enabled")) {
 	// 	unmountCache();
 	// }
@@ -549,6 +560,111 @@ Vector<String> OS_NX::get_video_adapter_driver_info() const {
 Error OS_NX::get_entropy(uint8_t *r_buffer, int p_bytes) {
     nn::crypto::GenerateCryptographicallyRandomBytes(r_buffer, size_t(p_bytes));
     return OK;
+}
+
+// Handle object for Switch's dynamic modules (libraries)
+// See also: ${NINTENDO_SDK_ROOT}\Samples\Sources\Applications\RoSimple\RoStaticApplication\RoStaticApplication.cpp
+struct DynamicLibraryNX {
+	uint8_t *nro = nullptr;
+	uint8_t *bss = nullptr;
+	nn::ro::Module module;
+	~DynamicLibraryNX() {
+		free(nro); // Never null!
+		nro = nullptr;
+		if (bss) {
+			free(bss);
+		}
+		bss = nullptr;
+	}
+};
+
+Error OS_NX::open_dynamic_library(const String &p_path, void *&p_library_handle, GDExtensionData *p_data) {
+	ERR_FAIL_COND_V(p_path.get_extension() != "nro", ERR_FILE_UNRECOGNIZED);
+	if (!core_dynamic_modules_nrr) {
+		// Initialize dynamic modules if applicable.
+		String dynamic_modules_path = "res:/.nrr/CoreDynamicModules.nrr";
+		ERR_FAIL_COND_V(!FileAccess::exists(dynamic_modules_path), ERR_CANT_CREATE);
+		nn::ro::Initialize();
+		core_dynamic_modules_nrr = (uint8_t *) aligned_alloc(nn::os::MemoryPageSize, MAX_FILE_SIZE);
+		Error err;
+		Ref<FileAccess> f = FileAccess::open(dynamic_modules_path, FileAccess::READ, &err);
+		if (err != OK) {
+			NN_LOG("Failed to open core dynamic module NRR!");
+			NN_ABORT();
+		}
+		size_t core_dynamic_modules_nrr_size = core_dynamic_modules_nrr_size = f->get_buffer(core_dynamic_modules_nrr, MAX_FILE_SIZE);
+		NN_UNUSED(core_dynamic_modules_nrr_size);
+		nn::Result result = nn::ro::RegisterModuleInfo(&core_dynamic_modules_info, core_dynamic_modules_nrr);
+		if (result.IsFailure()) {
+			NN_LOG("Failed to register core dynamic module NRR!");
+			NN_ABORT();
+		}
+		f->close();
+	}
+
+	Error err;
+    uint8_t *nro;
+	{
+		Ref<FileAccess> f = FileAccess::open(p_path, FileAccess::READ, &err);
+		ERR_FAIL_COND_V(err != OK, err);
+		nro = (uint8_t *) aligned_alloc(nn::os::MemoryPageSize, MAX_FILE_SIZE);
+		size_t nro_size = f->get_buffer(nro, MAX_FILE_SIZE);
+		NN_UNUSED(nro_size);
+		f->close();
+	}
+
+	DynamicLibraryNX *lib = memnew(DynamicLibraryNX);
+	lib->nro = nro;
+	size_t buffer_size;
+	{
+		nn::Result result = nn::ro::GetBufferSize(&buffer_size, nro);
+		if (result.IsFailure()) {
+			memdelete(lib);
+			ERR_FAIL_V_MSG(ERR_CANT_CREATE, vformat("Failed to load NRO module \"%s\" (Description:%d)", p_path, result.GetDescription()));
+		}
+		if (buffer_size != 0)
+		{
+			lib->bss = (uint8_t *) aligned_alloc(nn::os::MemoryPageSize, buffer_size);
+		}
+	}
+    
+    {
+        // Load the NRO file (delayed resolution for the symbols).
+		// TODO: Make it possible to control the bind flag here via compile flags?
+        nn::Result result = nn::ro::LoadModule(&lib->module, lib->nro, lib->bss, buffer_size, nn::ro::BindFlag_Lazy);
+        if (result.IsFailure()) {
+			memdelete(lib);
+			ERR_FAIL_V_MSG(ERR_CANT_CREATE, vformat("Failed to load NRO module \"%s\" (Description:%d)", p_path, result.GetDescription()));
+		}
+        // You can now call the symbols inside the dynamic module.
+    }
+
+	if (p_data) {
+		// Implementation based on OS_Unix::open_dynamic_library.
+		// TODO: Should there be special path resolution?
+		if (p_data->r_resolved_path != nullptr) {
+			*p_data->r_resolved_path = p_path;
+		}
+	}
+
+	p_library_handle = lib;
+	return OK;
+}
+
+Error OS_NX::close_dynamic_library(void *p_library_handle) {
+	DynamicLibraryNX *lib = reinterpret_cast<DynamicLibraryNX *>(p_library_handle);
+	nn::ro::UnloadModule(&lib->module);
+	memdelete(lib);
+	return OK;
+}
+
+Error OS_NX::get_dynamic_library_symbol_handle(void *p_library_handle, const String &p_name, void *&p_symbol_handle, bool p_optional) {
+	DynamicLibraryNX *lib = reinterpret_cast<DynamicLibraryNX *>(p_library_handle);
+	uintptr_t symbol;
+	nn::Result result = nn::ro::LookupModuleSymbol(&symbol, &lib->module, p_name.utf8().get_data());
+	ERR_FAIL_COND_V_MSG(result.IsFailure(), ERR_CANT_RESOLVE, vformat("Failed to get dynamic library symbol \"%s\" (Description:%d)", p_name, result.GetDescription()));
+	p_symbol_handle = reinterpret_cast<void *>(symbol);
+	return OK;
 }
 
 Error OS_NX::execute(const String &p_path, const List<String> &p_arguments, String *r_pipe, int *r_exitcode, bool read_stderr, Mutex *p_pipe_mutex, bool p_open_console) {

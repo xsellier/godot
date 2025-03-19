@@ -2,6 +2,7 @@
 #include "publishing_metadata_nx.h"
 #include "editor/editor_paths.h"
 #include "core/config/project_settings.h"
+#include "core/io/json.h"
 
 #include "modules/modules_enabled.gen.h"
 #ifdef MODULE_SVG_ENABLED
@@ -93,7 +94,11 @@ void EditorExportPlatformNX::get_preset_features(const Ref<EditorExportPreset> &
 		r_features->push_back("etc2");
 	}
 
-	r_features->push_back("64");
+	if (p_preset->get("binary_format/64_bits")) {
+		r_features->push_back("arm64");
+	} else {
+		r_features->push_back("arm32");
+	}
 }
 
 Ref<Texture2D> EditorExportPlatformNX::get_logo() const
@@ -274,8 +279,6 @@ Error EditorExportPlatformNX::export_project(const Ref<EditorExportPreset> &p_pr
 	bool log_verbose = p_preset->get("debug/log_verbose");
 	
 	ExportNotifier notifier(*this, p_preset, p_debug, p_path, p_flags);
-
-	EditorProgress ep("export", "Exporting for Nintendo Switch", 5, true);
 	
 	String src_pkg_name;
 	String dest_dir = p_path.get_base_dir() + "/";
@@ -358,17 +361,137 @@ Error EditorExportPlatformNX::export_project(const Ref<EditorExportPreset> &p_pr
         return err;
     }
 
+	EditorProgress ep("export", "Exporting for Nintendo Switch", 8, true);
+
+	int step = 0;
+
 	// Package datafile from project
-	if (ep.step("Making .pck", 0))
+	if (ep.step("Making .pck", step++))
 		return ERR_SKIP;
 	String pack_path = dest_dir + binary_name + "/data/" + "project" + ".pck";
 	Vector<SharedObject> libraries;
 	err = save_pack(p_preset, p_debug, pack_path, &libraries);
 	if (err != OK)
 		return err;
+	
+	String sdk_version_path = sdkPath + "/PackageInfo/Versions/NintendoSDK_Version.json";
+
+	Dictionary version_json = JSON::parse_string(FileAccess::get_file_as_string(sdk_version_path, &err));
+	ERR_FAIL_COND_V(err, err);
+	version_json = version_json["Version"];
+	int version_major = version_json["Major"];
+	int version_minor = version_json["Minor"];
+	int version_micro = version_json["Micro"];
+	int version_relstep = version_json["Relstep"];
+	
+	bool use_dynamic_modules = false;
+	PackedStringArray so_paths;
+	PackedStringArray nrs_paths;
+	PackedStringArray nro_paths;
+	for (const SharedObject &library : libraries) {
+		if (library.path.ends_with(".so") || library.path.ends_with(".o")) {
+			use_dynamic_modules = true;
+			so_paths.push_back(library.path);
+		}
+	}
+
+	if (use_dynamic_modules) {
+		if (ep.step("Generating NRS", step++))
+			return ERR_SKIP;
+
+		String clang_command = sdkPath + "/Compilers/NintendoClang/bin/clang++.exe";
+		for (const String &so_path : so_paths) {
+			// Convert object files to NRS.
+			String nrs_path;
+			if (so_path.begins_with("res://") || so_path.begins_with(ProjectSettings::get_singleton()->get_resource_path())) {
+				// Check if the path is under res:// (GDExtension)
+				nrs_path = dest_dir + binary_name + "/data/.nrs/extension/" + so_path.trim_prefix(ProjectSettings::get_singleton()->get_resource_path()).trim_suffix("so") + "nrs";
+			} else if (so_path.contains("\\godot-publish-dotnet\\") || so_path.contains("/godot-publish-dotnet/")) {
+				// Check if the path is a dotnet artifact (C#)
+				nrs_path = dest_dir + binary_name + "/data/.nrs/godot-publish-dotnet/" + so_path.get_file().trim_suffix("so") + "nrs";
+			} else {
+				ERR_FAIL_V_MSG(ERR_FILE_BAD_PATH, vformat("Cannot resolve shared object path \"%s\" for .so to .nrs conversion.", nrs_path));
+			}
+			err = DirAccess::make_dir_recursive_absolute(nrs_path.get_base_dir());
+			if (err) {
+				return err;
+			}
+			List<String> clang_args;
+			clang_args.push_back(vformat("--config=%s/Build/ClangConfigs/NX-NXFP2-a64/Link/RoModule.cfg", sdkPath));
+			clang_args.push_back("-Wl,--whole-archive");
+			clang_args.push_back(so_path);
+			if (p_debug) {
+				clang_args.push_back(vformat("%s/Libraries/NX-NXFP2-a64/Develop/rocrt_nro.o", sdkPath));
+			} else {
+				clang_args.push_back(vformat("%s/Libraries/NX-NXFP2-a64/Release/rocrt_nro.o", sdkPath));
+			}
+
+			// TODO: Static libraries?
+
+			if (p_debug) {
+				clang_args.push_back(vformat("%s/Libraries/NX-NXFP2-a64/Develop/crtend.o", sdkPath));
+			} else {
+				clang_args.push_back(vformat("%s/Libraries/NX-NXFP2-a64/Release/crtend.o", sdkPath));
+			}
+		
+			clang_args.push_back("-Wl,--no-whole-archive");
+			clang_args.push_back("-o");
+			clang_args.push_back(nrs_path);
+			err = execute_cmd(clang_command, clang_args, log_verbose);
+			ERR_FAIL_COND_V(err, err);
+			nrs_paths.push_back(nrs_path);
+		}
+		
+		if (ep.step("Generating NRO", step++))
+			return ERR_SKIP;
+
+		String makenro_command = sdkPath + "/Tools/CommandLineTools/MakeNro/MakeNro.exe";
+		for (const String &nrs_path : nrs_paths) {
+			// Convert NRS to NRO.
+			String nro_path = nrs_path.replace(".nrs", ".nro");
+			err = DirAccess::make_dir_recursive_absolute(nro_path.get_base_dir());
+			if (err) {
+				return err;
+			}
+			List<String> makenro_args;
+			if (version_major >= 20) {
+                // TODO: Nintendo Switch 2 support in the future?
+				makenro_args.push_back("-platform");
+				makenro_args.push_back("NX");
+			}
+			makenro_args.push_back(nrs_path);
+			makenro_args.push_back(nro_path);
+			err = execute_cmd(makenro_command, makenro_args, log_verbose);
+			ERR_FAIL_COND_V(err, err);
+			nro_paths.push_back(nro_path);
+		}
+
+		if (ep.step("Generating NRR", step++))
+			return ERR_SKIP;
+
+		err = da->make_dir("data/.nrr");
+		if (err) {
+			return err;
+		}
+		String makenrr_command = sdkPath + "/Tools/CommandLineTools/MakeNrr/MakeNrr.exe";
+		List<String> makenrr_args;
+		if (version_major >= 20) {
+			makenrr_args.push_back("-platform");
+			makenrr_args.push_back("NX");
+		}
+		makenrr_args.push_back("-o");
+		makenrr_args.push_back(dest_dir + binary_name + "/data/.nrr/CoreDynamicModules.nrr");
+		for (const String &nro_path : nro_paths) {
+			makenrr_args.push_back(nro_path);
+		}
+		err = execute_cmd(makenrr_command, makenrr_args, log_verbose);
+		ERR_FAIL_COND_V(err, err);
+	} else {
+		step += 3; // Skip NRS, NRO, NRR.
+	}
 
 	// Create .nso file from .nss
-	if (ep.step("Generating NSO", 1))
+	if (ep.step("Generating NSO", step++))
 		return ERR_SKIP;
 	String makenso_command = sdkPath + "/Tools/CommandLineTools/MakeNso/MakeNso.exe";
 	List<String> makenso_args;
@@ -403,7 +526,7 @@ Error EditorExportPlatformNX::export_project(const Ref<EditorExportPreset> &p_pr
 	}
 
 	// Create .nmeta file based on project properties
-	if (ep.step("Generating .nmeta information", 2))
+	if (ep.step("Generating .nmeta information", step++))
 		return ERR_SKIP;
 	String nmetaTemplate;
 	if (use64)
@@ -537,7 +660,7 @@ Error EditorExportPlatformNX::export_project(const Ref<EditorExportPreset> &p_pr
     f.unref(); // close
 
 	// Create .npdm file from generated .nmeta
-	if (ep.step("Writing .npdm", 3))
+	if (ep.step("Writing .npdm", step++))
 		return ERR_SKIP;
 	String makemeta_command = sdkPath + "/Tools/CommandLineTools/MakeMeta/MakeMeta.exe";
 	List<String> makemeta_args;
@@ -552,7 +675,7 @@ Error EditorExportPlatformNX::export_project(const Ref<EditorExportPreset> &p_pr
 	ERR_FAIL_COND_V(err, err);
 
 	// Fill Code Region Directory
-	if (ep.step("Filling Code Region", 4))
+	if (ep.step("Filling Code Region", step++))
 		return ERR_SKIP;
 	// *.nso -> main (done already)
 	// *.npdm -> main.npdm (done already)
@@ -583,7 +706,7 @@ Error EditorExportPlatformNX::export_project(const Ref<EditorExportPreset> &p_pr
     }
 
 	// Generate .nsp Application Image
-	if (ep.step("Generate final .nsp Application Image", 5))
+	if (ep.step("Generate final .nsp Application Image", step++))
 		return ERR_SKIP;
 	String authoring_tool_command = sdkPath + "/Tools/CommandLineTools/AuthoringTool/AuthoringTool.exe";
 	List<String> creatensp_args;
@@ -596,8 +719,18 @@ Error EditorExportPlatformNX::export_project(const Ref<EditorExportPreset> &p_pr
 	creatensp_args.push_back(nmetaOutputFile);
 	creatensp_args.push_back("--type");
 	creatensp_args.push_back("Application");
+	if (use_dynamic_modules) {
+		creatensp_args.push_back("--nro");
+		creatensp_args.push_back(dest_dir + binary_name + "/data/.nro/"); // Not .nrr!
+	}
 	creatensp_args.push_back("--nss");
 	creatensp_args.push_back(src_pkg_name);
+	if (use_dynamic_modules) {
+		creatensp_args.push_back("--nrs");
+		for (const String &nrs_path : nrs_paths) {
+			creatensp_args.push_back(nrs_path);
+		}
+	}
 	creatensp_args.push_back("--program");
 	creatensp_args.push_back(dest_dir + binary_name + "/code/");
 	creatensp_args.push_back(dest_dir + binary_name + "/data/");
