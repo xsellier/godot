@@ -49,6 +49,7 @@
 #endif
 #endif
 
+class JoypadSDL;
 class OS_LinuxBSD : public OS_Unix {
 	virtual void delete_main_loop() override;
 
@@ -59,6 +60,10 @@ class OS_LinuxBSD : public OS_Unix {
 
 	int _weight_to_fc(int p_weight) const;
 	int _stretch_to_fc(int p_stretch) const;
+#endif
+
+#ifdef SDL_ENABLED
+	JoypadSDL *joypad_sdl = nullptr;
 #endif
 
 #ifdef JOYDEV_ENABLED

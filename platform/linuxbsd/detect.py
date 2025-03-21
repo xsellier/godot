@@ -41,6 +41,7 @@ def get_opts():
         BoolVariable("use_msan", "Use LLVM compiler memory sanitizer (MSAN)", False),
         BoolVariable("use_sowrap", "Dynamically load system libraries", True),
         BoolVariable("alsa", "Use ALSA", True),
+        BoolVariable("sdl3", "Use SDL3", True),
         BoolVariable("pulseaudio", "Use PulseAudio", True),
         BoolVariable("dbus", "Use D-Bus to handle screensaver and portal desktop settings", True),
         BoolVariable("speechd", "Use Speech Dispatcher for Text-to-Speech support", True),
@@ -346,6 +347,18 @@ def configure(env: "SConsEnvironment"):
                 env["dbus"] = False
         else:
             env.Append(CPPDEFINES=["DBUS_ENABLED"])
+
+    if env["sdl3"]:
+        if not env["use_sowrap"]:
+            if os.system("pkg-config --exists sdl3") == 0:  # 0 means found
+                env.ParseConfig("pkg-config sdl3 --cflags --libs")
+                env.Append(CPPDEFINES=["SDL_ENABLED"])
+            else:
+                print("Warning: SDL development libraries not found. Disabling the SDL input driver.")
+                env["sdl3"] = False
+
+        else:
+            env.Append(CPPDEFINES=["SDL_ENABLED"])
 
     if env["speechd"]:
         if not env["use_sowrap"]:

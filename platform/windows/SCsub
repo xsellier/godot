@@ -124,6 +124,24 @@ if env["d3d12"]:
             Copy("$TARGET", "$SOURCE"),
         )
 
+# SDL
+if env["sdl3"]:
+    if env["sdl_path"] != "" and os.path.exists(env["sdl_path"]):
+        sdl_dll = "SDL3.dll"
+        sdl_dll_path = ""
+
+        if env.msvc:
+            arch_subdir = "x64" if env["arch"].endswith("64") else "x86"
+            sdl_dll_path = env["sdl_path"] + "/lib/" + arch_subdir + sdl_dll
+        else:
+            sdl_dll_path = env["sdl_path"] + "/bin/" + sdl_dll
+
+        env.Command(
+            "#bin/" + sdl_dll,
+            sdl_dll_path,
+            Copy("$TARGET", "$SOURCE"),
+        )
+
 if not os.getenv("VCINSTALLDIR"):
     if env["debug_symbols"]:
         env.AddPostAction(prog, env.Run(platform_windows_builders.make_debug_mingw))

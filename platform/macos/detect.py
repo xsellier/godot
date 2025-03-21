@@ -36,6 +36,7 @@ def get_opts():
         BoolVariable("use_asan", "Use LLVM/GCC compiler address sanitizer (ASAN)", False),
         BoolVariable("use_tsan", "Use LLVM/GCC compiler thread sanitizer (TSAN)", False),
         BoolVariable("use_coverage", "Use instrumentation codes in the binary (e.g. for code coverage)", False),
+        BoolVariable("sdl3", "Use SDL3", False),
         ("angle_libs", "Path to the ANGLE static libraries", ""),
         (
             "bundle_sign_identity",

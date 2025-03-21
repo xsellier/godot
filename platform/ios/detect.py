@@ -34,6 +34,7 @@ def get_opts():
         BoolVariable("ios_simulator", "Build for iOS Simulator", False),
         ("ios_triple", "Triple for ios toolchain", ""),
         BoolVariable("generate_bundle", "Generate an APP bundle after building iOS/macOS binaries", False),
+        BoolVariable("sdl3", "Use SDL3", False),
     ]
 
 

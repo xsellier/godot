@@ -51,7 +51,9 @@
 #if defined(GLES3_ENABLED)
 #include "drivers/gles3/rasterizer_gles3.h"
 #endif
-
+#ifdef SDL_ENABLED
+#include "drivers/sdl3/joypad_sdl.h"
+#endif
 #include <avrt.h>
 #include <dwmapi.h>
 #include <propkey.h>
@@ -5831,7 +5833,9 @@ LRESULT DisplayServerWindows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 
 		} break;
 		case WM_DEVICECHANGE: {
-			joypad->probe_joypads();
+			if (joypad) {
+				joypad->probe_joypads();
+			}
 		} break;
 		case WM_DESTROY: {
 			Input::get_singleton()->flush_buffered_events();
@@ -7022,7 +7026,19 @@ DisplayServerWindows::DisplayServerWindows(const String &p_rendering_driver, Win
 		ERR_FAIL_MSG("Failed to create main window.");
 	}
 
+#ifdef SDL_ENABLED
+	joypad_sdl = memnew(JoypadSDL(Input::get_singleton()));
+	if (joypad_sdl->initialize() != OK) {
+		// SDL init failed, fallback to the native driver
+		memdelete(joypad_sdl);
+		joypad_sdl = nullptr;
+	}
+	if (!joypad_sdl) {
+		joypad = new JoypadWindows(&windows[MAIN_WINDOW_ID].hWnd);
+	}
+#else
 	joypad = new JoypadWindows(&windows[MAIN_WINDOW_ID].hWnd);
+#endif
 
 	for (int i = 0; i < WINDOW_FLAG_MAX; i++) {
 		if (p_flags & (1 << i)) {
