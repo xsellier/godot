@@ -22,6 +22,8 @@ Multiple builds must be done before Godot can be used for Nintendo Switch develo
 
 ```scons platform=nx target=template_debug debug_symbols=yes arch=arm32```
 
+If your game does not require changing user profiles while in-game, you may enable the additional flag ```nx_use_preselected_user=yes```. This may help avoid a few issues in lotcheck.
+
 You don't necessarily need to build for all 4 device configurations but these are all the potential export templates.  The Windows build provides the editor and exporter for the NX.
 
 Once the export templates are generated you need to deploy your local export templates folder. There is a scripted provided to do this for you:
