@@ -67543,17 +67543,6 @@ msgstr ""
 msgid "Provides access to the Java Native Interface."
 msgstr "Soláthraíonn rochtain ar an Java Dúchasach Chomhéadain...."
 
-msgid ""
-"Wraps a class defined in Java, and returns it as a [JavaClass] [Object] type "
-"that Godot can interact with.\n"
-"[b]Note:[/b] This method only works on Android. On every other platform, this "
-"method does nothing and returns an empty [JavaClass]."
-msgstr ""
-"Wraps rang sainithe i Java, agus ar ais é mar [JavaClass] [Réad] chineál gur "
-"féidir Godot idirghníomhú leis.\n"
-"[b]Nóta:[/b] Ní oibríonn an modh seo ach ar Android. Ar gach ardán eile, ní "
-"dhéanann an modh seo rud ar bith agus filleann sé folamh [JavaClass]."
-
 msgid "Represents an object from the Java Native Interface."
 msgstr "Is ionann é agus réad ón gComhéadan Dúchasach Java."
 

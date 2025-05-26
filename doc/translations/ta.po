@@ -63717,17 +63717,6 @@ msgstr ""
 msgid "Provides access to the Java Native Interface."
 msgstr "சாவா சொந்த இடைமுகத்திற்கான அணுகலை வழங்குகிறது."
 
-msgid ""
-"Wraps a class defined in Java, and returns it as a [JavaClass] [Object] type "
-"that Godot can interact with.\n"
-"[b]Note:[/b] This method only works on Android. On every other platform, this "
-"method does nothing and returns an empty [JavaClass]."
-msgstr ""
-"சாவாவில் வரையறுக்கப்பட்ட ஒரு வகுப்பை மூடுகிறது, மேலும் அதை [சாவாக்ளாச்] [பொருள்] "
-"வகையாக கோடோட் தொடர்பு கொள்ளலாம்.\n"
-" [b] குறிப்பு: [/b] இந்த முறை ஆண்ட்ராய்டு இல் மட்டுமே வேலை செய்கிறது. மற்ற எல்லா "
-"தளங்களிலும், இந்த முறை எதுவும் செய்யாது மற்றும் வெற்று [சாவாக்லாச்] ஐ வழங்குகிறது."
-
 msgid "Represents an object from the Java Native Interface."
 msgstr "சாவா சொந்த இடைமுகத்திலிருந்து ஒரு பொருளைக் குறிக்கிறது."
 
