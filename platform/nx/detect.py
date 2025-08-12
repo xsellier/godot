@@ -30,7 +30,7 @@ def get_flags():
             ('module_upnp_enabled', False),
             ('builtin_pcre2_with_jit', False),
             ('use_volk', False),
-            ('builtin_embree', False),
+            ('builtin_embree', True),
             ('opengl3', False),
             ('arch', 'arm64'),
             ('target', 'template_debug'),

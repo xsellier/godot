@@ -94,6 +94,9 @@ if env["builtin_embree"]:
     if env["platform"] == "web":
         env_thirdparty.Append(CXXFLAGS=["-msimd128"])
 
+    if env["platform"] == "nx":
+        env_thirdparty.Append(CPPDEFINES=["__NX__"])
+
     if not env.msvc:
         # Flags synced with upstream gnu.cmake.
         if env["arch"] == "arm64" and env["platform"] == "linuxbsd" and not env["use_llvm"]:
