@@ -341,7 +341,7 @@ namespace embree
 /// Unix Platform
 ////////////////////////////////////////////////////////////////////////////////
 
-#if defined(__UNIX__) || defined(PTHREADS_WIN32)
+#if defined(__UNIX__) || defined(PTHREADS_WIN32) || defined(__NX__)
 
 #include <pthread.h>
 #include <sched.h>

@@ -375,3 +375,53 @@ namespace embree
 }
 
 #endif
+
+// Godot-NX
+
+#if defined(__NX__)
+
+#include <stdlib.h>
+
+namespace embree
+{
+  bool os_init(bool hugepages, bool verbose)
+  {
+    return true;
+  }
+
+  void* os_malloc(size_t bytes, bool& hugepages)
+  {
+    void* ptr = malloc(bytes);
+    if (ptr == NULL) {
+      abort();
+    }
+    return ptr;
+  }
+
+  size_t os_shrink(void* ptr, size_t bytesNew, size_t bytesOld, bool hugepages)
+  {
+    if (bytesNew >= bytesOld)
+      return bytesOld;
+
+    ptr = realloc(ptr, bytesNew);
+    if (ptr == NULL) {
+      abort();
+    }
+    return bytesNew;
+  }
+
+  void os_free(void* ptr, size_t bytes, bool hugepages)
+  {
+    if (bytes == 0)
+      return;
+
+    free(ptr);
+  }
+
+  /* hint for transparent huge pages (THP) */
+  void os_advise(void* pptr, size_t bytes)
+  {
+    return;
+  }
+}
+#endif

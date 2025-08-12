@@ -19,7 +19,7 @@ namespace embree
 }
 #endif
 
-#if defined(__UNIX__) || defined(PTHREADS_WIN32)
+#if defined(__UNIX__) || defined(PTHREADS_WIN32) || defined(__NX__)
 #include <pthread.h>
 namespace embree
 {

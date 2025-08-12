@@ -55,6 +55,8 @@ namespace embree
     return "Unix (32bit)";
 #elif defined(__UNIX__) && defined(__64BIT__)
     return "Unix (64bit)";
+#elif defined(__NX__)
+    return "NX";
 #else
     return "Unknown";
 #endif
@@ -650,7 +652,7 @@ namespace embree
 /// Unix Platform
 ////////////////////////////////////////////////////////////////////////////////
 
-#if defined(__UNIX__)
+#if defined(__UNIX__) || defined(__NX__)
 
 #include <unistd.h>
 #include <sys/ioctl.h>
