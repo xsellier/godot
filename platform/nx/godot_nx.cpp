@@ -15,9 +15,17 @@
 #include <nn/account/account_Selector.h>
 #include <nn/util/util_ScopeExit.h>
 
+#include <nn/nn_Middleware.h>
+
+#ifdef DEBUG_ENABLED
+NN_DEFINE_MIDDLEWARE(g_MiddlewareInfo, "RAWRLABGames", "GodotEngine-RAWRLAB-4_4_1-Debug" );
+#else
+NN_DEFINE_MIDDLEWARE(g_MiddlewareInfo, "RAWRLABGames", "GodotEngine-RAWRLAB-4_4_1-Release" );
+#endif
 
 extern "C" void nnMain()
 {
+	NN_USING_MIDDLEWARE(g_MiddlewareInfo);
     NN_LOG("nnMain\n");
 	int argc = nn::os::GetHostArgc();
 	char **argv = nn::os::GetHostArgv();
