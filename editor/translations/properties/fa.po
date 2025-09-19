@@ -46,13 +46,16 @@
 # HOSSIEN <hossien014@gmail.com>, 2024.
 # Atur Aseman <aturaseman9@gmail.com>, 2024, 2025.
 # saman balahang <saman.balahang.2012@gmail.com>, 2024.
+# Parham Nasehi <www.ganiscotg.com@gmail.com>, 2025.
+# Mahan Khalili <mkh-user@users.noreply.hosted.weblate.org>, 2025.
+# ali zia <sampadpars@gmail.com>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Godot Engine properties\n"
 "Report-Msgid-Bugs-To: https://github.com/godotengine/godot\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2025-06-04 16:52+0000\n"
-"Last-Translator: Atur <aturaseman9@gmail.com>\n"
+"PO-Revision-Date: 2025-08-03 07:02+0000\n"
+"Last-Translator: ali zia <sampadpars@gmail.com>\n"
 "Language-Team: Persian <https://hosted.weblate.org/projects/godot-engine/"
 "godot-properties/fa/>\n"
 "Language: fa\n"
@@ -60,7 +63,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 5.12-dev\n"
+"X-Generator: Weblate 5.13-dev\n"
 
 msgid "Application"
 msgstr "برنامه"
@@ -119,20 +122,32 @@ msgstr "پذیرش خودکار خروج"
 msgid "Quit on Go Back"
 msgstr "خروج در بازگشت"
 
+msgid "Accessibility"
+msgstr "دسترسی‌پذیری"
+
+msgid "General"
+msgstr "عمومی"
+
+msgid "Accessibility Support"
+msgstr "پشتیبانی از دسترسی"
+
+msgid "Updates per Second"
+msgstr "به‌روزرسانی در ثانیه"
+
 msgid "Display"
-msgstr "نمایشگر"
+msgstr "نمایش"
 
 msgid "Window"
-msgstr "پنجره"
+msgstr "پنجره (چارچوب)"
 
 msgid "Size"
 msgstr "اندازه"
 
 msgid "Viewport Width"
-msgstr "پهنای دیدگستره (viewport)"
+msgstr "طول دید"
 
 msgid "Viewport Height"
-msgstr "بلندای دیدگستره (viewport)"
+msgstr "عرض دید"
 
 msgid "Mode"
 msgstr "حالت"
@@ -147,7 +162,7 @@ msgid "Initial Screen"
 msgstr "صفحه اولیه"
 
 msgid "Resizable"
-msgstr "قابل تغییر اندازه"
+msgstr "تغییر اندازه پذیر"
 
 msgid "Borderless"
 msgstr "بی‌مرز"
@@ -167,11 +182,17 @@ msgstr "بدون تمرکز"
 msgid "Sharp Corners"
 msgstr "گوشه‌های تیز"
 
+msgid "Minimize Disabled"
+msgstr "کوچک کردن پنجره غیرفعال شده است"
+
+msgid "Maximize Disabled"
+msgstr "بزرگ کردن پنجره غیرفعال شده است"
+
 msgid "Window Width Override"
 msgstr "بازنویسی پهنای پنجره"
 
 msgid "Window Height Override"
-msgstr "بازنویسی بلندای پنجره"
+msgstr "بازنویسی ارتفاع پنجره"
 
 msgid "Energy Saving"
 msgstr "ذخیره انرژی"
@@ -189,31 +210,28 @@ msgid "Check Invalid Track Paths"
 msgstr "بررسی مسیرهای نامعتبر نوار"
 
 msgid "Check Angle Interpolation Type Conflicting"
-msgstr "بررسی ناسازگاری گونهٔ میانیابی زاویه"
+msgstr "بررسی ناسازگاری نوع درون‌یابی زاویه"
 
 msgid "Audio"
 msgstr "صدا"
 
 msgid "Buses"
-msgstr "اتوبوس ها"
+msgstr "غول ها"
 
 msgid "Default Bus Layout"
 msgstr "چیدمان پیش‌فرض باس"
 
-msgid "General"
-msgstr "عمومی"
-
 msgid "Default Playback Type"
-msgstr "گونهٔ پیش‌فرض بازنواخت"
+msgstr "نوع پیش‌فرض بازپخش"
 
 msgid "Text to Speech"
-msgstr "نوشتار به گفتار"
+msgstr "متن به گفتار"
 
 msgid "2D Panning Strength"
-msgstr "قدرت سراسرنمایی دوبعدی"
+msgstr "قدرت پیوستگی دوبعدی"
 
 msgid "3D Panning Strength"
-msgstr "قدرت سراسرنمایی سه‌بعدی"
+msgstr "قدرت پیوستگی سه‌بعدی"
 
 msgid "iOS"
 msgstr "آی‌او‌اس"
@@ -222,16 +240,25 @@ msgid "Session Category"
 msgstr "دسته‌بندی نشست"
 
 msgid "Mix With Others"
-msgstr "آمیزش با دیگران"
+msgstr "ترکیب با بقیه"
 
 msgid "Subwindows"
 msgstr "زیر پنجره ها"
 
 msgid "Embed Subwindows"
-msgstr "نهادینه‌سازی زیرپنجره‌ها"
+msgstr "جاسازی زیرپنجره‌ها"
+
+msgid "Frame Pacing"
+msgstr "فاصله گذاری فریم"
 
 msgid "Android"
 msgstr "اندروید"
+
+msgid "Enable Frame Pacing"
+msgstr "فعالسازی فاصله گذاری فریم"
+
+msgid "Swappy Mode"
+msgstr "حالت چرخان"
 
 msgid "Physics"
 msgstr "فیزیک"
@@ -240,7 +267,7 @@ msgid "2D"
 msgstr "دوبعدی"
 
 msgid "Run on Separate Thread"
-msgstr "اجرا روی ریسهٔ جدا"
+msgstr "اجرا روی ریسهٔ جداگانه"
 
 msgid "3D"
 msgstr "سه‌بعدی"
@@ -267,7 +294,10 @@ msgid "Profiler"
 msgstr "واکاو"
 
 msgid "Max Functions"
-msgstr "بیشینه‌‌ی تابع‌ها"
+msgstr "حداکثر توابع"
+
+msgid "Max Timestamp Query Elements"
+msgstr "بیشینهٔ المان‌های برچسب زمانی جستجو"
 
 msgid "Compression"
 msgstr "فشرده‌سازی"
@@ -285,7 +315,7 @@ msgid "Compression Level"
 msgstr "میزان فشرده‌سازی"
 
 msgid "Window Log Size"
-msgstr "اندازه گزارش پنجره"
+msgstr "اندازه پنجره گزارش گیری"
 
 msgid "Zlib"
 msgstr "‌Zlib"
@@ -294,7 +324,7 @@ msgid "Gzip"
 msgstr "Gzip"
 
 msgid "Crash Handler"
-msgstr "گردانندهٔ سرنگونی"
+msgstr "کنترل کننده سرنگونی"
 
 msgid "Message"
 msgstr "پیام"
@@ -303,31 +333,43 @@ msgid "Rendering"
 msgstr "نماپردازش"
 
 msgid "Occlusion Culling"
-msgstr "گردآوری بندآمدگی"
+msgstr "جمع آوری انسداد"
 
 msgid "BVH Build Quality"
 msgstr "کیفیت ساخت BVH"
+
+msgid "Jitter Projection"
+msgstr "پیش بینی نوسانات"
 
 msgid "Internationalization"
 msgstr "بین‌المللی‌سازی"
 
 msgid "Force Right to Left Layout Direction"
-msgstr "واداشتن سوی راست به چپ به چیدمان"
+msgstr "راست‌چین کردن اجباری جهت چیدمان"
 
 msgid "Root Node Layout Direction"
-msgstr "سوی ریشهٔ گرهٔ چیدمان"
+msgstr "جهت چیدمان گره ریشه"
+
+msgid "Root Node Auto Translate"
+msgstr "ترجمه‌ خودکار گره ریشه"
 
 msgid "GUI"
-msgstr "رابط‌کاربری گرافیکی"
+msgstr "رابط‌ کاربری گرافیکی"
 
 msgid "Timers"
-msgstr "تایمرها"
+msgstr "زمان سنج ها"
 
 msgid "Incremental Search Max Interval Msec"
-msgstr "جست و جو"
+msgstr "حداکثر وقفه زمانی جستجوی افزایشی (میلی ثانیه)"
 
 msgid "Tooltip Delay (sec)"
-msgstr "دیرکرد پندابزار (ثانیه)"
+msgstr "تاخیر نمایش راهنمای ابزار (ثانیه)"
+
+msgid "Common"
+msgstr "عمومی"
+
+msgid "Snap Controls to Pixels"
+msgstr "چسباندن کنترل ها به پیکسل ها"
 
 msgid "Fonts"
 msgstr "قلم‌ها"
@@ -336,7 +378,7 @@ msgid "Dynamic Fonts"
 msgstr "قلم‌های پویا"
 
 msgid "Use Oversampling"
-msgstr "بکاربردن نمونه‌گیری بیش از اندازه"
+msgstr "استفاده از نمونه‌گیری بیش از حد"
 
 msgid "Rendering Device"
 msgstr "دستگاه نماپردازش"
@@ -347,6 +389,12 @@ msgstr "وی-سینک"
 msgid "Frame Queue Size"
 msgstr "اندازهٔ صف فریم"
 
+msgid "Swapchain Image Count"
+msgstr "مجموع تصاویر قابل پردازش"
+
+msgid "Staging Buffer"
+msgstr "بافر مرحله ای"
+
 msgid "Block Size (KB)"
 msgstr "اندازه بلوک (کیلوبایت)"
 
@@ -354,22 +402,40 @@ msgid "Max Size (MB)"
 msgstr "حداکثر اندازه (مگابایت)"
 
 msgid "Texture Upload Region Size Px"
-msgstr "اندازهٔ دامنهٔ بارگذاری بافت به پیکسل"
+msgstr "اندازهٔ ناحیۀ بارگذاری بافت (پیکسل)"
+
+msgid "Texture Download Region Size Px"
+msgstr "اندازهٔ ناحیۀ بارگیری بافت (پیکسل)"
 
 msgid "Pipeline Cache"
-msgstr "کش"
+msgstr "کش خط لوله"
 
 msgid "Enable"
-msgstr "به‌کاراندازی"
+msgstr "راه اندازی"
 
 msgid "Save Chunk Size (MB)"
-msgstr "اندازه"
+msgstr "اندازه بخش ذخیره سازی (مگابایت)"
 
 msgid "Vulkan"
-msgstr "‌Vulkan"
+msgstr "‌ولکان"
+
+msgid "Max Descriptors per Pool"
+msgstr "حداکثر توصیف‌گر در هر استخر توصیف‌گر"
 
 msgid "D3D12"
 msgstr "D3D12"
+
+msgid "Max Resource Descriptors per Frame"
+msgstr "حداکثر توصیف‌گران منابع در هر فریم"
+
+msgid "Max Sampler Descriptors per Frame"
+msgstr "حداکثر توصیف‌گران نمونه ساز در هر فریم"
+
+msgid "Max Misc Descriptors per Frame"
+msgstr "حداکثر توصیف‌گران متفرقه در هر فریم"
+
+msgid "Agility SDK Version"
+msgstr "نسخه کیت توسعه نرم‌افزاری Agility"
 
 msgid "Textures"
 msgstr "بافت‌ها"
@@ -378,16 +444,49 @@ msgid "Canvas Textures"
 msgstr "بافت‌های بوم"
 
 msgid "Default Texture Filter"
-msgstr "پالایهٔ بافت پیش‌فرض"
+msgstr "فیلتر پیشفرض بافت"
+
+msgid "Default Texture Repeat"
+msgstr "تکرار کنندۀ پیشفرض بافت"
 
 msgid "Collada"
-msgstr "کولادا"
+msgstr "Collada"
+
+msgid "Use Ambient"
+msgstr "استفاده از محیط"
 
 msgid "Input Devices"
-msgstr "دستگاه‌های درونداد"
+msgstr "دستگاه‌های ورودی"
+
+msgid "Pointing"
+msgstr "نقطه گذاری"
 
 msgid "Enable Long Press as Right Click"
-msgstr "به‌کاراندازی فشار دراز به‌عنوان راست کلیک"
+msgstr "درنظرگرفتن فشار طولانی به‌عنوان راست کلیک"
+
+msgid "Enable Pan and Scale Gestures"
+msgstr "فعالسازی حرکات کشیدن و مقیاس دهی"
+
+msgid "Override Volume Buttons"
+msgstr "بازنویسی دکمه‌های بلندی صدا"
+
+msgid "Navigation"
+msgstr "ناوبری"
+
+msgid "World"
+msgstr "جهان"
+
+msgid "Avoidance"
+msgstr "پرهیز"
+
+msgid "Pathfinding"
+msgstr "مسیریابی"
+
+msgid "Max Threads"
+msgstr "بیشینه‌‌ی ریسه‌ها"
+
+msgid "Baking"
+msgstr "پخت"
 
 msgid "Low Processor Usage Mode"
 msgstr "حالت کاربرد کم پردازنده"
@@ -421,6 +520,12 @@ msgstr "حالت ماوس"
 
 msgid "Use Accumulated Input"
 msgstr "بکاربردن درونداد انباشته"
+
+msgid "Emulate Mouse From Touch"
+msgstr "شبیه‌سازی موس از بساوش"
+
+msgid "Emulate Touch From Mouse"
+msgstr "شبیه‌سازی بساوش از موس"
 
 msgid "Compatibility"
 msgstr "سازگاری"
@@ -650,9 +755,6 @@ msgstr "ریسه‌بندی"
 msgid "Worker Pool"
 msgstr "خزینهٔ کارگر"
 
-msgid "Max Threads"
-msgstr "بیشینه‌‌ی ریسه‌ها"
-
 msgid "Low Priority Thread Ratio"
 msgstr "نسبت ریسهٔ اولویت پایین"
 
@@ -713,14 +815,321 @@ msgstr "استریم"
 msgid "Start Offset"
 msgstr "انحراف آغازین"
 
+msgid "Asset Library"
+msgstr "کتابخانهٔ دارایی"
+
+msgid "Available URLs"
+msgstr "URLهای در دسترس"
+
 msgid "Request Timeout"
 msgstr "درخواست وقفه"
+
+msgid "Distraction Free Mode"
+msgstr "حالت بدون حواس‌پرتی"
+
+msgid "Movie Maker Enabled"
+msgstr "فیلم‌ساز به‌کارافتاده"
+
+msgid "Custom Template"
+msgstr "قالب شخصی"
+
+msgid "Release"
+msgstr "انتشار"
+
+msgid "Architectures"
+msgstr "معماری‌ها"
+
+msgid "Short Version"
+msgstr "نسخهٔ کوتاه"
+
+msgid "Plugins"
+msgstr "افزایه‌ها"
+
+msgid "Capabilities"
+msgstr "توانایی‌ها"
+
+msgid "Access Wi-Fi"
+msgstr "دسترسی به وای‌فای"
+
+msgid "Enabled"
+msgstr "بکارافتاده"
+
+msgid "Icons"
+msgstr "آیکون‌ها"
+
+msgid "Binary Format"
+msgstr "چارچوب باینری"
+
+msgid "Embed PCK"
+msgstr "نهادینه‌سازی پی.سی.کی"
+
+msgid "Texture Format"
+msgstr "چارچوب بافت"
+
+msgid "Export Path"
+msgstr "مسیر برون‌برد"
+
+msgid "Access"
+msgstr "دسترسی"
+
+msgid "Display Mode"
+msgstr "حالت نمایشگر"
+
+msgid "File Mode"
+msgstr "حالت پرونده"
+
+msgid "Filters"
+msgstr "پالایه‌ها"
+
+msgid "Options"
+msgstr "گزینه‌ها"
+
+msgid "Show Hidden Files"
+msgstr "نمایش پرونده‌های پنهان شده"
+
+msgid "Disable Overwrite Warning"
+msgstr "ازکاراندازی هشدار بازنویسی"
 
 msgid "Label"
 msgstr "برچسب"
 
 msgid "Read Only"
 msgstr "فقط مطالعه"
+
+msgid "Bone Renamer"
+msgstr "بازنامگذار استخوان"
+
+msgid "Rename Bones"
+msgstr "بازنامگذاری استخوان‌ها"
+
+msgid "Unique Node"
+msgstr "گرهٔ یکتا"
+
+msgid "Make Unique"
+msgstr "یکتا سازی"
+
+msgid "Apply Node Transforms"
+msgstr "بکاربستن ترادیسی‌های گره"
+
+msgid "Filter"
+msgstr "پالایش"
+
+msgid "Threshold"
+msgstr "آستانه"
+
+msgid "Offset Mesh"
+msgstr "مش بازه از مبدا"
+
+msgid "Node"
+msgstr "گره"
+
+msgid "Script"
+msgstr "اسکریپت"
+
+msgid "Import"
+msgstr "درون‌برد"
+
+msgid "Skip Import"
+msgstr "جست زدن درون‌برد"
+
+msgid "Body Type"
+msgstr "گونه بدن"
+
+msgid "Physics Material Override"
+msgstr "بازنویسی جنس فیزیکی"
+
+msgid "Layer"
+msgstr "لایه"
+
+msgid "Mask"
+msgstr "ماسک"
+
+msgid "Mesh Instance"
+msgstr "نمونهٔ مش"
+
+msgid "Layers"
+msgstr "لایه‌ها"
+
+msgid "Visibility Range Begin"
+msgstr "آغاز برد پدیداری"
+
+msgid "Visibility Range Begin Margin"
+msgstr "لبهٔ آغازین برد پدیداری"
+
+msgid "Visibility Range End"
+msgstr "پایان برد پدیداری"
+
+msgid "Visibility Range End Margin"
+msgstr "لبهٔ پایانی برد پدیداری"
+
+msgid "Visibility Range Fade Mode"
+msgstr "حالت پریدگی برد پدیداری"
+
+msgid "Advanced"
+msgstr "پیشرفته"
+
+msgid "Min Volume per Convex Hull"
+msgstr "گنجایش کمینه بر بدنهٔ کوژ"
+
+msgid "Height"
+msgstr "بلندا"
+
+msgid "Radius"
+msgstr "شعاع"
+
+msgid "Occluder"
+msgstr "بندآور"
+
+msgid "LODs"
+msgstr "LODs"
+
+msgid "Loop Mode"
+msgstr "حالت چرخه"
+
+msgid "Amount"
+msgstr "مقدار"
+
+msgid "Page Size"
+msgstr "اندازهٔ صفحه"
+
+msgid "Load Pose"
+msgstr "بارکردن ژست"
+
+msgid "External Animation Library"
+msgstr "کتابخانهٔ بیرونی پویانمایی"
+
+msgid "Selected Animation"
+msgstr "پویانمایی برگزیده"
+
+msgid "Nodes"
+msgstr "گره‌ها"
+
+msgid "Apply Root Scale"
+msgstr "به‌کاربندی مقیاس ریشه"
+
+msgid "Root Scale"
+msgstr "مقیاس ریشه"
+
+msgid "Import as Skeleton Bones"
+msgstr "درون‌برد به‌عنوان استخوان‌های استخوان‌بندی"
+
+msgid "Meshes"
+msgstr "مش‌ها"
+
+msgid "Light Baking"
+msgstr "پخت نور"
+
+msgid "FPS"
+msgstr "فریم بر ثانیه"
+
+msgid "Trimming"
+msgstr "در حال تراشیدن"
+
+msgid "Import Script"
+msgstr "درون‌برد اسکریپت"
+
+msgid "Materials"
+msgstr "جنس"
+
+msgid "Antialiasing"
+msgstr "نادندانگی"
+
+msgid "Multichannel Signed Distance Field"
+msgstr "میدان فاصله امضا شده چند کاناله"
+
+msgid "Hinting"
+msgstr "اشاره"
+
+msgid "Oversampling"
+msgstr "بیش‌نمونه‌گیری"
+
+msgid "Metadata Overrides"
+msgstr "بازنویسی فراداده"
+
+msgid "Language Support"
+msgstr "پشتیبانی زبان"
+
+msgid "Script Support"
+msgstr "پشتیبانی از اسکریپت"
+
+msgid "Language"
+msgstr "زبان"
+
+msgid "Outline Size"
+msgstr "اندازهٔ پیراخط"
+
+msgid "Variation"
+msgstr "گوناگونی"
+
+msgid "Transform"
+msgstr "ترادیسی"
+
+msgid "Columns"
+msgstr "ستون‌ها"
+
+msgid "Rows"
+msgstr "ردیف‌ها"
+
+msgid "Image Margin"
+msgstr "لبهٔ تصویر"
+
+msgid "Character Margin"
+msgstr "لبهٔ نویسه"
+
+msgid "Limit"
+msgstr "محدودیت"
+
+msgid "Layout"
+msgstr "چیدمان"
+
+msgid "Base Scale"
+msgstr "مقیاس پایه"
+
+msgid "Saturation"
+msgstr "سیری"
+
+msgid "Process"
+msgstr "فرآیند"
+
+msgid "HDR as sRGB"
+msgstr "HDR به‌عنوان sRGB"
+
+msgid "SVG"
+msgstr "SVG"
+
+msgid "Editor"
+msgstr "ویراستار"
+
+msgid "Scale With Editor Scale"
+msgstr "مقیاس کردن با مقیاس ویراستار"
+
+msgid "Convert Colors With Editor Theme"
+msgstr "تبدیل رنگ‌ها با زمینهٔ ویراستار"
+
+msgid "Import Mode"
+msgstr "حالت درون‌برد"
+
+msgid "Trim Alpha Border From Region"
+msgstr "تراشیدن مرز آلفا از دامنه"
+
+msgctxt "Enforce"
+msgid "Force"
+msgstr "واداشتن"
+
+msgid "8 Bit"
+msgstr "۸ بیت"
+
+msgid "Edit"
+msgstr "ویرایش"
+
+msgid "Trim"
+msgstr "تراشیدن"
+
+msgid "Loop Begin"
+msgstr "آغاز چرخه"
+
+msgid "Loop End"
+msgstr "پایان چرخه"
 
 msgid "Draw Label"
 msgstr "کشیدن برچسب"
@@ -746,12 +1155,6 @@ msgstr "زدایش‌پذیر"
 msgid "Selectable"
 msgstr "گزینش‌پذیر"
 
-msgid "Distraction Free Mode"
-msgstr "حالت بدون حواس‌پرتی"
-
-msgid "Movie Maker Enabled"
-msgstr "فیلم‌ساز به‌کارافتاده"
-
 msgid "Base Type"
 msgstr "نوع پایه"
 
@@ -761,17 +1164,68 @@ msgstr "ويرايش‌پذیر"
 msgid "Toggle Mode"
 msgstr "تغییر حالت"
 
+msgid "Templates Search Path"
+msgstr "مسیر جستجوی قالب‌ها"
+
+msgid "Naming"
+msgstr "نامگذاری"
+
+msgid "Reimport Missing Imported Files"
+msgstr "دوباره درون‌برد کردن پرونده‌های درون‌بردشدهٔ از جا افتاده"
+
+msgid "Use Multiple Threads"
+msgstr "به‌کارگیری چندین ریسه"
+
+msgid "Export"
+msgstr "برون‌برد"
+
+msgid "Version Control"
+msgstr "کنترل نسخه"
+
+msgid "Plugin Name"
+msgstr "نام افزایه"
+
+msgid "Autoload on Startup"
+msgstr "خودبارکردن هنگام راه‌اندازی"
+
+msgid "ID"
+msgstr "شناسه"
+
+msgid "Texture"
+msgstr "بافت"
+
+msgid "Margins"
+msgstr "لبه‌ها"
+
+msgid "Separation"
+msgstr "جدایی"
+
+msgid "Texture Region Size"
+msgstr "اندازهٔ دامنهٔ بافت"
+
+msgid "Alternative ID"
+msgstr "شناسهٔ دگرگزین"
+
+msgid "Speed"
+msgstr "سرعت"
+
+msgid "Duration"
+msgstr "مدت"
+
+msgid "Editors"
+msgstr "ویراستارها"
+
+msgid "3D Gizmos"
+msgstr "گیزمو‌های سه‌بعدی"
+
+msgid "Gizmo Colors"
+msgstr "رنگ‌های گیزمو"
+
 msgid "Interface"
 msgstr "میانا"
 
-msgid "Editor"
-msgstr "ویراستار"
-
 msgid "Editor Language"
 msgstr "زبان ویراستار"
-
-msgid "Asset Library"
-msgstr "کتابخانهٔ دارایی"
 
 msgid "Use Threads"
 msgstr "به‌کارگیری ریسه‌ها"
@@ -800,8 +1254,23 @@ msgstr "اتصال"
 msgid "Use Embedded Menu"
 msgstr "به‌کارگیری گزینگان نهادینه‌شده"
 
+msgid "Main Font Size"
+msgstr "اندازهٔ قلم اصلی"
+
+msgid "Code Font Size"
+msgstr "اندازهٔ قلم کد"
+
+msgid "Code Font Contextual Ligatures"
+msgstr "نویسه‌های پیوندی قلم کد"
+
+msgid "Font Antialiasing"
+msgstr "نادندانگی قلم"
+
 msgid "Main Font"
 msgstr "قلم اصلی"
+
+msgid "Main Font Bold"
+msgstr "قلم اصلی پررنگ"
 
 msgid "Code Font"
 msgstr "قلم کد"
@@ -826,9 +1295,6 @@ msgstr "خواب حالت تمرکز نشدهٔ کم پردازنده (میکر�
 
 msgid "Update Continuously"
 msgstr "بروزرسانی مستمر"
-
-msgid "Editors"
-msgstr "ویراستارها"
 
 msgid "Show Scene Tree Root Selection"
 msgstr "نمایش برگزیدگان ریشهٔ درخت صحنه"
@@ -938,12 +1404,6 @@ msgstr "گذرواژه"
 msgid "File Dialog"
 msgstr "دیالوگ پرونده"
 
-msgid "Show Hidden Files"
-msgstr "نمایش پرونده‌های پنهان شده"
-
-msgid "Display Mode"
-msgstr "حالت نمایشگر"
-
 msgid "Max Results"
 msgstr "نتایج بیشینه‌"
 
@@ -955,9 +1415,6 @@ msgstr "دربرگیری برافزاها"
 
 msgid "Default Display Mode"
 msgstr "حالت پیش‌فرض نمایشگر"
-
-msgid "Import"
-msgstr "درون‌برد"
 
 msgid "Blender"
 msgstr "درآمیزی"
@@ -980,6 +1437,9 @@ msgstr "OIDN"
 msgid "Auto Expand to Selected"
 msgstr "گسترش خودکار به برگزیده"
 
+msgid "Accessibility Warnings"
+msgstr "هشدارهای دسترسی‌پذیری"
+
 msgid "Always Show Folders"
 msgstr "همیشه پوشه‌ها نمایش داده شوند"
 
@@ -995,11 +1455,11 @@ msgstr "بازهٔ نوگردانی خودکار"
 msgid "Text Editor"
 msgstr "ویراستار متن"
 
-msgid "Line Spacing"
-msgstr "فاصله خطوط"
-
 msgid "Color Theme"
 msgstr "رنگ زمینه"
+
+msgid "Warning List"
+msgstr "فهرست هشدارها"
 
 msgid "Appearance"
 msgstr "ظاهر"
@@ -1022,11 +1482,11 @@ msgstr "حالت پوشانیدن خودکار"
 msgid "Draw Spaces"
 msgstr "کشیدن فاصله‌ها"
 
+msgid "Line Spacing"
+msgstr "فاصله خطوط"
+
 msgid "Behavior"
 msgstr "رفتار"
-
-msgid "Navigation"
-msgstr "ناوبری"
 
 msgid "Move Caret on Right Click"
 msgstr "جابه‌جایی هشتک هنگام راست‌کلیک"
@@ -1127,12 +1587,6 @@ msgstr "نمایش اندیس راهنما"
 msgid "Sort Functions Alphabetically"
 msgstr "چینش تابع‌ها بر پایهٔ الفبا"
 
-msgid "3D Gizmos"
-msgstr "گیزمو‌های سه‌بعدی"
-
-msgid "Gizmo Colors"
-msgstr "رنگ‌های گیزمو"
-
 msgid "Instantiated"
 msgstr "نمونه‌سازی‌شده"
 
@@ -1162,9 +1616,6 @@ msgstr "مفصل بدن A"
 
 msgid "Joint Body B"
 msgstr "مفصل بدن B"
-
-msgid "Occluder"
-msgstr "بندآور"
 
 msgid "Reflection Probe"
 msgstr "کاوَند بازتاب"
@@ -1274,9 +1725,6 @@ msgstr "الگوی توری"
 msgid "Visual Shader"
 msgstr "سایه‌زن دیداری"
 
-msgid "Export"
-msgstr "برون‌برد"
-
 msgid "SSH"
 msgstr "اس‌اس‌اچ"
 
@@ -1328,9 +1776,6 @@ msgstr "به‌کاراندازی تی.ال.اس نسخهٔ ۱"
 msgid "Debugger"
 msgstr "اشکال‌زدا"
 
-msgid "Version Control"
-msgstr "کنترل نسخه"
-
 msgid "Username"
 msgstr "نام کاربری"
 
@@ -1346,48 +1791,6 @@ msgstr "درونداد"
 msgid "Project Manager"
 msgstr "مدیر پروژه"
 
-msgid "Keyword Color"
-msgstr "رنگ کلیدواژه"
-
-msgid "Base Type Color"
-msgstr "رنگ نوع پایه"
-
-msgid "Engine Type Color"
-msgstr "رنگ گونهٔ موتور"
-
-msgid "User Type Color"
-msgstr "رنگ گونهٔ کاربر"
-
-msgid "Comment Color"
-msgstr "رنگ کامنت‌"
-
-msgid "String Color"
-msgstr "رنگ رشته"
-
-msgid "Background Color"
-msgstr "رنگ پس‌زمینه"
-
-msgid "Text Color"
-msgstr "رنگ متن"
-
-msgid "Line Number Color"
-msgstr "رنگ شمارهٔ خط"
-
-msgid "Current Line Color"
-msgstr "رنگ خط کنونی"
-
-msgid "Number Color"
-msgstr "رنگ عدد"
-
-msgid "Function Color"
-msgstr "رنگ تابع"
-
-msgid "Bookmark Color"
-msgstr "رنگ نشانک"
-
-msgid "Executing Line Color"
-msgstr "رنگ خط در حال اجرا"
-
 msgid "Connection Colors"
 msgstr "رنگ‌های اتصال"
 
@@ -1402,295 +1805,6 @@ msgstr "رنگ درونداد"
 
 msgid "Textures Color"
 msgstr "رنگ بافت‌ها"
-
-msgid "Custom Template"
-msgstr "قالب شخصی"
-
-msgid "Release"
-msgstr "انتشار"
-
-msgid "Binary Format"
-msgstr "چارچوب باینری"
-
-msgid "Embed PCK"
-msgstr "نهادینه‌سازی پی.سی.کی"
-
-msgid "Texture Format"
-msgstr "چارچوب بافت"
-
-msgid "Export Path"
-msgstr "مسیر برون‌برد"
-
-msgid "Access"
-msgstr "دسترسی"
-
-msgid "Filters"
-msgstr "پالایه‌ها"
-
-msgid "Options"
-msgstr "گزینه‌ها"
-
-msgid "Disable Overwrite Warning"
-msgstr "ازکاراندازی هشدار بازنویسی"
-
-msgid "Bone Renamer"
-msgstr "بازنامگذار استخوان"
-
-msgid "Rename Bones"
-msgstr "بازنامگذاری استخوان‌ها"
-
-msgid "Unique Node"
-msgstr "گرهٔ یکتا"
-
-msgid "Make Unique"
-msgstr "یکتا سازی"
-
-msgid "Apply Node Transforms"
-msgstr "بکاربستن ترادیسی‌های گره"
-
-msgid "Filter"
-msgstr "پالایش"
-
-msgid "Threshold"
-msgstr "آستانه"
-
-msgid "Offset Mesh"
-msgstr "مش بازه از مبدا"
-
-msgid "Skip Import"
-msgstr "جست زدن درون‌برد"
-
-msgid "Body Type"
-msgstr "گونه بدن"
-
-msgid "Physics Material Override"
-msgstr "بازنویسی جنس فیزیکی"
-
-msgid "Layer"
-msgstr "لایه"
-
-msgid "Mask"
-msgstr "ماسک"
-
-msgid "Mesh Instance"
-msgstr "نمونهٔ مش"
-
-msgid "Layers"
-msgstr "لایه‌ها"
-
-msgid "Visibility Range Begin"
-msgstr "آغاز برد پدیداری"
-
-msgid "Visibility Range Begin Margin"
-msgstr "لبهٔ آغازین برد پدیداری"
-
-msgid "Visibility Range End"
-msgstr "پایان برد پدیداری"
-
-msgid "Visibility Range End Margin"
-msgstr "لبهٔ پایانی برد پدیداری"
-
-msgid "Visibility Range Fade Mode"
-msgstr "حالت پریدگی برد پدیداری"
-
-msgid "Advanced"
-msgstr "پیشرفته"
-
-msgid "Min Volume per Convex Hull"
-msgstr "گنجایش کمینه بر بدنهٔ خمیده"
-
-msgid "Height"
-msgstr "بلندا"
-
-msgid "Radius"
-msgstr "شعاع"
-
-msgid "Enabled"
-msgstr "بکارافتاده"
-
-msgid "LODs"
-msgstr "LODs"
-
-msgid "Loop Mode"
-msgstr "حالت چرخه"
-
-msgid "Amount"
-msgstr "مقدار"
-
-msgid "Page Size"
-msgstr "اندازهٔ صفحه"
-
-msgid "Load Pose"
-msgstr "بارکردن ژست"
-
-msgid "External Animation Library"
-msgstr "کتابخانهٔ بیرونی پویانمایی"
-
-msgid "Selected Animation"
-msgstr "پویانمایی برگزیده"
-
-msgid "Nodes"
-msgstr "گره‌ها"
-
-msgid "Apply Root Scale"
-msgstr "به‌کاربندی مقیاس ریشه"
-
-msgid "Root Scale"
-msgstr "مقیاس ریشه"
-
-msgid "Import as Skeleton Bones"
-msgstr "درون‌برد به‌عنوان استخوان‌های استخوان‌بندی"
-
-msgid "Meshes"
-msgstr "مش‌ها"
-
-msgid "Light Baking"
-msgstr "پخت نور"
-
-msgid "FPS"
-msgstr "فریم بر ثانیه"
-
-msgid "Trimming"
-msgstr "در حال تراشیدن"
-
-msgid "Import Script"
-msgstr "درون‌برد اسکریپت"
-
-msgid "Antialiasing"
-msgstr "نادندانگی"
-
-msgid "Multichannel Signed Distance Field"
-msgstr "میدان فاصله امضا شده چند کاناله"
-
-msgid "Hinting"
-msgstr "اشاره"
-
-msgid "Oversampling"
-msgstr "بیش‌نمونه‌گیری"
-
-msgid "Metadata Overrides"
-msgstr "بازنویسی فراداده"
-
-msgid "Language Support"
-msgstr "پشتیبانی زبان"
-
-msgid "Script Support"
-msgstr "پشتیبانی از اسکریپت"
-
-msgid "Language"
-msgstr "زبان"
-
-msgid "Outline Size"
-msgstr "اندازهٔ پیراخط"
-
-msgid "Variation"
-msgstr "گوناگونی"
-
-msgid "Transform"
-msgstr "ترادیسی"
-
-msgid "Columns"
-msgstr "ستون‌ها"
-
-msgid "Rows"
-msgstr "ردیف‌ها"
-
-msgid "Image Margin"
-msgstr "لبهٔ تصویر"
-
-msgid "Character Margin"
-msgstr "لبهٔ نویسه"
-
-msgid "Limit"
-msgstr "محدودیت"
-
-msgid "Layout"
-msgstr "چیدمان"
-
-msgid "Process"
-msgstr "فرآیند"
-
-msgid "HDR as sRGB"
-msgstr "HDR به‌عنوان sRGB"
-
-msgid "SVG"
-msgstr "SVG"
-
-msgid "Scale With Editor Scale"
-msgstr "مقیاس کردن با مقیاس ویراستار"
-
-msgid "Convert Colors With Editor Theme"
-msgstr "تبدیل رنگ‌ها با زمینهٔ ویراستار"
-
-msgid "Import Mode"
-msgstr "حالت درون‌برد"
-
-msgid "Trim Alpha Border From Region"
-msgstr "تراشیدن مرز آلفا از دامنه"
-
-msgctxt "Enforce"
-msgid "Force"
-msgstr "واداشتن"
-
-msgid "8 Bit"
-msgstr "۸ بیت"
-
-msgid "Edit"
-msgstr "ویرایش"
-
-msgid "Trim"
-msgstr "تراشیدن"
-
-msgid "Loop Begin"
-msgstr "آغاز چرخه"
-
-msgid "Loop End"
-msgstr "پایان چرخه"
-
-msgid "Available URLs"
-msgstr "URLهای در دسترس"
-
-msgid "ID"
-msgstr "شناسه"
-
-msgid "Texture"
-msgstr "بافت"
-
-msgid "Margins"
-msgstr "لبه‌ها"
-
-msgid "Separation"
-msgstr "جدایی"
-
-msgid "Texture Region Size"
-msgstr "اندازهٔ دامنهٔ بافت"
-
-msgid "Alternative ID"
-msgstr "شناسهٔ دگرگزین"
-
-msgid "Speed"
-msgstr "سرعت"
-
-msgid "Duration"
-msgstr "مدت"
-
-msgid "Script"
-msgstr "اسکریپت"
-
-msgid "Naming"
-msgstr "نامگذاری"
-
-msgid "Reimport Missing Imported Files"
-msgstr "دوباره درون‌برد کردن پرونده‌های درون‌بردشدهٔ از جا افتاده"
-
-msgid "Use Multiple Threads"
-msgstr "به‌کارگیری چندین ریسه"
-
-msgid "Plugin Name"
-msgstr "نام افزایه"
-
-msgid "Autoload on Startup"
-msgstr "خودبارکردن هنگام راه‌اندازی"
 
 msgid "Low Processor Mode"
 msgstr "حالت کم پردازنده"
@@ -1869,27 +1983,6 @@ msgstr "درون‌بردگر"
 msgid "GDScript"
 msgstr "جی‌دی اسکریپت"
 
-msgid "Function Definition Color"
-msgstr "رنگ تعریف تابع"
-
-msgid "Global Function Color"
-msgstr "رنگ تابع جهانی"
-
-msgid "Node Path Color"
-msgstr "رنگ مسیر گره"
-
-msgid "Node Reference Color"
-msgstr "رنگ بازبرد گره"
-
-msgid "String Name Color"
-msgstr "رنگ نام رشته"
-
-msgid "Warning Color"
-msgstr "رنگ هشدار"
-
-msgid "Warning List"
-msgstr "فهرست هشدارها"
-
 msgid "Language Server"
 msgstr "سرور زبان"
 
@@ -1926,14 +2019,14 @@ msgstr "درون‌بردگر مش"
 msgid "Image Format"
 msgstr "چارچوب تصویر"
 
+msgid "Visibility Mode"
+msgstr "حالت پدیداری"
+
 msgid "Json"
 msgstr "جی‌سان"
 
 msgid "Buffers"
 msgstr "بافرها"
-
-msgid "Materials"
-msgstr "جنس"
 
 msgid "Scene Name"
 msgstr "نام صحنه"
@@ -2049,17 +2142,20 @@ msgstr "برخالی"
 msgid "Width"
 msgstr "پهنا"
 
-msgid "In 3D Space"
-msgstr "در فضای سه‌بعدی"
-
 msgid "Seamless"
 msgstr "یک‌پارچه"
+
+msgid "In 3D Space"
+msgstr "در فضای سه‌بعدی"
 
 msgid "Display Refresh Rate"
 msgstr "نرخ نوگردانی نمایشگر"
 
 msgid "Layer Viewport"
 msgstr "دیدگسترهٔ لایه"
+
+msgid "Border Color"
+msgstr "رنگ مرز"
 
 msgid "Aspect Ratio"
 msgstr "نسبت نما"
@@ -2069,6 +2165,9 @@ msgstr "زاویهٔ مرکزی"
 
 msgid "Motion Range"
 msgstr "برد جنبش"
+
+msgid "Tracker"
+msgstr "ردیاب"
 
 msgid "Subject"
 msgstr "موضوع"
@@ -2094,12 +2193,6 @@ msgstr "پس‌زمینهٔ سازوار ۴۳۲ در ۴۳۲"
 msgid "Export Format"
 msgstr "چارچوب برون‌برد"
 
-msgid "Plugins"
-msgstr "افزایه‌ها"
-
-msgid "Architectures"
-msgstr "معماری‌ها"
-
 msgid "Debug User"
 msgstr "کاربر اشکال‌زدایی"
 
@@ -2124,14 +2217,14 @@ msgstr "پشتیبانی بهنجار"
 msgid "Support Large"
 msgstr "پشتیبانی بزرگ"
 
+msgid "Background Color"
+msgstr "رنگ پس‌زمینه"
+
 msgid "Allow"
 msgstr "اجازه دادن"
 
 msgid "Salt"
 msgstr "نمک"
-
-msgid "Icons"
-msgstr "آیکون‌ها"
 
 msgid "Spotlight 80 X 80"
 msgstr "اِسپات‌لایت ۸۰ × ۸۰"
@@ -2150,15 +2243,6 @@ msgstr "آی‌پَد ۱۵۲ × ۱۵۲"
 
 msgid "App Store 1024 X 1024"
 msgstr "اَپ‌اِستور ۱۰۲۴ × ۱۰۲۴"
-
-msgid "Short Version"
-msgstr "نسخهٔ کوتاه"
-
-msgid "Capabilities"
-msgstr "توانایی‌ها"
-
-msgid "Access Wi-Fi"
-msgstr "دسترسی به وای‌فای"
 
 msgid "Architecture"
 msgstr "معماری"
@@ -2502,9 +2586,6 @@ msgstr "حالت مفصل"
 msgid "Border"
 msgstr "مرز"
 
-msgid "Pathfinding"
-msgstr "مسیریابی"
-
 msgid "Navigation Layers"
 msgstr "لایه‌های ناوبری"
 
@@ -2522,9 +2603,6 @@ msgstr "ساده‌سازی مسیر"
 
 msgid "Simplify Epsilon"
 msgstr "ساده‌سازی اپسیلون"
-
-msgid "Avoidance"
-msgstr "پرهیز"
 
 msgid "Avoidance Enabled"
 msgstr "پرهیزِ به‌کارافتاده"
@@ -2597,9 +2675,6 @@ msgstr "پیمایش"
 
 msgid "Base Offset"
 msgstr "بازه از مبدا پایه"
-
-msgid "Base Scale"
-msgstr "مقیاس پایه"
 
 msgid "Limit Begin"
 msgstr "کران آغاز"
@@ -2705,6 +2780,9 @@ msgstr "ازکارانداخته"
 
 msgid "One Way Collision"
 msgstr "برخورد یک‌وری"
+
+msgid "Margin"
+msgstr "لبه"
 
 msgid "Debug Color"
 msgstr "رنگ اشکال‌زدایی"
@@ -2815,14 +2893,20 @@ msgstr "نیرو"
 msgid "Torque"
 msgstr "گشتاور"
 
-msgid "Margin"
-msgstr "لبه"
-
 msgid "Constant Linear Velocity"
 msgstr "سرعت خطی ثابت"
 
 msgid "Constant Angular Velocity"
 msgstr "سرعت زاویه‌ای ثابت"
+
+msgid "Texture Normal"
+msgstr "بهنجاری بافت"
+
+msgid "Texture Pressed"
+msgstr "فشرده شدن بافت"
+
+msgid "Shape Visible"
+msgstr "پدیداری شکل"
 
 msgid "UV"
 msgstr "فرابنفش"
@@ -2862,21 +2946,6 @@ msgstr "به‌کاراندازی برخوردگاه"
 
 msgid "Use Kinematic Bodies"
 msgstr "بکاربردن بدن‌های جنبشی"
-
-msgid "Navigation Enabled"
-msgstr "ناوبری بکارانداخته شده"
-
-msgid "Texture Normal"
-msgstr "بهنجاری بافت"
-
-msgid "Texture Pressed"
-msgstr "فشرده شدن بافت"
-
-msgid "Shape Visible"
-msgstr "پدیداری شکل"
-
-msgid "Visibility Mode"
-msgstr "حالت پدیداری"
 
 msgid "Node Path"
 msgstr "مسیر گره"
@@ -3073,6 +3142,9 @@ msgstr "کواترنیون"
 msgid "Visibility"
 msgstr "پدیداری"
 
+msgid "Debug Shape"
+msgstr "شکل اشکال‌زدایی"
+
 msgid "Force Magnitude"
 msgstr "بزرگی نیرو"
 
@@ -3105,9 +3177,6 @@ msgstr "حالت میرایی خطی"
 
 msgid "Angular Damp Mode"
 msgstr "حالت میرایی زاویه‌ای"
-
-msgid "Debug Shape"
-msgstr "شکل اشکال‌زدایی"
 
 msgid "Spring Length"
 msgstr "درازای فنر"
@@ -3168,9 +3237,6 @@ msgstr "ردگیر بدن"
 
 msgid "Body Update"
 msgstr "به‌روزرسانی بدن"
-
-msgid "Tracker"
-msgstr "ردیاب"
 
 msgid "Pose"
 msgstr "ژست"
@@ -3340,6 +3406,9 @@ msgstr "تنوع نوع"
 msgid "Autowrap"
 msgstr "پوشاندن خودکار"
 
+msgid "Title"
+msgstr "عنوان"
+
 msgid "Show Grid"
 msgstr "نمایش توری"
 
@@ -3360,9 +3429,6 @@ msgstr "کشاندنی"
 
 msgid "Selected"
 msgstr "برگزیده"
-
-msgid "Title"
-msgstr "عنوان"
 
 msgid "Autoshrink Enabled"
 msgstr "تنجش خودکار بکارافتاد"
@@ -3417,9 +3483,6 @@ msgstr "گام"
 
 msgid "Page"
 msgstr "صفحه"
-
-msgid "Border Color"
-msgstr "رنگ مرز"
 
 msgid "Border Width"
 msgstr "پهنای مرز"
@@ -3856,9 +3919,6 @@ msgstr "مه گنجایشی"
 msgid "Brightness"
 msgstr "روشنایی"
 
-msgid "Saturation"
-msgstr "سیری"
-
 msgid "Features"
 msgstr "ویژگی‌ها"
 
@@ -3897,9 +3957,6 @@ msgstr "روی فرابنفش ۲"
 
 msgid "Max Layers"
 msgstr "لایه‌های بیشینه‌"
-
-msgid "Subsurface Scattering"
-msgstr "پراکندگی زیر سطحی"
 
 msgid "UV Layer"
 msgstr "لایهٔ فرابنفش"
@@ -3982,6 +4039,12 @@ msgstr "لبه‌های بافت"
 msgid "Sub-Region"
 msgstr "زیردامنه"
 
+msgid "Number Color"
+msgstr "رنگ عدد"
+
+msgid "Function Color"
+msgstr "رنگ تابع"
+
 msgid "Color Regions"
 msgstr "دامنه‌های رنگ"
 
@@ -4041,6 +4104,18 @@ msgstr "پاک کردن"
 
 msgid "Tab"
 msgstr "زبانه"
+
+msgid "Current Line Color"
+msgstr "رنگ خط کنونی"
+
+msgid "Bookmark Color"
+msgstr "رنگ نشانک"
+
+msgid "Executing Line Color"
+msgstr "رنگ خط در حال اجرا"
+
+msgid "Line Number Color"
+msgstr "رنگ شمارهٔ خط"
 
 msgid "Grabber"
 msgstr "رباینده"
@@ -4138,17 +4213,11 @@ msgstr "توری کماد"
 msgid "Grid Major"
 msgstr "توری مهاد"
 
-msgid "Node"
-msgstr "گره"
-
 msgid "Default Theme Scale"
 msgstr "مقیاس پیش‌فرض زمینه"
 
 msgid "Custom"
 msgstr "سفارشی"
-
-msgid "Default Font Antialiasing"
-msgstr "نادندانگی پیش‌فرض قلم"
 
 msgid "Playback Mode"
 msgstr "حالت بازنواخت"
@@ -4224,12 +4293,6 @@ msgstr "پرچم‌های فراداده"
 
 msgid "Default Link Connection Radius"
 msgstr "شعاع پیش‌فرض پیوند اتصال"
-
-msgid "World"
-msgstr "جهان"
-
-msgid "Baking"
-msgstr "پخت"
 
 msgid "Link Connection Color"
 msgstr "رنگ پیوند اتصال"
@@ -4339,6 +4402,9 @@ msgstr "اچ.دی.آر دوبعدی"
 msgid "Decals"
 msgstr "برگردان‌ها"
 
+msgid "Subsurface Scattering"
+msgstr "پراکندگی زیر سطحی"
+
 msgid "Global Shader Variables"
 msgstr "متغیر‌های جهانی سایه‌زن"
 
@@ -4362,6 +4428,9 @@ msgstr "زبان سایه‌زن"
 
 msgid "Treat Warnings as Errors"
 msgstr "رفتار کردن با هشدارها به‌عنوان خطا"
+
+msgid "Default Font Antialiasing"
+msgstr "نادندانگی پیش‌فرض قلم"
 
 msgid "Has Tracking Data"
 msgstr "دادهٔ ردیابی‌شده دارد"

@@ -58,7 +58,6 @@ Size2 CheckBox::get_icon_size() const {
 	if (theme_cache.radio_unchecked_disabled.is_valid()) {
 		tex_size = tex_size.max(theme_cache.radio_unchecked_disabled->get_size());
 	}
-
 	float texture_scale = 1.0;
 	
 	if (!theme_cache.normal_style.is_null()) {
@@ -90,6 +89,16 @@ Size2 CheckBox::get_minimum_size() const {
 
 void CheckBox::_notification(int p_what) {
 	switch (p_what) {
+		case NOTIFICATION_ACCESSIBILITY_UPDATE: {
+			RID ae = get_accessibility_element();
+			ERR_FAIL_COND(ae.is_null());
+
+			if (is_radio()) {
+				DisplayServer::get_singleton()->accessibility_update_set_role(ae, DisplayServer::AccessibilityRole::ROLE_RADIO_BUTTON);
+			} else {
+				DisplayServer::get_singleton()->accessibility_update_set_role(ae, DisplayServer::AccessibilityRole::ROLE_CHECK_BOX);
+			}
+		} break;
 		case NOTIFICATION_THEME_CHANGED:
 		case NOTIFICATION_LAYOUT_DIRECTION_CHANGED:
 		case NOTIFICATION_TRANSLATION_CHANGED: {
@@ -132,7 +141,6 @@ void CheckBox::_notification(int p_what) {
 			} else {
 				offset.x = theme_cache.normal_style->get_margin(SIDE_LEFT);
 			}
-
 			float computed_checkbox_height = get_size().height - (theme_cache.normal_style->get_margin(SIDE_TOP) + theme_cache.normal_style->get_margin(SIDE_BOTTOM));
 
 			if (is_pressed()) {
@@ -140,19 +148,19 @@ void CheckBox::_notification(int p_what) {
 				float texture_scale = MIN(1.0, computed_checkbox_height / texture_size.height);
 
 				offset.y = int((get_size().height - texture_scale * on_texture->get_height()) / 2);
-				on_texture->draw_rect(ci, Rect2(offset, _fit_icon_size(texture_size * texture_scale)));
+				on_texture->draw_rect(ci, Rect2(offset, _fit_icon_size(texture_size * texture_scale)), false, theme_cache.checkbox_checked_color);
 			} else {
 				Size2 texture_size = off_texture->get_size();
 				float texture_scale = MIN(1.0, computed_checkbox_height / texture_size.height);
 				
 				offset.y = int((get_size().height - texture_scale * off_texture->get_height()) / 2);
-				off_texture->draw_rect(ci, Rect2(offset, _fit_icon_size(texture_size * texture_scale)));
+				off_texture->draw_rect(ci, Rect2(offset, _fit_icon_size(texture_size * texture_scale)), false, theme_cache.checkbox_unchecked_color);
 			}
 		} break;
 	}
 }
 
-bool CheckBox::is_radio() {
+bool CheckBox::is_radio() const {
 	return get_button_group().is_valid();
 }
 
@@ -169,6 +177,8 @@ void CheckBox::_bind_methods() {
 	BIND_THEME_ITEM(Theme::DATA_TYPE_ICON, CheckBox, unchecked_disabled);
 	BIND_THEME_ITEM(Theme::DATA_TYPE_ICON, CheckBox, radio_checked_disabled);
 	BIND_THEME_ITEM(Theme::DATA_TYPE_ICON, CheckBox, radio_unchecked_disabled);
+	BIND_THEME_ITEM(Theme::DATA_TYPE_COLOR, CheckBox, checkbox_checked_color);
+	BIND_THEME_ITEM(Theme::DATA_TYPE_COLOR, CheckBox, checkbox_unchecked_color);
 }
 
 CheckBox::CheckBox(const String &p_text) :
