@@ -28,3 +28,10 @@
 #define JPH_PLATFORM_BLUE_RWLOCK_RLOCK(lock) nn::os::AcquireReadLock(&lock)
 #define JPH_PLATFORM_BLUE_RWLOCK_WUNLOCK(lock) nn::os::ReleaseWriteLock(&lock)
 #define JPH_PLATFORM_BLUE_RWLOCK_RUNLOCK(lock) nn::os::ReleaseReadLock(&lock)
+
+#define JPH_PLATFORM_BLUE_SEMAPHORE nn::os::SemaphoreType
+#define JPH_PLATFORM_BLUE_SEMAPHORE_INIT(mSemaphore) nn::os::InitializeSemaphore(&mSemaphore, 0, INT_MAX);
+#define JPH_PLATFORM_BLUE_SEMAPHORE_DESTROY(mSemaphore) nn::os::FinalizeSemaphore(&mSemaphore)
+#define JPH_PLATFORM_BLUE_SEMAPHORE_SIGNAL(mSemaphore, num_to_acquire) nn::os::ReleaseSemaphore(&mSemaphore, num_to_release)
+#define JPH_PLATFORM_BLUE_SEMAPHORE_WAIT(mSemaphore) nn::os::AcquireSemaphore(&mSemaphore);
+

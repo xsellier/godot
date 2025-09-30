@@ -46,11 +46,14 @@ Semaphore::Semaphore()
 		std::abort();
 	}
 #elif defined(JPH_PLATFORM_BLUE)
+	JPH_PLATFORM_BLUE_SEMAPHORE_INIT(mSemaphore);
+	/*
 	if (!JPH_PLATFORM_BLUE_SEMAPHORE_INIT(mSemaphore))
 	{
 		Trace("Failed to create semaphore");
 		std::abort();
 	}
+	*/
 #endif
 }
 
@@ -119,7 +122,8 @@ void Semaphore::Acquire(uint inNumber)
 		for (int i = 0; i < num_to_acquire; ++i)
 			dispatch_semaphore_wait(mSemaphore, DISPATCH_TIME_FOREVER);
 	#elif defined(JPH_PLATFORM_BLUE)
-		JPH_PLATFORM_BLUE_SEMAPHORE_WAIT(mSemaphore, num_to_acquire);
+		for (int i = 0; i < num_to_acquire; ++i)
+			JPH_PLATFORM_BLUE_SEMAPHORE_WAIT(mSemaphore);
 	#endif
 	}
 #else
