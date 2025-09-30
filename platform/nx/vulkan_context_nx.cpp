@@ -7,8 +7,7 @@
 #include <nn/nn_Assert.h>
 #include <nn/nn_Log.h>
 
-#include <vulkan/vulkan.h>
-#include <vulkan/vulkan_vi.h>
+#include "drivers/vulkan/godot_vulkan.h"
 
 const char *VulkanContextNX::_get_platform_surface_extension() const {
 	return VK_NN_VI_SURFACE_EXTENSION_NAME;
