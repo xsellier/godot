@@ -4809,16 +4809,14 @@ bool Main::iteration() {
 	}
 	message_queue->flush();
 
-<<<<<<< HEAD
 #ifndef NAVIGATION_2D_DISABLED
 	NavigationServer2D::get_singleton()->process(process_step * time_scale);
 #endif // NAVIGATION_2D_DISABLED
 #ifndef NAVIGATION_3D_DISABLED
 	NavigationServer3D::get_singleton()->process(process_step * time_scale);
 #endif // NAVIGATION_3D_DISABLED
-=======
+
 	PROF_POP_BLOCK();
->>>>>>> b309197f61 (NX: Integrate Nintendo CPU Profiler)
 
 	RenderingServer::get_singleton()->sync(); //sync if still drawing from previous frames.
 

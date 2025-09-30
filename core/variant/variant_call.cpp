@@ -36,11 +36,8 @@
 #include "core/io/marshalls.h"
 #include "core/object/class_db.h"
 #include "core/os/os.h"
-<<<<<<< HEAD
 #include "core/templates/a_hash_map.h"
-=======
 #include "core/profiler/profiler_macros.h"
->>>>>>> b309197f61 (NX: Integrate Nintendo CPU Profiler)
 #include "core/templates/local_vector.h"
 
 typedef void (*VariantFunc)(Variant &r_ret, Variant &p_self, const Variant **p_args);

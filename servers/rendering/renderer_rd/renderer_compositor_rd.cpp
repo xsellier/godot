@@ -277,7 +277,6 @@ RendererCompositorRD::RendererCompositorRD() {
 	uniform_set_cache = memnew(UniformSetCacheRD);
 	framebuffer_cache = memnew(FramebufferCacheRD);
 
-<<<<<<< HEAD
 	bool shader_cache_enabled = GLOBAL_GET("rendering/shader_compiler/shader_cache/enabled");
 	bool compress = GLOBAL_GET("rendering/shader_compiler/shader_cache/compress");
 	bool use_zstd = GLOBAL_GET("rendering/shader_compiler/shader_cache/use_zstd_compression");
@@ -291,17 +290,11 @@ RendererCompositorRD::RendererCompositorRD() {
 		// Attempt to create a folder for the shader cache that the user can write to. Shaders will only be attempted to be saved if this path exists.
 		String shader_cache_user_dir = Engine::get_singleton()->get_shader_cache_path();
 		if (shader_cache_user_dir.is_empty()) {
-			shader_cache_user_dir = "user://";
-=======
-	{
-		String shader_cache_dir = Engine::get_singleton()->get_shader_cache_path();
-		if (shader_cache_dir.is_empty()) {
 			#ifdef NX_ENABLED
-				shader_cache_dir = OS::get_singleton()->get_cache_path();
+				shader_cache_user_dir = OS::get_singleton()->get_cache_path();
 			#else
-				shader_cache_dir = "user://";
+				shader_cache_user_dir = "user://";
 			#endif
->>>>>>> 475dc1c5bc (NX: Added support for read only shader cache.)
 		}
 
 		Ref<DirAccess> user_da = DirAccess::open(shader_cache_user_dir);
