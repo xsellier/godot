@@ -152,6 +152,12 @@ uint64_t FileAccessNX::get_length() const
     return uint64_t(nx_file_size);
 }
 
+int64_t FileAccessNX::_get_size(const String &p_file)
+{
+    // TODO
+	return 0;
+}
+
 bool FileAccessNX::eof_reached() const
 {
     return last_error == ERR_FILE_EOF;

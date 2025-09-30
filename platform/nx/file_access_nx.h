@@ -61,7 +61,8 @@ public:
 
 	bool file_exists(const String &p_path) override; ///< return true if a file exists
 
-
+    virtual int64_t _get_size(const String &p_file) override;
+	virtual uint64_t _get_access_time(const String &p_file) override { return 0; }
 
 	FileAccessNX();
 	~FileAccessNX() override;
