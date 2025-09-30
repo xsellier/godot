@@ -1,6 +1,6 @@
 #include "export_plugin.h"
 #include "publishing_metadata_nx.h"
-#include "editor/editor_paths.h"
+#include "editor/file_system/editor_paths.h"
 #include "core/config/project_settings.h"
 #include "core/io/json.h"
 
@@ -546,7 +546,7 @@ Error EditorExportPlatformNX::export_project(const Ref<EditorExportPreset> &p_pr
 
 	String nmetaString;
 	String newNmetaString;
-	nmetaString.parse_utf8((const char *)data.ptr(), data.size());
+	nmetaString.append_utf8((const char *)data.ptr(), data.size());
 	Vector<String> lines = nmetaString.split("\n");
 	bool skip = false;
 	for (int i = 0; i < lines.size(); i++) {
