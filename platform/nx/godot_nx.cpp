@@ -18,9 +18,9 @@
 #include <nn/nn_Middleware.h>
 
 #ifdef DEBUG_ENABLED
-NN_DEFINE_MIDDLEWARE(g_MiddlewareInfo, "RAWRLABGames", "GodotEngine-RAWRLAB-4_4_1-Debug" );
+NN_DEFINE_MIDDLEWARE(g_MiddlewareInfo, "RAWRLABGames", "GodotEngine-RAWRLAB-4_5-Debug" );
 #else
-NN_DEFINE_MIDDLEWARE(g_MiddlewareInfo, "RAWRLABGames", "GodotEngine-RAWRLAB-4_4_1-Release" );
+NN_DEFINE_MIDDLEWARE(g_MiddlewareInfo, "RAWRLABGames", "GodotEngine-RAWRLAB-4_5-Release" );
 #endif
 
 extern "C" void nnMain()
