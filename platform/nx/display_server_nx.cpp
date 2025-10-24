@@ -7,6 +7,8 @@
 #include <nv/nv_MemoryManagement.h>
 #include <nn/gll.h>
 
+#include "core/config/project_settings.h"
+
 #include <stdlib.h>
 
 const size_t gfxMemSize = 8 * 1024 * 1024;
@@ -170,6 +172,8 @@ DisplayServerNX::~DisplayServerNX() {
 
 bool DisplayServerNX::has_feature(Feature p_feature) const {
     switch (p_feature) {
+		case FEATURE_MOUSE:
+		case FEATURE_MOUSE_WARP:
         case FEATURE_TOUCHSCREEN:
             return true;
         default:
@@ -374,3 +378,44 @@ DisplayServer::VSyncMode DisplayServerNX::window_get_vsync_mode(WindowID p_vsync
     return DisplayServer::VSYNC_ENABLED;
 }
 
+void DisplayServerNX::_mouse_update_mode() {
+	MouseMode wanted_mouse_mode = mouse_mode_override_enabled
+			? mouse_mode_override
+			: mouse_mode_base;
+
+	if (mouse_mode == wanted_mouse_mode) {
+		return;
+	}
+
+	mouse_mode = wanted_mouse_mode;
+}
+
+void DisplayServerNX::mouse_set_mode(MouseMode p_mode) {
+	ERR_FAIL_INDEX(p_mode, MouseMode::MOUSE_MODE_MAX);
+	if (p_mode == mouse_mode_base) {
+		return;
+	}
+	mouse_mode_base = p_mode;
+	_mouse_update_mode();
+}
+
+void DisplayServerNX::cursor_set_custom_image(const Ref<Resource> &p_cursor, CursorShape p_shape, const Vector2 &p_hotspot) {
+	ERR_FAIL_INDEX(p_shape, CURSOR_MAX);
+	String cursor_path = p_cursor.is_valid() ? p_cursor->get_path() : "";
+	if (!cursor_path.is_empty()) {
+		cursor_path = ProjectSettings::get_singleton()->globalize_path(cursor_path);
+	}
+	
+	// _cursor_set_shape_helper(p_shape, true);
+}
+
+Point2i DisplayServerNX::mouse_get_position() const {
+	return Input::get_singleton()->get_mouse_position();
+}
+
+void DisplayServerNX::warp_mouse(const Point2i &p_to) {
+	return Input::get_singleton()->set_mouse_position(p_to);
+}
+
+
+void set_mouse_position(const Point2 &p_posf);
