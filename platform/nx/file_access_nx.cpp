@@ -5,6 +5,8 @@
 
 #include <nn/nn_Result.h>
 
+#include <cstring>
+
 Error FileAccessNX::FileAccessNX::open_internal(const String &p_path, int p_mode_flags)
 {
     nx_cache_start_pos = -1;
@@ -47,7 +49,7 @@ Error FileAccessNX::FileAccessNX::open_internal(const String &p_path, int p_mode
         } else {
             is_writable_user_data = false;
         }
-        if (p_path.begins_with(OS::get_singleton()->get_cache_path()) && !GLOBAL_GET("rendering/shader_compiler/shader_cache/read_only")) {
+        if (p_path.begins_with(OS::get_singleton()->get_cache_path())) {
             is_writable_cache_data = true;
         } else {
             is_writable_cache_data = false;
@@ -175,17 +177,7 @@ uint8_t FileAccessNX::get_8() const
 
     // We use a small read cache to avoid thousands of 1 byte reads.
 	// Solves issue with lot check (FS Logging)
-	if(offset >= nx_cache_end_pos) {
-		size_t length = NX_CACHE_SIZE;
-        const uint64_t realLength = get_length();
-        if (length + offset >= realLength) {
-            length = realLength - offset;
-        }
-        nn::fs::ReadFile(f, offset, nx_cache, length);
-
-        nx_cache_start_pos = offset;
-		nx_cache_end_pos = nx_cache_start_pos + length;
-	}
+	ensure_cache(1);
 
 	return_pos = offset - nx_cache_start_pos;
 
@@ -197,16 +189,39 @@ uint64_t FileAccessNX::get_buffer(uint8_t *p_dst, uint64_t p_length) const
 {
     ERR_FAIL_COND_V(!f.handle, NULL);
     // check if length + offset is longer than the file
-    size_t length = p_length;
+    int64_t length = p_length;
     if (length + offset >= get_length()) {
         length = get_length() - offset;
         last_error = ERR_FILE_EOF;
     }
+	
+	if (length > NX_CACHE_SIZE) {
+		nn::fs::ReadFile(f, offset, p_dst, length);
+	} else {
+        ensure_cache(length);
 
-    nn::fs::ReadFile(f, offset, p_dst, length);
+        int64_t return_pos = offset - nx_cache_start_pos;
+        std::memcpy(p_dst, nx_cache + return_pos, length);
+	}
 
     offset += length;
     return length;
+}
+
+void FileAccessNX::ensure_cache(int64_t length) const {
+    if (offset < nx_cache_start_pos || (offset + length) > nx_cache_end_pos) {
+        size_t chunk = NX_CACHE_SIZE;
+        const uint64_t realLength = get_length();
+        if (offset + chunk > realLength) {
+            chunk = realLength - offset;
+        }
+        if (chunk == 0) {
+            return;
+        }
+        nn::fs::ReadFile(f, offset, nx_cache, chunk);
+        nx_cache_start_pos = offset;
+        nx_cache_end_pos   = nx_cache_start_pos + chunk;
+    }
 }
 	
 Error FileAccessNX::get_error() const
@@ -234,8 +249,10 @@ bool FileAccessNX::store_buffer(const uint8_t *p_src, uint64_t p_length)
 {
     ERR_FAIL_COND_V(!f.handle, false);
 	nn::Result result = nn::fs::WriteFile(f, offset, p_src, p_length, nn::fs::WriteOption::MakeValue(nn::fs::WriteOptionFlag_Flush));
-	if (nn::fs::ResultUsableSpaceNotEnough::Includes(result))
+	if (nn::fs::ResultUsableSpaceNotEnough::Includes(result)) {
 		NN_LOG("Not enough usable space to write!!\n");
+		print_verbose("Not enough usable space to write!!");
+	}
     offset += p_length;
     return true;
 }

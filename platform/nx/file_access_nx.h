@@ -4,7 +4,9 @@
 #include <nn/os.h>
 #include <nn/fs.h>
 
-#define NX_CACHE_SIZE 8192
+// #define NX_CACHE_SIZE 8192
+// #define NX_CACHE_SIZE 262144
+#define NX_CACHE_SIZE 131072
 
 class FileAccessNX : public FileAccess {
 
@@ -20,8 +22,10 @@ class FileAccessNX : public FileAccess {
 	mutable uint8_t nx_cache[NX_CACHE_SIZE];
 	mutable int64_t nx_cache_start_pos;
 	mutable int64_t nx_cache_end_pos;
+	void ensure_cache(int64_t length) const;
 
     void _close(); ///< close a file
+	
 
 protected:
     Error open_internal(const String &p_path, int p_mode_flags) override; ///< open a file
