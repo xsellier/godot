@@ -6875,9 +6875,13 @@ Error RenderingDevice::initialize(RenderingContextDriver *p_context, DisplayServ
 	bool project_pipeline_cache_enable = GLOBAL_GET("rendering/rendering_device/pipeline_cache/enable");
 	if (is_main_instance && project_pipeline_cache_enable) {
 		// Only the instance that is not a local device and is also the singleton is allowed to manage a pipeline cache.
+#ifdef NX_ENABLED
+		pipeline_cache_file_path = "user://pipelines.blue_platform";
+#else
 		pipeline_cache_file_path = vformat("user://vulkan/pipelines.%s.%s",
 				OS::get_singleton()->get_current_rendering_method(),
 				device.name.validate_filename().replace_char(' ', '_').to_lower());
+#endif
 		if (Engine::get_singleton()->is_editor_hint()) {
 			pipeline_cache_file_path += ".editor";
 		}
@@ -8244,6 +8248,11 @@ Ref<RDShaderSPIRV> RenderingDevice::_shader_compile_spirv_from_source(const Ref<
 			bytecode->set_stage_compile_error(stage, error);
 		}
 	}
+	
+#ifdef NX_ENABLED
+	print_verbose("Compiled shader from source on target!!");
+#endif
+
 	return bytecode;
 }
 
@@ -8263,6 +8272,10 @@ Vector<uint8_t> RenderingDevice::_shader_compile_binary_from_spirv(const Ref<RDS
 		}
 		stage_data.push_back(sd);
 	}
+
+#ifdef NX_ENABLED
+	print_verbose("Compiled shader from spirv on target");
+#endif
 
 	return shader_compile_binary_from_spirv(stage_data, p_shader_name);
 }
