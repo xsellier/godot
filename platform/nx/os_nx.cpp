@@ -198,7 +198,7 @@ void OS_NX::getNpadSupport()
 
 	for (int i = 0; i < npadIdCountMax; ++i) {
 		if (npadStates[i].previous_connected != npadStates[i].connected && s_NpadIds[i] != nn::hid::NpadId::Handheld){
-			if(!ignore_changed_connect_status)
+			if(!ignore_changed_connect_status && !disable_applet_support_calling_on_changed_connect)
 				nn::hid::ShowControllerSupport(controllerArg);
 			nn::hid::NpadStyleSet npadStyleSet = nn::hid::GetNpadStyleSet(s_NpadIds[i]);
 			if (npadStyleSet.IsAllOff()) {
@@ -827,12 +827,7 @@ String OS_NX::get_resource_dir() const {
 
 String OS_NX::get_cache_path() const {
 	// CACHE directory
-	
-	if(!GLOBAL_GET("rendering/shader_compiler/shader_cache/read_only")) {
-		return get_user_data_dir();
-	} else {
-		return get_resource_dir();
-	}
+	return "cache://";
 }
 
 int OS_NX::get_process_exit_code(const ProcessID &p_pid) const {

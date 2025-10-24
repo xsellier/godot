@@ -15,6 +15,8 @@
 #include <nn/hid/hid_NpadJoy.h>
 #include <nn/hid/hid_Vibration.h>
 
+static bool disable_applet_support_calling_on_changed_connect = false;
+
 class OS_NX : public OS {
 	enum {
 		MAX_EVENTS = 64,
