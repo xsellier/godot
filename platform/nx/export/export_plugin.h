@@ -129,7 +129,8 @@ public:
 	String get_option_label(int p_index) const override;
 	String get_option_tooltip(int p_index) const override;
 
-	Error run(const Ref<EditorExportPreset> &p_preset, int p_device, int p_debug_flags);
+	// Error run(const Ref<EditorExportPreset> &p_preset, int p_device, int p_debug_flags);
+	virtual Error run(const Ref<EditorExportPreset> &p_preset, int p_device, BitField<EditorExportPlatform::DebugFlags> p_debug_flags) override;
 
     bool has_valid_export_configuration(const Ref<EditorExportPreset> &p_preset, String &r_error, bool &r_missing_templates, bool p_debug = false) const override;
 	bool has_valid_project_configuration(const Ref<EditorExportPreset> &p_preset, String &r_error) const override;

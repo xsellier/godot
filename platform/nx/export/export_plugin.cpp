@@ -50,8 +50,10 @@ void EditorExportPlatformNX::get_export_options(List<ExportOption> *r_options) c
 	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "binary_format/64_bits"), true));
 
 	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "texture_format/s3tc"), true));
-	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "texture_format/etc"), false));
+	// r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "texture_format/etc"), false));
 	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "texture_format/etc2"), false));
+	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "texture_format/astc"), false));
+	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "shader_baker/enabled"), false));
 	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "debug/renderdoc"), false));
 	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "debug/log_verbose"), false));
 }
@@ -87,11 +89,19 @@ void EditorExportPlatformNX::get_preset_features(const Ref<EditorExportPreset> &
     if (p_preset->get("texture_format/s3tc")) {
 		r_features->push_back("s3tc");
 	}
+	/*
 	if (p_preset->get("texture_format/etc")) {
 		r_features->push_back("etc");
 	}
+	*/
 	if (p_preset->get("texture_format/etc2")) {
 		r_features->push_back("etc2");
+	}
+	if (p_preset->get("texture_format/astc")) {
+		r_features->push_back("astc");
+	}
+	if (p_preset->get("shader_baker/enabled")) {
+		r_features->push_back("shader_baker");
 	}
 
 	if (p_preset->get("binary_format/64_bits")) {
@@ -277,6 +287,12 @@ List<String> EditorExportPlatformNX::get_binary_extensions(const Ref<EditorExpor
 Error EditorExportPlatformNX::export_project(const Ref<EditorExportPreset> &p_preset, bool p_debug, const String &p_path, BitField<EditorExportPlatform::DebugFlags> p_flags)
 {
 	bool log_verbose = p_preset->get("debug/log_verbose");
+	
+	String terminate_cmd = OS::get_singleton()->get_environment("NINTENDO_SDK_ROOT") + "/Tools/CommandLineTools/ControlTarget.exe";
+	List<String> terminate_args;
+	terminate_args.push_back("terminate");
+	Error err_cmd = execute_cmd(terminate_cmd, terminate_args, log_verbose);
+	ERR_FAIL_COND_V(err_cmd, err_cmd);
 	
 	ExportNotifier notifier(*this, p_preset, p_debug, p_path, p_flags);
 	
@@ -795,7 +811,7 @@ String EditorExportPlatformNX::get_option_tooltip(int p_index) const
 	return s;
 }
 
-Error EditorExportPlatformNX::run(const Ref<EditorExportPreset> &p_preset, int p_device, int p_debug_flags)
+Error EditorExportPlatformNX::run(const Ref<EditorExportPreset> &p_preset, int p_device, BitField<EditorExportPlatform::DebugFlags> p_debug_flags)
 {
 	ERR_FAIL_INDEX_V(p_device, devices.size(), ERR_INVALID_PARAMETER);
 
