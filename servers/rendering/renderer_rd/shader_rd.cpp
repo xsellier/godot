@@ -446,9 +446,6 @@ bool ShaderRD::_load_from_cache(Version *p_version, int p_group) {
 	}
 
 	if (f.is_null()) {
-		if(GLOBAL_GET("rendering/shader_compiler/shader_cache/read_only")) {
-			print_verbose("Could not load cached shader (!exist): api_safe_name " + api_safe_name);
-		}
 		return false;
 	}
 
@@ -509,7 +506,6 @@ bool ShaderRD::_load_from_cache(Version *p_version, int p_group) {
 	}
 
 	p_version->valid = true;
-	print_verbose("Loaded cached shader: api_safe_name " + api_safe_name);
 	return true;
 }
 
