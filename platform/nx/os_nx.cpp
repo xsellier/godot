@@ -285,15 +285,15 @@ void OS_NX::process_joy_buttons(int deviceIndex, const nn::hid::NpadButtonSet& c
 	} 
 	
 	if (currentState.Test<nn::hid::NpadJoyButton::X>()) {
-		input->joy_button(deviceIndex, JoyButton::X, true);
-	} else {
-		input->joy_button(deviceIndex, JoyButton::X, false);
-	} 
-	
-	if (currentState.Test<nn::hid::NpadJoyButton::Y>()) {
 		input->joy_button(deviceIndex, JoyButton::Y, true);
 	} else {
 		input->joy_button(deviceIndex, JoyButton::Y, false);
+	} 
+	
+	if (currentState.Test<nn::hid::NpadJoyButton::Y>()) {
+		input->joy_button(deviceIndex, JoyButton::X, true);
+	} else {
+		input->joy_button(deviceIndex, JoyButton::X, false);
 	} 
 	
 	if (currentState.Test<nn::hid::NpadJoyButton::StickL>()) {
