@@ -108,14 +108,10 @@ public:
 	
 	virtual void mouse_set_mode(MouseMode p_mode) override;
 	MouseMode mouse_mode = MouseMode::MOUSE_MODE_VISIBLE;
-	MouseMode mouse_mode_base = MouseMode::MOUSE_MODE_VISIBLE;
-	MouseMode mouse_mode_override = MouseMode::MOUSE_MODE_VISIBLE;
-	bool mouse_mode_override_enabled = false;
-	void _mouse_update_mode();
 	virtual Point2i mouse_get_position() const override;
 	virtual void cursor_set_custom_image(const Ref<Resource> &p_cursor, CursorShape p_shape = CURSOR_ARROW, const Vector2 &p_hotspot = Vector2()) override;
 	virtual void warp_mouse(const Point2i &p_to) override;
-
+	virtual MouseMode mouse_get_mode() const override;
 
 	virtual DisplayServer::VSyncMode window_get_vsync_mode(WindowID p_vsync_mode) const override;
 };
