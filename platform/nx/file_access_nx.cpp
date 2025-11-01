@@ -7,6 +7,9 @@
 
 #include <cstring>
 
+int FileAccessNX::open_files_rw_user  = 0;
+int FileAccessNX::open_files_rw_cache = 0;
+
 Error FileAccessNX::FileAccessNX::open_internal(const String &p_path, int p_mode_flags)
 {
     nx_cache_start_pos = -1;
@@ -43,13 +46,16 @@ Error FileAccessNX::FileAccessNX::open_internal(const String &p_path, int p_mode
 
     // If mode is write, and to user data, flag for special close handling
     const String user_data_path = OS::get_singleton()->get_user_data_dir();
+	const String cache_data_path = OS::get_singleton()->get_cache_path();
     if (p_mode_flags & WRITE) {
         if (p_path.begins_with(user_data_path)) {
+			open_files_rw_user++;
             is_writable_user_data = true;
         } else {
             is_writable_user_data = false;
         }
-        if (p_path.begins_with(OS::get_singleton()->get_cache_path())) {
+		if (p_path.begins_with(cache_data_path)) {
+			open_files_rw_cache++;
             is_writable_cache_data = true;
         } else {
             is_writable_cache_data = false;
@@ -98,12 +104,18 @@ void FileAccessNX::_close()
         return;
 
     nn::fs::CloseFile(f);
-    if (is_writable_user_data) {
-        NN_LOG("Committing user save data");
-        nn::fs::Commit("user");
+	if (is_writable_user_data) {
+		if (open_files_rw_user == 1) {
+			NN_LOG("Committing user save data");
+			nn::fs::Commit("user");
+		}
+		open_files_rw_user--;
     } else if (is_writable_cache_data) {
-        NN_LOG("Committing cache data");
-        nn::fs::Commit("cache");
+		if (open_files_rw_cache == 1) {
+			NN_LOG("Committing cache data");
+			nn::fs::Commit("cache");
+		}
+		open_files_rw_cache--;
     }
 
     f.handle = NULL;

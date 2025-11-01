@@ -6,9 +6,13 @@
 
 // #define NX_CACHE_SIZE 8192
 // #define NX_CACHE_SIZE 262144
-#define NX_CACHE_SIZE 131072
+// #define NX_CACHE_SIZE 131072
+// Recommended 1MB by Nintendo
+#define NX_CACHE_SIZE 1048576
 
 class FileAccessNX : public FileAccess {
+	static int open_files_rw_user;
+	static int open_files_rw_cache;
 
     nn::fs::FileHandle f;
     int flags;
