@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  modifier_bone_target_3d.h                                             */
+/*  test_triangle2.h                                                      */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -30,26 +30,41 @@
 
 #pragma once
 
-#include "scene/3d/skeleton_modifier_3d.h"
+#include "modules/navigation_2d/triangle2.h"
 
-class ModifierBoneTarget3D : public SkeletonModifier3D {
-	GDCLASS(ModifierBoneTarget3D, SkeletonModifier3D);
+#include "tests/test_macros.h"
 
-	String bone_name;
-	int bone = -1;
+namespace TestTriangle2 {
+TEST_SUITE("[Triangle2]") {
+	TEST_CASE("[Triangle2] Test get_area") {
+		const Vector2 p0(5.0, 5.0);
+		const Vector2 p1(6.0, 7.0);
+		const Vector2 p2(7.0, 6.0);
 
-protected:
-	void _validate_property(PropertyInfo &p_property) const;
-	virtual void _validate_bone_names() override;
-	static void _bind_methods();
-	virtual void _process_modification(double p_delta) override;
+		CHECK_EQ(Triangle2(p0, p1, p2).get_area(), doctest::Approx(1.5));
+		CHECK_EQ(Triangle2(p0, p2, p1).get_area(), doctest::Approx(1.5));
 
-public:
-#ifdef TOOLS_ENABLED
-	virtual bool is_processed_on_saving() const override { return true; }
-#endif
-	void set_bone_name(const String &p_bone_name);
-	String get_bone_name() const;
-	void set_bone(int p_bone);
-	int get_bone() const;
-};
+		CHECK_EQ(Triangle2(p0, p2, p2).get_area(), doctest::Approx(0.0));
+		CHECK_EQ(Triangle2(p0, p1, p1).get_area(), doctest::Approx(0.0));
+	}
+
+	TEST_CASE("[Triangle2] Test get_closest_point_to") {
+		const Vector2 p0(5.0, 5.0);
+		const Vector2 p1(6.0, 7.0);
+		const Vector2 p2(7.0, 6.0);
+
+		const Vector2 p3(0.0, 0.0);
+		const Vector2 p4(6.0, 6.5);
+
+		const Triangle2 t(p0, p1, p2);
+
+		CHECK(t.get_closest_point_to(p0).is_equal_approx(p0));
+		CHECK(t.get_closest_point_to(p1).is_equal_approx(p1));
+		CHECK(t.get_closest_point_to(p2).is_equal_approx(p2));
+
+		CHECK(t.get_closest_point_to(p3).is_equal_approx(p0));
+
+		CHECK(t.get_closest_point_to(p4).is_equal_approx(p4));
+	}
+}
+} // namespace TestTriangle2
