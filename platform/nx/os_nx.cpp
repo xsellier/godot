@@ -827,7 +827,9 @@ String OS_NX::get_resource_dir() const {
 
 String OS_NX::get_cache_path() const {
 	// CACHE directory
-	return "cache://";
+	// FIXME: Add a macro for enabling the cache partition
+	// return "cache://";
+	return "user://";
 }
 
 int OS_NX::get_process_exit_code(const ProcessID &p_pid) const {
