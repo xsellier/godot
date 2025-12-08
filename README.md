@@ -12,17 +12,16 @@ First make sure you have a valid Nintendo SDK (at least version 15) install, whi
 
 Multiple builds must be done before Godot can be used for Nintendo Switch development.  Clone this repo, change into the directory and build the following configurations:
 
-```scons platform=windows target=editor```
+```shell
+scons platform=windows target=editor
 
-```scons platform=nx target=template_release arch=arm64```
+scons platform=nx target=template_release arch=arm64
+scons platform=nx target=template_debug debug_symbols=yes arch=arm64
 
-```scons platform=nx target=template_debug debug_symbols=yes arch=arm64```
+scons platform=nx target=template_release arch=arm32
+scons platform=nx target=template_debug debug_symbols=yes arch=arm32
+```
 
-```scons platform=nx target=template_release arch=arm32```
-
-```scons platform=nx target=template_debug debug_symbols=yes arch=arm32```
-
-If your game does not require changing user profiles while in-game, you may enable the additional flag ```nx_use_preselected_user=yes```. This may help avoid a few issues in lotcheck.
 
 You don't necessarily need to build for all 4 device configurations but these are all the potential export templates.  The Windows build provides the editor and exporter for the NX.
 
@@ -31,6 +30,14 @@ Once the export templates are generated you need to deploy your local export tem
 ```python misc/scripts/export_nx_templates.py```
 
 If you make any changes to this project you need to build and redeploy the export templates.
+
+### Build Flags
+Certain features are only available once the editor and export templates have been built with additional build flags.
+
+| Flag                            | Description                                                                                                   |
+|---------------------------------|---------------------------------------------------------------------------------------------------------------|
+| ``nx_use_preselected_user=yes`` | If your game does not require changing user profiles while in-game, this flag may help avoid lotcheck issues. |
+| ``nx_web_module=yes``           | This flag enables GDScript functionality for the nn::web api to display web content.                          |
 
 ## Export and Deployment
 

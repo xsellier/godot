@@ -110,6 +110,8 @@ void PublishingMetadataNX::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_display_version"), &PublishingMetadataNX::get_display_version);
 	ClassDB::bind_method(D_METHOD("set_legal_information", "legal_information"), &PublishingMetadataNX::set_legal_information);
 	ClassDB::bind_method(D_METHOD("get_legal_information"), &PublishingMetadataNX::get_legal_information);
+	ClassDB::bind_method(D_METHOD("set_accessible_urls", "accessible_urls"), &PublishingMetadataNX::set_accessible_urls);
+	ClassDB::bind_method(D_METHOD("get_accessible_urls"), &PublishingMetadataNX::get_accessible_urls);
 	ClassDB::bind_method(D_METHOD("set_localization_metadata", "localization_metadata"), &PublishingMetadataNX::set_localization_metadata);
 	ClassDB::bind_method(D_METHOD("get_localization_metadata"), &PublishingMetadataNX::get_localization_metadata);
 	ClassDB::bind_method(D_METHOD("set_rating_metadata", "rating_metadata"), &PublishingMetadataNX::set_rating_metadata);
@@ -132,6 +134,7 @@ void PublishingMetadataNX::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "display_version"), "set_display_version", "get_display_version");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "demo"), "set_demo", "is_demo");
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "legal_information", PROPERTY_HINT_FILE, "*.zip"), "set_legal_information", "get_legal_information");
+	ADD_PROPERTY(PropertyInfo(Variant::STRING, "accessible_urls", PROPERTY_HINT_FILE, "*.txt"), "set_accessible_urls", "get_accessible_urls");
 	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "localization_metadata", PROPERTY_HINT_TYPE_STRING, itos(Variant::OBJECT) + "/" + itos(PROPERTY_HINT_RESOURCE_TYPE) + ":LocalizationMetadataNX"), "set_localization_metadata", "get_localization_metadata");
 	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "rating_metadata", PROPERTY_HINT_TYPE_STRING, itos(Variant::OBJECT) + "/" + itos(PROPERTY_HINT_RESOURCE_TYPE) + ":RatingMetadataNX"), "set_rating_metadata", "get_rating_metadata");
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "appropriate_age_for_china", PROPERTY_HINT_ENUM, ages_for_china_raw_string), "set_appropriate_age_for_china", "get_appropriate_age_for_china");
@@ -184,6 +187,14 @@ void PublishingMetadataNX::set_legal_information(const String &p_legal_informati
 
 String PublishingMetadataNX::get_legal_information() const {
 	return legal_information;
+}
+
+void PublishingMetadataNX::set_accessible_urls(const String &p_accessible_urls) {
+	accessible_urls = p_accessible_urls;
+}
+
+String PublishingMetadataNX::get_accessible_urls() const {
+	return accessible_urls;
 }
 
 void PublishingMetadataNX::set_localization_metadata(const Array &p_localization_metadata) {

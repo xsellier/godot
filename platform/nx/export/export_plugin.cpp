@@ -541,6 +541,15 @@ Error EditorExportPlatformNX::export_project(const Ref<EditorExportPreset> &p_pr
 		WARN_PRINT_ED("Legal information not provided.");
 	}
 
+	// Special preprocessing for accessible urls
+	String accessible_urls_source = publishing_metadata->get_accessible_urls();
+	String accessible_urls_target = accessible_urls_source.get_file();
+	if (!accessible_urls_source.is_empty()) {
+		copy_file(accessible_urls_source, dest_dir + binary_name + "/" + accessible_urls_target);
+	} else {
+		WARN_PRINT_ED("Accessible URLs not provided.");
+	}
+
 	// Create .nmeta file based on project properties
 	if (ep.step("Generating .nmeta information", step++))
 		return ERR_SKIP;
@@ -635,6 +644,9 @@ Error EditorExportPlatformNX::export_project(const Ref<EditorExportPreset> &p_pr
 #endif
 			if (!legal_information_target.is_empty()) {
 				newNmetaString += "<LegalInformationFilePath>"+legal_information_target+"</LegalInformationFilePath>\n";
+			}
+			if (!accessible_urls_target.is_empty()) {
+				newNmetaString += "<AccessibleUrlsFilePath>"+accessible_urls_target+"</AccessibleUrlsFilePath>\n";
 			}
 
 			if (publishing_metadata->is_demo()) {
