@@ -10,6 +10,7 @@ NNUtils::NNUtils() {
 void NNUtils::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("enable_cpu_boost", "enabled"), &NNUtils::enable_cpu_boost);
 	ClassDB::bind_method(D_METHOD("is_nswitch_2"), &NNUtils::is_nswitch_2);
+	ClassDB::bind_method(D_METHOD("is_docked"), &NNUtils::is_docked);
 }
 
 void NNUtils::enable_cpu_boost(bool enable) {
@@ -30,4 +31,13 @@ bool NNUtils::is_nswitch_2() {
 #else
 	return nn::pl::IsRunningOnOunce();
 #endif
+}
+
+bool NNUtils::is_docked() {
+#ifndef NX_ENABLED
+	return false;
+#else
+	return (nn::oe::GetOperationMode() == nn::oe::OperationMode::OperationMode_Console);
+#endif
+	
 }

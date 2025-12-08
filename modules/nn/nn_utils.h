@@ -25,6 +25,7 @@ protected:
 public:
 	void enable_cpu_boost(bool enable);
 	bool is_nswitch_2();
+	bool is_docked();
 	
 	NNUtils();
 };
