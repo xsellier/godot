@@ -59,13 +59,15 @@
 # Arshia Borzoo <arshi.ahoora@gmail.com>, 2025.
 # Dr-helicopter <hashmya1@gmail.com>, 2025.
 # "Mahdi B. Jahani" <kelbowonl@gmail.com>, 2025.
+# "A Thousand Ships (she/her)" <over999ships@gmail.com>, 2025.
+# Mazdak Parnian <mazdak.parniandg@gmail.com>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Godot Engine editor interface\n"
 "Report-Msgid-Bugs-To: https://github.com/godotengine/godot\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2025-09-25 19:02+0000\n"
-"Last-Translator: \"Mahdi B. Jahani\" <kelbowonl@gmail.com>\n"
+"PO-Revision-Date: 2025-12-10 16:35+0000\n"
+"Last-Translator: John Smith <pkafsharix@gmail.com>\n"
 "Language-Team: Persian <https://hosted.weblate.org/projects/godot-engine/"
 "godot/fa/>\n"
 "Language: fa\n"
@@ -73,7 +75,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 5.14-dev\n"
+"X-Generator: Weblate 5.15-dev\n"
 
 msgid "Unset"
 msgstr "تنظیم نشده"
@@ -714,6 +716,9 @@ msgstr "گام Y شبکه‌ای"
 msgid "Blend X Value"
 msgstr "مقدار X را ترکیب کنید"
 
+msgid "Blend Y Value"
+msgstr "مقدار Y را ترکیب کنید"
+
 msgid "Max Y"
 msgstr "حداکثر Y"
 
@@ -728,6 +733,9 @@ msgstr "حداقل ایکس"
 
 msgid "X Value"
 msgstr "مقدار X"
+
+msgid "Max X"
+msgstr "حداکثر X"
 
 msgid "Parameter Changed: %s"
 msgstr "پارامتر دگرگون شده: %s"
@@ -9305,7 +9313,7 @@ msgid "Snap Camera2D Limits to the Viewport"
 msgstr "محدودیت‌های Camera2D برای Viewport را بررسی کنید"
 
 msgid "Camera2D"
-msgstr "دوربین دوبعدی"
+msgstr "دوربین دو بعدی"
 
 msgid "Snap the Limits to the Viewport"
 msgstr "چفت محدودیت‌ها به دیدگستره"
@@ -9609,7 +9617,7 @@ msgid "Create Rest Pose from Bones"
 msgstr "ساختن ژست استراحت از استخوان‌ها"
 
 msgid "Skeleton2D"
-msgstr "استخوان‌بندی دوبعدی"
+msgstr "اسکلت دو بعدی"
 
 msgid "Reset to Rest Pose"
 msgstr "تنظیم مجدد به حالت استراحت"
@@ -9656,9 +9664,6 @@ msgstr "تبدیل به MeshInstance2D"
 msgid "Invalid geometry, can't create polygon."
 msgstr "هندسه نامعتبر است، نمی‌توان چندضلعی ساخت."
 
-msgid "Convert to Polygon2D"
-msgstr "تبدیل به چندضلعی دوبعدی"
-
 msgid "Invalid geometry, can't create collision polygon."
 msgstr "هندسه نامعتبر است، نمی‌توان چندضلعی برخوردگاه ساخت."
 
@@ -9673,9 +9678,6 @@ msgstr "ساخت هم‌نیای LightOccluder2D"
 
 msgid "Sprite's region needs to be enabled in the inspector."
 msgstr "منطقه اسپرایت باید در بخش بازرس فعال شود."
-
-msgid "Sprite2D"
-msgstr "اسپرایت‌دوبعدی"
 
 msgid "Drag to Resize Region Rect"
 msgstr "برای تغییر اندازه ناحیه، بکشید"
@@ -9813,8 +9815,17 @@ msgstr "چسباندن نیم‌پیکسل"
 msgid "Grid Snap"
 msgstr "چفت توری"
 
+msgid "Subdivision"
+msgstr "تقسیمات فرعی"
+
+msgid "Painting Tiles Property"
+msgstr "ویژگی های نقاشی کاشی ها"
+
 msgid "Painting:"
 msgstr "رنگ‌آمیزی:"
+
+msgid "No terrains"
+msgstr "بدون زمین‌"
 
 msgid "No terrain"
 msgstr "بدون زمین‌"
@@ -9827,6 +9838,9 @@ msgstr "رنگ‌آمیزی زمین"
 
 msgid "Pick"
 msgstr "برداشتن"
+
+msgid "Drawing Rect:"
+msgstr "کشیدن مستطیل:"
 
 msgid "Can't transform scene tiles."
 msgstr "نمی‌توان کاشی‌های صحنه را ترادیسید."
@@ -9889,6 +9903,18 @@ msgstr "شیفت: کشیدن خط."
 msgid "Shift: Draw rectangle."
 msgstr "شیفت: کشیدن مستطیل."
 
+msgid "Paint Tool"
+msgstr "ابزار نقاشی"
+
+msgid "Line Tool"
+msgstr "ابزار خط"
+
+msgid "Rect Tool"
+msgstr "ابزار مستطیل"
+
+msgid "Bucket Tool"
+msgstr "ابزار سطل"
+
 msgid "Alternatively hold %s with other tools to pick tile."
 msgstr "دگرگزینانه برای برداشتن کاشی %s را با دیگر ابزارها نگه دارید."
 
@@ -9903,6 +9929,15 @@ msgstr "چرخش کاشی به چپ"
 
 msgid "Rotate Tile Right"
 msgstr "چرخش کاشی به راست"
+
+msgid "Flip Tile Horizontally"
+msgstr "کاشی به صورت افقی قرینه شود"
+
+msgid "Flip Tile Vertically"
+msgstr "کاشی به صورت عمودی قرینه شود"
+
+msgid "Contiguous"
+msgstr "مستمر"
 
 msgid "Place Random Tile"
 msgstr "قرار دادن کاشی تصادفی"
@@ -9934,6 +9969,9 @@ msgstr "چینش بر پایهٔ شناسه‌ (از بالا به پایین)"
 msgid "Sort by ID (Descending)"
 msgstr "چینش بر پایهٔ شناسه‌ (از پایین به بالا)"
 
+msgid "Invalid source selected."
+msgstr "منبع نامعتبر انتخاب شده است."
+
 msgid "Patterns"
 msgstr "الگوها"
 
@@ -9941,8 +9979,17 @@ msgid "Drag and drop or paste a TileMap selection here to store a pattern."
 msgstr ""
 "یک انتخاب TileMap را اینجا بکشید و رها کنید یا بچسبانید تا الگو را ذخیره کنید."
 
+msgid "Paint terrain"
+msgstr "نقاشی زمین"
+
 msgid "Matches Corners and Sides"
 msgstr "هماهنگی گوشه‌ها و کناره‌ها"
+
+msgid "Matches Corners Only"
+msgstr "فقط تطابق گوشه ها"
+
+msgid "Matches Sides Only"
+msgstr "فقط تطابق طرفین"
 
 msgid "Terrain Set %d (%s)"
 msgstr "تنظیم زمین %d (%s)"
@@ -9983,8 +10030,8 @@ msgid ""
 "The edited TileMap or TileMapLayer node has no TileSet resource.\n"
 "Create or load a TileSet resource in the Tile Set property in the inspector."
 msgstr ""
-"گرهٔ نقشه‌کاشی یا لایهٔ نقشه‌کاشی، بنمایهٔ دسته‌کاشی‌ای ندارد.\n"
-"یک بنمایهٔ دسته‌کاشی در ویژگی دسته‌کاشی درون بازرس بساز یا بارکن."
+"گرهٔ نقشه‌کاشی یا لایهٔ نقشه‌کاشی، منبع دسته‌کاشی‌ای ندارد.\n"
+"یک منبع دسته‌کاشی در ویژگی دسته‌کاشی درون بازرس بسازید یا بازکنید."
 
 msgid "Select Next Tile Map Layer"
 msgstr "گزینش لایهٔ نقشه‌کاشی بعدی"
@@ -10006,9 +10053,6 @@ msgstr "گزینش همهٔ لایه‌ها"
 
 msgid "Select all TileMapLayers in scene"
 msgstr "گزینش همهٔ TileMapLayer های درون صحنه"
-
-msgid "Highlight Selected TileMap Layer"
-msgstr "برجسته‌سازی لایهٔ نقشه‌کاشی برگزیده"
 
 msgid "Toggle grid visibility."
 msgstr "روشن/خاموش کردن پدیداری توری."
@@ -11756,9 +11800,6 @@ msgstr "در حال زایش اِی.اِی.بی.بی پدیداری (منتظر 
 msgid "Generate Visibility AABB"
 msgstr "ایجاد AABB نمایان بودن"
 
-msgid "\"%s\" doesn't inherit from Node3D."
-msgstr "«%s» از گرهٔ سه‌بعدی ارث نمی‌برد."
-
 msgid "\"%s\" doesn't contain geometry."
 msgstr "«%s» دارای هندسه نیست."
 
@@ -11898,9 +11939,6 @@ msgstr "بازگردانی استخوان"
 
 msgid "Revert"
 msgstr "بازگردانی"
-
-msgid "Skeleton3D"
-msgstr "استخوان‌بندی سه‌بعدی"
 
 msgid "Apply All Poses to Rests"
 msgstr "اعمال تمام حالات به استراحت‌ها"
@@ -15865,6 +15903,61 @@ msgstr ""
 "\n"
 "اگر «x» کوچکتر از «آستانه» باشد ۰٫۰ برمی‌گرداند و در غیر این صورت ۱٫۰."
 
+msgid ""
+"Step function( scalar(edge), vector(x) ).\n"
+"\n"
+"Returns 0.0 if 'x' is smaller than 'edge' and otherwise 1.0."
+msgstr ""
+"تابع مرحله‌ای (scalar(edge)، vector(x)).\n"
+"\n"
+"اگر «x» از «edge» کوچک‌تر باشد، مقدار 0.0 و در غیر این صورت 1.0 بازمی‌گرداند."
+
+msgid ""
+"(Fragment/Light mode only) (Vector) Sum of absolute derivative in 'x' and 'y'."
+msgstr "(فقط حالت Fragment/Light) (Vector) مجموع مشتق قدر مطلق در «x» و «y»."
+
+msgid "(Vector) Sum of absolute derivative in 'x' and 'y'."
+msgstr "(Vector) مجموع مشتق قدر مطلق در «x» و «y»."
+
+msgid "Adds 2D vector to 2D vector."
+msgstr "افزودن بردار ۲‌بعدی به بردار ۲‌بعدی."
+
+msgid "Adds 3D vector to 3D vector."
+msgstr "افزودن بردار ۳‌بعدی به بردار ۳‌بعدی."
+
+msgid "Adds 4D vector to 4D vector."
+msgstr "افزودن بردار ۴‌بعدی به بردار ۴‌بعدی."
+
+msgid "Divides 2D vector by 2D vector."
+msgstr "تقسیم بردار ۲‌بعدی بر بردار ۲‌بعدی."
+
+msgid "Divides 3D vector by 3D vector."
+msgstr "تقسیم بردار ۳‌بعدی بر بردار ۳‌بعدی."
+
+msgid "Divides 4D vector by 4D vector."
+msgstr "تقسیم بردار ۴‌بعدی بر بردار ۴‌بعدی."
+
+msgid "Multiplies 2D vector by 2D vector."
+msgstr "ضرب بردار ۲‌بعدی در بردار ۲‌بعدی."
+
+msgid "Multiplies 3D vector by 3D vector."
+msgstr "ضرب بردار ۳‌بعدی در بردار ۳‌بعدی."
+
+msgid "Multiplies 4D vector by 4D vector."
+msgstr "ضرب بردار ۴‌بعدی در بردار ۴‌بعدی."
+
+msgid "Returns the remainder of the two 2D vectors."
+msgstr "باقی‌مانده دو بردار ۲‌بعدی را بازمی‌گرداند."
+
+msgid "Returns the remainder of the two 3D vectors."
+msgstr "باقیمانده دو بردار ۳‌بعدی را بازمی‌گرداند."
+
+msgid "Returns the remainder of the two 4D vectors."
+msgstr "باقیمانده دو بردار ۴‌بعدی را بازمی‌گرداند."
+
+msgid "Subtracts 2D vector from 2D vector."
+msgstr "کسر بردار ۲‌بعدی از بردار ۲‌بعدی."
+
 msgid "2D vector constant."
 msgstr "ثابت بردار دوبعدی."
 
@@ -16430,11 +16523,6 @@ msgstr "پاک‌کردن NavigationPolygon"
 msgid "Clears the internal NavigationPolygon outlines, vertices and polygons."
 msgstr "حاشیه‌ها، رئوس و چندضلعی‌های داخلی NavigationPolygon را پاک می‌کند."
 
-msgid ""
-"A NavigationPolygon resource must be set or created for this node to work."
-msgstr ""
-"یک بنمایهٔ NavigationMesh باید برای این گره نشانده یا ساخته شود تا کار کند."
-
 msgid "Change Start Position"
 msgstr "دگرش نهشت آغازین"
 
@@ -16501,11 +16589,33 @@ msgstr ""
 msgid "Clear NavigationMesh"
 msgstr "پاک کردن NavigationMesh"
 
+msgid "Clears the internal NavigationMesh vertices and polygons."
+msgstr "رئوس و چندضلعی‌های داخلی NavigationMesh را پاک می‌کند."
+
 msgid "Rename Action"
 msgstr "بازنامگذاری کنش"
 
+msgid "Rename Actions Localized name"
+msgstr "تغییر نام بومی‌سازی‌شده کنش‌ها"
+
 msgid "Change Action Type"
-msgstr "دگرش گونهٔ کنش"
+msgstr "تغییر نوع کنش"
+
+msgid ""
+"Internal name of the action. Some XR runtimes don't allow spaces or special "
+"characters."
+msgstr ""
+"نام داخلی کنش. برخی زمان‌اجرای اکس‌آر اجازه استفاده از فاصله یا نویسه‌های ویژه "
+"را نمی‌دهند."
+
+msgid "Action Name"
+msgstr "نام کنش"
+
+msgid "Human-readable name of the action. This can be displayed to end users."
+msgstr "نام قابل‌خواندن برای کنش. این می‌تواند به کاربران نهایی نمایش داده شود."
+
+msgid "Action Localized Name"
+msgstr "نام بومی‌سازی‌شده کنش"
 
 msgid "Remove action"
 msgstr "برچیدن کنش"
@@ -16516,17 +16626,36 @@ msgstr "خطا در بارکردن %s : %s."
 msgid "Error saving file %s: %s"
 msgstr "خطای در ذخیرهٔ پروندهٔ %s: %s"
 
+msgid "Remove interaction profile"
+msgstr "حذف نمایه تعامل"
+
+msgid "Add an action set."
+msgstr "افزودن مجموعه کنش."
+
 msgid "Add profile"
 msgstr "افزودن نمایه"
 
 msgid "Add an interaction profile."
 msgstr "افزودن نمایه تعاملی."
 
+msgid "Save this OpenXR action map."
+msgstr "ذخیره این نقشه کنش اوپن‌اکس‌آر."
+
+msgid "Reset to default OpenXR action map."
+msgstr "بازنشانی نقشه عملکرد اوپن‌اکس‌آر به حالت پیش‌فرض."
+
 msgid "Add action"
 msgstr "افزودن کنش"
 
 msgid "Delete action"
 msgstr "زدایش کنش"
+
+msgid ""
+"Priority of the action set. If multiple action sets bind to the same input, "
+"the action set with the highest priority will be updated."
+msgstr ""
+"اولویت مجموعه کنش. اگر چند مجموعه کنش به یک ورودی یکسان متصل شوند، مجموعه "
+"کنشی که بالاترین اولویت را دارد به‌روزرسانی خواهد شد."
 
 msgid "Add action."
 msgstr "افزودن کنش."
@@ -16571,6 +16700,17 @@ msgstr "ناشناخته"
 msgid "Select an action"
 msgstr "گزینش یک کنش"
 
+msgid "All interaction profiles have been added to the action map."
+msgstr "همه نمایه‌های برهم‌کنش به نقشه کنش افزوده شده‌اند."
+
+msgid ""
+"Hole punching won't work as expected unless the sort order is less than zero."
+msgstr ""
+"سوراخ‌سازی طبق انتظار عمل نخواهد کرد مگر اینکه ترتیب مرتب‌سازی کمتر از صفر باشد."
+
+msgid "Package name is missing."
+msgstr "نام بسته وجود ندارد."
+
 msgid "Package segments must be of non-zero length."
 msgstr "بخش‌های بسته باید طول غیرصفر داشته باشند."
 
@@ -16612,6 +16752,10 @@ msgid "\"Min SDK\" can only be overridden when \"Use Gradle Build\" is enabled."
 msgstr ""
 "گزینه «حداقل اس‌دی‌کی» تنها زمانی قابل بازنویسی است که «استفاده از ساخت گریدل» "
 "فعال باشد."
+
+msgid "\"Min SDK\" should be a valid integer, but got \"%s\" which is invalid."
+msgstr ""
+"گزینه «حداقل اس‌دی‌کی» باید یک عدد صحیح معتبر باشد، اما مقدار «%s» نامعتبر است."
 
 msgid ""
 "\"Min SDK\" cannot be lower than %d, which is the version needed by the Godot "
@@ -17052,15 +17196,15 @@ msgstr "شناسه UUID درخواست یادداشت‌گذاری: «%s»"
 msgid "The notarization process generally takes less than an hour."
 msgstr "فرآیند یادداشت‌گذاری معمولاً کمتر از یک ساعت طول می‌کشد."
 
-msgid ""
-"You can check progress manually by opening a Terminal and running the "
-"following command:"
-msgstr ""
-"شما می‌توانید با گشودن پایانه و اجرای فرمان زیر به روش دستی پیشرفت را بررسی "
-"کنید:"
-
 msgid "Xcode command line tools are not installed."
 msgstr "ابزارهای فرمان خط ایکس‌کد نصب‌شده نیستند."
+
+msgid ""
+"See instructions on finding your team ID: https://developer.apple.com/help/"
+"glossary/team-id"
+msgstr ""
+"برای یافتن شناسه تیم خود به دستورالعمل‌ها مراجعه کنید: https://"
+"developer.apple.com/help/glossary/team-id"
 
 msgid "Built-in CodeSign failed with error \"%s\"."
 msgstr "امضای کد داخلی با خطا \"%s\" با شکست مواجه شد."
@@ -17403,16 +17547,6 @@ msgstr ""
 "می‌کند."
 
 msgid ""
-"This node has no shape, so it can't collide or interact with other objects.\n"
-"Consider adding a CollisionShape2D or CollisionPolygon2D as a child to define "
-"its shape."
-msgstr ""
-"این گره هیچ شکلی ندارد، پس نمی‌تواند با دیگر شیء‌ها برخورد یا تعامل داشته "
-"باشد.\n"
-"برای تعریف کردن شکل آن، می‌توانید یک (CollisionShape2D) یا (CollisionShape2D) "
-"را به‌عنوان فرزند به آن بیفزایید."
-
-msgid ""
 "CollisionPolygon2D only serves to provide a collision shape to a "
 "CollisionObject2D derived node. Please only use it as a child of Area2D, "
 "StaticBody2D, RigidBody2D, CharacterBody2D, etc. to give them a shape."
@@ -17471,13 +17605,6 @@ msgid ""
 msgstr ""
 "یک PhysicalBone2D تنها زمانی کار می‌کند که گره والد آن یک Skeleton2D یا یک "
 "PhysicalBone2D دیگر باشد!"
-
-msgid ""
-"A PhysicalBone2D needs to be assigned to a Bone2D node in order to function! "
-"Please set a Bone2D node in the inspector."
-msgstr ""
-"یک استخوان دوبعدی فیزیکی برای کارکردن نیاز دارد تا به یک استخوان دوبعدی "
-"واگذار شود! لطفا یک گرهٔ استخوان دوبعدی درون بازرس بنشانید."
 
 msgid ""
 "A PhysicalBone2D node should have a Joint2D-based child node to keep bones "
@@ -18027,13 +18154,6 @@ msgstr ""
 "فاصلهٔ انتقال محو روی ۰ تنظیم شده است.\n"
 "برای رفع این مشکل، مقدار حاشیهٔ انتهایی برد دید را به عددی بزرگ‌تر از ۰ افزایش "
 "دهید."
-
-msgid ""
-"GeometryInstance3D visibility range transparency fade is only available when "
-"using the Forward+ rendering method."
-msgstr ""
-"محدوده شفافیت کاهش دید هندسه‌نمونه‌۳‌بعدی تنها زمانی در دسترس است که از روش رندر "
-"Forward+ استفاده شود."
 
 msgid "Plotting Meshes"
 msgstr "ترسیم مش‌ها"

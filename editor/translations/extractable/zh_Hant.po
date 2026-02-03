@@ -1,242 +1,242 @@
-# Chinese (Simplified) translation of the Godot Engine extractable strings.
+# Chinese (Traditional Han script) translation of the Godot Engine extractable strings.
 # Copyright (c) 2014-present Godot Engine contributors.
 # Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.
 # This file is distributed under the same license as the Godot source code.
 msgid ""
 msgstr ""
-"Project-Id-Version: Chinese (Simplified) (Godot Engine)\n"
+"Project-Id-Version: Godot Engine extractable strings\n"
 "Report-Msgid-Bugs-To: https://github.com/godotengine/godot\n"
-"POT-Creation-Date: 2018-01-20 12:15+0200\n"
-"PO-Revision-Date: 2024-02-23 09:02+0000\n"
-"Last-Translator: Haoyu Qiu <timothyqiu32@gmail.com>\n"
-"Language-Team: Chinese (Simplified) <https://hosted.weblate.org/projects/"
-"godot-engine/godot/zh_Hans/>\n"
-"Language: zh_CN\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2024-02-12 23:42+0000\n"
+"Last-Translator: Chang-Chia Tseng <pswo10680@gmail.com>\n"
+"Language-Team: Chinese (Traditional Han script) <https://hosted.weblate.org/"
+"projects/godot-engine/godot/zh_Hant/>\n"
+"Language: zh_Hant\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.5-dev\n"
+"X-Generator: Weblate 5.4-dev\n"
 
 msgid "All Recognized"
-msgstr "所有可用类型"
+msgstr "支援的型別"
 
 msgid "New Code Region"
-msgstr "新建代码区域"
+msgstr "新建程式碼區域"
 
 msgid "Pick a color from the screen."
-msgstr "从屏幕中拾取颜色。"
+msgstr "從螢幕上選擇一種顏色。"
 
 msgid "Pick a color from the application window."
-msgstr "从应用程序窗口中拾取颜色。"
+msgstr "從應用程式視窗中選擇一種顏色。"
 
 msgid "Enter a hex code (\"#ff0000\") or named color (\"red\")."
-msgstr "输入十六进制码（\"#ff0000\"）或颜色名称（\"red\"）。"
+msgstr "輸入十六進位碼（“#ff0000”）或顏色名稱（“red”）。"
 
 msgid "Save"
-msgstr "保存"
+msgstr "儲存"
 
 msgid "Clear"
 msgstr "清除"
 
 msgid "Select a picker shape."
-msgstr "选择选取器形状。"
+msgstr "選擇選取器形狀。"
 
 msgid "Select a picker mode."
-msgstr "选择选取器模式。"
+msgstr "選擇選取氣模式。"
 
 msgid "Hex code or named color"
-msgstr "十六进制码或颜色名称"
+msgstr "十六進位碼或顏色名稱"
 
 msgid "Add current color as a preset."
-msgstr "将当前颜色添加为预设。"
+msgstr "將目前的顏色加入預設設定。"
 
 msgid "Network"
-msgstr "网络"
+msgstr "網路"
 
 msgid ""
 "File \"%s\" already exists.\n"
 "Do you want to overwrite it?"
 msgstr ""
-"文件“%s”已存在。\n"
-"是否要覆盖？"
+"檔案「%s」已存在。\n"
+"你希望覆寫嗎?"
 
 msgid "Open"
-msgstr "打开"
+msgstr "開啟"
 
 msgid "Select Current Folder"
-msgstr "选择当前文件夹"
+msgstr "選擇目前資料夾"
 
 msgid "Select This Folder"
-msgstr "选择此文件夹"
+msgstr "選擇此資料夾"
 
 msgid "You don't have permission to access contents of this folder."
-msgstr "你无权访问此文件夹的内容。"
+msgstr "你無權存取此資料夾的內容。"
 
 msgid "All Files"
-msgstr "所有文件"
+msgstr "所有檔案"
 
 msgid "Open a File"
-msgstr "打开文件"
+msgstr "開啟檔案"
 
 msgid "Open File(s)"
-msgstr "打开文件"
+msgstr "開啟檔案"
 
 msgid "Open a Directory"
-msgstr "打开目录"
+msgstr "開啟資料夾"
 
 msgid "Open a File or Directory"
-msgstr "打开文件或目录"
+msgstr "開啟檔案或資料夾"
 
 msgid "Save a File"
-msgstr "保存文件"
+msgstr "儲存檔案"
 
 msgid "Go to previous folder."
-msgstr "转到上个文件夹。"
+msgstr "前往上一個資料夾。"
 
 msgid "Go to next folder."
-msgstr "转到下个文件夹。"
+msgstr "前往下一個資料夾。"
 
 msgid "Go to parent folder."
-msgstr "转到父文件夹。"
+msgstr "前往上一層資料夾。"
 
 msgid "Path:"
-msgstr "路径："
+msgstr "路徑："
 
 msgid "Refresh files."
-msgstr "刷新文件。"
+msgstr "重新整理檔案。"
 
 msgid "Directories & Files:"
-msgstr "目录与文件："
+msgstr "資料夾與檔案："
 
 msgid "Toggle the visibility of hidden files."
-msgstr "切换隐藏文件的可见性。"
+msgstr "顯示／取消顯示隱藏檔案。"
 
 msgid "File:"
-msgstr "文件："
+msgstr "檔案："
 
 msgid "Create Folder"
-msgstr "创建文件夹"
+msgstr "建立資料夾"
 
 msgid "Name:"
-msgstr "名称："
+msgstr "名稱："
 
 msgid "Could not create folder."
-msgstr "无法创建文件夹。"
+msgstr "無法新增資料夾。"
 
 msgid "Invalid extension, or empty filename."
-msgstr "扩展名无效或文件名为空。"
+msgstr "無效的副檔名，或空白的檔名。"
 
 msgid "Zoom Out"
-msgstr "缩小"
+msgstr "縮小"
 
 msgid "Zoom Reset"
-msgstr "重置缩放"
+msgstr "重設縮放"
 
 msgid "Zoom In"
 msgstr "放大"
 
 msgid "Toggle the visual grid."
-msgstr "开关可视网格。"
+msgstr "顯示／取消可視網格。"
 
 msgid "Toggle snapping to the grid."
-msgstr "开关网格吸附。"
+msgstr "開啟／關閉網格吸附。"
 
 msgid "Change the snapping distance."
-msgstr "修改吸附距离。"
+msgstr "修改吸附距離。"
 
 msgid "Toggle the graph minimap."
-msgstr "开关小地图。"
+msgstr "開關迷你地圖。。"
 
 msgid "Automatically arrange selected nodes."
-msgstr "自动排列所选节点。"
+msgstr "自動排列所選節點。"
 
 msgid "Same as Layout Direction"
-msgstr "与布局方向一致"
+msgstr "與佈局方向一致"
 
 msgid "Auto-Detect Direction"
-msgstr "自动检测方向"
+msgstr "自動檢測方向"
 
 msgid "Left-to-Right"
-msgstr "从左至右"
+msgstr "由左至右"
 
 msgid "Right-to-Left"
-msgstr "从右至左"
+msgstr "由右至左"
 
 msgid "Left-to-Right Mark (LRM)"
-msgstr "从左至右标志（LRM）"
+msgstr "由左至右標記（LRM）"
 
 msgid "Right-to-Left Mark (RLM)"
-msgstr "从右至左标志（RLM）"
+msgstr "由右至左標記（RLM）"
 
 msgid "Start of Left-to-Right Embedding (LRE)"
-msgstr "开始从左至右嵌入（LRE）"
+msgstr "開始由左至右嵌入（LRE）"
 
 msgid "Start of Right-to-Left Embedding (RLE)"
-msgstr "开始从右至左嵌入（RLE）"
+msgstr "開始由右至左嵌入（RLE）"
 
 msgid "Start of Left-to-Right Override (LRO)"
-msgstr "开始从左至右强制（LRO）"
+msgstr "開始由左至右強制（LRO）"
 
 msgid "Start of Right-to-Left Override (RLO)"
-msgstr "开始从右至左强制（RLO）"
+msgstr "開始由右至左強制（RLO）"
 
 msgid "Pop Direction Formatting (PDF)"
-msgstr "退出方向格式化（PDF）"
+msgstr "離開方向格式化（PDF）"
 
 msgid "Arabic Letter Mark (ALM)"
-msgstr "阿拉伯字母标记（ALM）"
+msgstr "阿拉伯字父標記（ALM）"
 
 msgid "Left-to-Right Isolate (LRI)"
-msgstr "从左至右隔离（LRI）"
+msgstr "由左至右隔離（LRI）"
 
 msgid "Right-to-Left Isolate (RLI)"
-msgstr "从右至左隔离（RLI）"
+msgstr "由右至左隔離（RLI）"
 
 msgid "First Strong Isolate (FSI)"
-msgstr "第一个强隔离（FSI）"
+msgstr "第一個強隔離（FSI）"
 
 msgid "Pop Direction Isolate (PDI)"
-msgstr "退出方向隔离（PDI）"
+msgstr "離開方向隔離（PDI）"
 
 msgid "Zero-Width Joiner (ZWJ)"
-msgstr "零宽连接符（ZWJ）"
+msgstr "零寬度連接符（ZWJ）"
 
 msgid "Zero-Width Non-Joiner (ZWNJ)"
-msgstr "零宽非连接符（ZWNJ）"
+msgstr "零寬度非連接符（ZWNJ）"
 
 msgid "Word Joiner (WJ)"
-msgstr "文字连接符（WJ）"
+msgstr "文字連接符（WJ）"
 
 msgid "Soft Hyphen (SHY)"
-msgstr "软连字符（SHY）"
+msgstr "軟連字元（SHY）"
 
 msgid "Cut"
-msgstr "剪切"
+msgstr "剪下"
 
 msgid "Copy"
-msgstr "复制"
+msgstr "複製"
 
 msgid "Paste"
-msgstr "粘贴"
+msgstr "貼上"
 
 msgid "Select All"
-msgstr "全选"
+msgstr "全部選擇"
 
 msgid "Undo"
-msgstr "撤销"
+msgstr "復原"
 
 msgid "Redo"
 msgstr "重做"
 
 msgid "Text Writing Direction"
-msgstr "文本书写方向"
+msgstr "文字書寫方向"
 
 msgid "Display Control Characters"
-msgstr "显示控制字符"
+msgstr "顯示控制字元"
 
 msgid "Insert Control Character"
-msgstr "插入控制字符"
+msgstr "插入控制字元"
 
 msgid "(Other)"
-msgstr "（其他）"
+msgstr "（其它）"

@@ -1,4 +1,4 @@
-# Chinese (Taiwan) translation of the Godot Engine editor interface.
+# Chinese (Traditional Han script) translation of the Godot Engine editor interface.
 # Copyright (c) 2014-present Godot Engine contributors.
 # Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.
 # This file is distributed under the same license as the Godot source code.
@@ -66,21 +66,23 @@
 # sashimi <kyle2160k@gmail.com>, 2025.
 # 陳間時光（MorningFungame） <morningfungame@gmail.com>, 2025.
 # Stenyin <cbcbccc2003@gmail.com>, 2025.
+# "A Thousand Ships (she/her)" <over999ships@gmail.com>, 2025.
+# RogerFang <newlag@gmail.com>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Godot Engine editor interface\n"
 "Report-Msgid-Bugs-To: https://github.com/godotengine/godot\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2025-09-19 22:58+0000\n"
-"Last-Translator: STENYIN lee <stenyin@gmail.com>\n"
+"PO-Revision-Date: 2025-12-08 20:00+0000\n"
+"Last-Translator: RogerFang <newlag@gmail.com>\n"
 "Language-Team: Chinese (Traditional Han script) <https://hosted.weblate.org/"
 "projects/godot-engine/godot/zh_Hant/>\n"
-"Language: zh_TW\n"
+"Language: zh_Hant\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.14-dev\n"
+"X-Generator: Weblate 5.15-dev\n"
 
 msgid "Unset"
 msgstr "未設定"
@@ -719,6 +721,9 @@ msgstr "網格 Y 間距"
 
 msgid "Blend X Value"
 msgstr "混合 X 值"
+
+msgid "Blend Y Value"
+msgstr "混合 Y 值"
 
 msgid "Max Y"
 msgstr "最大 Y"
@@ -9704,13 +9709,6 @@ msgstr "所選 TileMap 沒有可編輯的圖層。"
 msgid "The edited layer is disabled or invisible"
 msgstr "編輯中的圖層已停用或隱藏"
 
-msgid ""
-"The edited TileMap or TileMapLayer node has no TileSet resource.\n"
-"Create or load a TileSet resource in the Tile Set property in the inspector."
-msgstr ""
-"編輯中的 TileMap 或 TileMapLayer 節點沒有圖塊集資源。\n"
-"請在 Inspector 的「圖塊集」屬性中建立或載入圖塊集資源。"
-
 msgid "Select Next Tile Map Layer"
 msgstr "選擇下一個圖塊地圖層"
 
@@ -9728,9 +9726,6 @@ msgstr "選擇下一個圖塊地圖層"
 
 msgid "Select all layers"
 msgstr "選擇全部圖層"
-
-msgid "Select all TileMapLayers in scene"
-msgstr "選取場景中所有圖塊地圖層"
 
 msgid "Highlight Selected TileMap Layer"
 msgstr "突顯所選 TileMap 圖層"
@@ -17507,20 +17502,8 @@ msgstr "設定結束位置"
 msgid "Create Navigation Polygon"
 msgstr "建立導航多邊形"
 
-msgid "Bake NavigationPolygon"
-msgstr "烘焙導航多邊形"
-
-msgid ""
-"Bakes the NavigationPolygon by first parsing the scene for source geometry "
-"and then creating the navigation polygon vertices and polygons."
-msgstr ""
-"透過先解析場景中的來源幾何，接著建立導航多邊形的頂點與多邊形來進行烘焙。"
-
 msgid "Clear NavigationPolygon"
 msgstr "清除導航多邊形"
-
-msgid "Clears the internal NavigationPolygon outlines, vertices and polygons."
-msgstr "清除內部導航多邊形的輪廓、頂點與多邊形。"
 
 msgid ""
 "A NavigationPolygon resource must be set or created for this node to work."
@@ -17598,19 +17581,10 @@ msgstr "無法產生導航網格，因為該資源是從其他類型匯入的。
 msgid "Bake"
 msgstr "烘焙"
 
-msgid "Bake NavigationMesh"
-msgstr "烘焙導航網格"
-
 msgid ""
 "Bakes the NavigationMesh by first parsing the scene for source geometry and "
 "then creating the navigation mesh vertices and polygons."
 msgstr "透過先解析場景中的來源幾何，接著建立導航網格的頂點與多邊形來進行烘焙。"
-
-msgid "Clear NavigationMesh"
-msgstr "清除導航網格"
-
-msgid "Clears the internal NavigationMesh vertices and polygons."
-msgstr "清除內部導航網格頂點與多邊形。"
 
 msgid "Baking NavigationMesh ..."
 msgstr "正在烘焙 NavigationMesh…"
@@ -18349,9 +18323,9 @@ msgid "The notarization process generally takes less than an hour."
 msgstr "公證流程通常少於一小時。"
 
 msgid ""
-"You can check progress manually by opening a Terminal and running the "
+"You can check the progress manually by opening a Terminal and running the "
 "following command:"
-msgstr "可在終端機執行下列指令以手動檢查進度："
+msgstr "您可以透過開啟終端機並執行以下命令來手動檢查進度："
 
 msgid ""
 "Run the following command to staple the notarization ticket to the exported "
@@ -18363,6 +18337,13 @@ msgstr "未安裝 Xcode 命令列工具。"
 
 msgid "Could not start xcrun executable."
 msgstr "無法啟動 xcrun 可執行檔。"
+
+msgid ""
+"See instructions on finding your team ID: https://developer.apple.com/help/"
+"glossary/team-id"
+msgstr ""
+"請參閱以下說明以尋找您的團隊 ID：https://developer.apple.com/help/glossary/"
+"team-id"
 
 msgid "Built-in CodeSign failed with error \"%s\"."
 msgstr "內建 CodeSign 失敗，錯誤：「%s」。"
@@ -18905,10 +18886,6 @@ msgstr "此 Bone2D 鏈應以 Skeleton2D 節點作結。"
 
 msgid "A Bone2D only works with a Skeleton2D or another Bone2D as parent node."
 msgstr "Bone2D 僅在父節點為 Skeleton2D 或另一個 Bone2D 時有效。"
-
-msgid ""
-"This bone lacks a proper REST pose. Go to the Skeleton2D node and set one."
-msgstr "此骨骼缺少正確的靜止姿勢。請至 Skeleton2D 節點設定。"
 
 msgid ""
 "The TileMap node is deprecated as it is superseded by the use of multiple "
