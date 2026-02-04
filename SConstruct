@@ -188,6 +188,7 @@ opts.Add(BoolVariable("threads", "Enable threading support", True))
 
 # NX (Nintendo Switch) options
 opts.Add(BoolVariable("nx_use_preselected_user", "NX option: Use the currently opened user account, preselected in the Nintendo Switch OS", False))
+opts.Add(BoolVariable("nx_web_module", "NX option: Enable usage of nn:web functionality", False))
 
 # General profiling options
 opts.Add(BoolVariable("use_profiler", "Enable profiler if implemented for the target platform. (See core/profiler_macros.h)", False))
@@ -1113,6 +1114,9 @@ methods.sort_module_list(env)
 
 if env["nx_use_preselected_user"]:
     env.Append(CPPDEFINES=["NX_USE_PRESELECTED_USER"])
+
+if env["nx_web_module"]:
+    env.Append(CPPDEFINES=["NX_WEB_MODULE"])
 
 if env.editor_build:
     # Add editor-specific dependencies to the dependency graph.

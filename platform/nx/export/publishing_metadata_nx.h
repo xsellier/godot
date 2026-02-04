@@ -55,6 +55,7 @@ class PublishingMetadataNX : public Resource {
 	String display_version = "1.0.0";
 	bool demo = false;
 	String legal_information;
+	String accessible_urls;
 	Array localization_metadata;
 	Array rating_metadata;
 	String appropriate_age_for_china = "";
@@ -83,6 +84,9 @@ public:
 
 	void set_legal_information(const String &p_legal_information);
 	String get_legal_information() const;
+
+	void set_accessible_urls(const String &p_accessible_urls);
+	String get_accessible_urls() const;
 
 	void set_localization_metadata(const Array &p_localization_metadata);
 	Array get_localization_metadata() const;

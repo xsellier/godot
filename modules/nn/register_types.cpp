@@ -6,11 +6,17 @@
 
 #include "nn_controller_support.h"
 #include "nn_utils.h"
+#ifdef NX_WEB_MODULE
+#include "nn_web.h"
+#endif
 
 void initialize_nn_module(ModuleInitializationLevel p_level) {
 	if (p_level == MODULE_INITIALIZATION_LEVEL_SCENE) {
 		GDREGISTER_CLASS(NNControllerSupport);
 		GDREGISTER_CLASS(NNUtils);
+#ifdef NX_WEB_MODULE
+		GDREGISTER_CLASS(NNWeb);
+#endif
 	}
 }
 
