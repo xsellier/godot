@@ -290,11 +290,7 @@ RendererCompositorRD::RendererCompositorRD() {
 		// Attempt to create a folder for the shader cache that the user can write to. Shaders will only be attempted to be saved if this path exists.
 		String shader_cache_user_dir = Engine::get_singleton()->get_shader_cache_path();
 		if (shader_cache_user_dir.is_empty()) {
-			#ifdef NX_ENABLED
-				shader_cache_user_dir = OS::get_singleton()->get_cache_path();
-			#else
-				shader_cache_user_dir = "user://";
-			#endif
+			shader_cache_user_dir = "user://";
 		}
 
 		Ref<DirAccess> user_da = DirAccess::open(shader_cache_user_dir);
@@ -315,7 +311,12 @@ RendererCompositorRD::RendererCompositorRD() {
 		}
 
 		// Check if a directory exists for the shader cache to pull shaders from as read-only. This is used on exported projects with baked shaders.
+#ifdef NX_ENABLED
+		String shader_cache_res_dir = "res://nswitch_shader_cache";
+#else
 		String shader_cache_res_dir = "res://.godot/shader_cache";
+#endif
+		
 		Ref<DirAccess> res_da = DirAccess::open(shader_cache_res_dir);
 		if (res_da.is_valid()) {
 			ShaderRD::set_shader_cache_res_dir(shader_cache_res_dir);

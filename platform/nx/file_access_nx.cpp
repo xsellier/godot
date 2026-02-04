@@ -53,7 +53,7 @@ Error FileAccessNX::FileAccessNX::open_internal(const String &p_path, int p_mode
         } else {
             is_writable_user_data = false;
         }
-		if (p_path.begins_with(cache_data_path)) {
+		if (p_path.begins_with(cache_data_path) && !GLOBAL_GET("rendering/shader_compiler/shader_cache/read_only")) {
             is_writable_cache_data = true;
         } else {
             is_writable_cache_data = false;
