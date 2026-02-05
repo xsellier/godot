@@ -26,6 +26,11 @@ class FileAccessNX : public FileAccess {
 	mutable uint8_t nx_cache[NX_CACHE_SIZE];
 	mutable int64_t nx_cache_start_pos;
 	mutable int64_t nx_cache_end_pos;
+	
+	mutable uint8_t* nx_write_cache = nullptr;
+	mutable int64_t nx_cache_write_length;
+	bool nx_cache_write_enabled = false;
+
 	void ensure_cache(int64_t length) const;
 
     void _close(); ///< close a file
@@ -64,6 +69,7 @@ public:
 	void flush() override;
 	bool store_8(uint8_t p_dest) override; ///< store a byte
 	bool store_buffer(const uint8_t *p_src, uint64_t p_length) override; ///< store an array of bytes
+	void extend_write_cache(uint64_t new_size);
 
 	void close() override; ///< close a file
 

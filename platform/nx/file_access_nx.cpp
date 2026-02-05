@@ -15,7 +15,8 @@ Error FileAccessNX::FileAccessNX::open_internal(const String &p_path, int p_mode
     nx_cache_start_pos = -1;
     nx_cache_end_pos = -1;
     nx_file_size = 0;
-
+	nx_cache_write_length = 0;
+	
     _close();
 
     offset = 0;
@@ -31,6 +32,7 @@ Error FileAccessNX::FileAccessNX::open_internal(const String &p_path, int p_mode
 	else if (p_mode_flags == WRITE) {
 		mode |= nn::fs::OpenMode_Write;
         mode |= nn::fs::OpenMode_AllowAppend;
+		nx_cache_write_enabled = true;								
 	} else if (p_mode_flags == READ_WRITE) {
 		mode |= nn::fs::OpenMode_Read;
         mode |= nn::fs::OpenMode_Write;
@@ -109,6 +111,15 @@ void FileAccessNX::_close()
     if (!f.handle)
         return;
 
+	if (nx_cache_write_length > 0 && nx_cache_write_enabled) {
+		nn::Result result = nn::fs::WriteFile(f, 0, nx_write_cache, nx_cache_write_length, nn::fs::WriteOption::MakeValue(nn::fs::WriteOptionFlag_Flush));
+		if (nn::fs::ResultUsableSpaceNotEnough::Includes(result)) {
+			NN_LOG("Not enough usable space to write!!\n");
+		}
+		result = nn::fs::SetFileSize(f, nx_cache_write_length);
+		
+		free(nx_write_cache);
+	}
     nn::fs::CloseFile(f);
 	if (is_writable_user_data) {
 		print_verbose("Saving user file " + path);
@@ -258,9 +269,16 @@ void FileAccessNX::flush()
 bool FileAccessNX::store_8(uint8_t p_dest)
 {
     ERR_FAIL_COND_V(!f.handle, false);
-	nn::Result result = nn::fs::WriteFile(f, offset, &p_dest, 1, nn::fs::WriteOption::MakeValue(nn::fs::WriteOptionFlag_Flush));
-	if (nn::fs::ResultUsableSpaceNotEnough::Includes(result))
-		NN_LOG("Not enough usable space to write!!\n");
+	if(is_writable_user_data && nx_cache_write_enabled) {
+		if( offset + 1 > nx_cache_write_length ) {
+			extend_write_cache(offset + 1);
+		}
+		nx_write_cache[offset] = p_dest;
+	} else {
+		nn::Result result = nn::fs::WriteFile(f, offset, &p_dest, 1, nn::fs::WriteOption::MakeValue(nn::fs::WriteOptionFlag_Flush));
+		if (nn::fs::ResultUsableSpaceNotEnough::Includes(result))
+			NN_LOG("Not enough usable space to write!!\n");
+	}								 
     offset += 1;
     return true;
 }
@@ -268,13 +286,32 @@ bool FileAccessNX::store_8(uint8_t p_dest)
 bool FileAccessNX::store_buffer(const uint8_t *p_src, uint64_t p_length)
 {
     ERR_FAIL_COND_V(!f.handle, false);
-	nn::Result result = nn::fs::WriteFile(f, offset, p_src, p_length, nn::fs::WriteOption::MakeValue(nn::fs::WriteOptionFlag_Flush));
-	if (nn::fs::ResultUsableSpaceNotEnough::Includes(result)) {
-		NN_LOG("Not enough usable space to write!!\n");
-		print_verbose("Not enough usable space to write!!");
+	if(is_writable_user_data && nx_cache_write_enabled) {
+		if( offset + p_length > nx_cache_write_length ) {
+			extend_write_cache(offset + p_length);
+		}
+		memcpy(nx_write_cache + offset, p_src, p_length);
+	} else {
+		nn::Result result = nn::fs::WriteFile(f, offset, p_src, p_length, nn::fs::WriteOption::MakeValue(nn::fs::WriteOptionFlag_Flush));
+		if (nn::fs::ResultUsableSpaceNotEnough::Includes(result)) {
+			NN_LOG("Not enough usable space to write!!\n");
+			print_verbose("Not enough usable space to write!!");
+		}
 	}
     offset += p_length;
     return true;
+}
+
+void FileAccessNX::extend_write_cache(uint64_t new_size) {
+    uint8_t* temp = (uint8_t*)realloc(nx_write_cache, new_size);
+
+						  
+    if (temp) {
+		nx_cache_write_length = new_size;
+        nx_write_cache = temp;
+    } else {
+        NN_LOG("Memory reallocation failed!\n");
+    }
 }
 
 void FileAccessNX::close()
