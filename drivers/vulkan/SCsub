@@ -8,7 +8,7 @@ thirdparty_dir = "#thirdparty/vulkan"
 thirdparty_volk_dir = "#thirdparty/volk"
 
 # Use bundled Vulkan headers
-env.Prepend(CPPEXTPATH=[thirdparty_dir, thirdparty_dir + "/include"])
+env.Prepend(CPPPATH=[thirdparty_dir, thirdparty_dir + "/include"])
 
 if env["use_volk"]:
     env.AppendUnique(CPPDEFINES=["USE_VOLK"])
