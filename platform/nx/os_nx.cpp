@@ -23,6 +23,8 @@
 // Time
 #include <nn/os/os_TickTypes.h>
 #include <nn/time/time_Api.h>
+#include <nn/time/time_PosixTime.h>
+#include <nn/time/time_StandardNetworkSystemClock.h>
 #include <nn/time/time_TimeZoneApi.h>
 #include <nn/time/time_StandardUserSystemClock.h>
 #include <nn/crypto/crypto_Csrng.h>
@@ -779,6 +781,18 @@ uint64_t OS_NX::get_ticks_usec() const {
 	longtime -= _clock_start;
 
 	return nn::os::ConvertToTimeSpan(longtime).GetMicroSeconds();
+}
+
+double OS_NX::get_unix_time() const {
+	nn::time::PosixTime now;
+	now.value = 0;
+	nn::Result result = nn::time::StandardUserSystemClock::GetCurrentTime(&now);
+
+	if (result.IsSuccess()) {
+		return (double)now.value;
+	} else {
+		return 0;
+	}
 }
 
 OS_NX::OS_NX() {

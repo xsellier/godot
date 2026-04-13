@@ -129,6 +129,7 @@ public:
     void delay_usec(uint32_t p_usec) const override;
 
     uint64_t get_ticks_usec() const override;
+	double get_unix_time() const override;
 
 	String get_locale() const override;
 	int get_processor_count() const override;
