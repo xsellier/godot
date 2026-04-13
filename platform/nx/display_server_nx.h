@@ -23,7 +23,9 @@ class DisplayServerNX : public DisplayServer {
     nn::vi::Display *viDisplay; // note: not suitable for EGL
     nn::vi::Layer *viLayer = nullptr;
     nn::vi::NativeWindowHandle nativeWindow;
-    Size2i resolution;
+	Size2i resolution;
+
+	NativeMenu *native_menu = nullptr;
 
     ObjectID window_attached_instance_id;
     Callable window_event_callback;

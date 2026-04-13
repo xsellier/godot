@@ -67,7 +67,9 @@ Vector<String> DisplayServerNX::get_rendering_drivers_func() {
 
 DisplayServerNX::DisplayServerNX(const String &p_rendering_driver, DisplayServer::WindowMode p_mode, DisplayServer::VSyncMode p_vsync_mode, uint32_t p_flags, const Vector2i *p_position, const Vector2i &p_resolution, int p_screen, int64_t p_parent_window, Error &r_error)
 {
-    rendering_driver = p_rendering_driver;
+	rendering_driver = p_rendering_driver;
+
+	native_menu = memnew(NativeMenu);
 
     // platform init
 
@@ -148,6 +150,11 @@ DisplayServerNX::DisplayServerNX(const String &p_rendering_driver, DisplayServer
 	Input::get_singleton()->set_event_dispatch_function(_dispatch_input_event);
 }
 DisplayServerNX::~DisplayServerNX() {
+
+	if (native_menu) {
+		memdelete(native_menu);
+		native_menu = nullptr;
+	}
 
     if (rendering_device_vulkan) {
 		rendering_device_vulkan->finalize();
