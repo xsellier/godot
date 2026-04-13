@@ -6,6 +6,8 @@
 #include <nn/util/util_BitUtil.h>
 #include <nv/nv_MemoryManagement.h>
 #include <nn/gll.h>
+#include <nn/swkbd/swkbd_Api.h>
+#include <nn/swkbd/swkbd_Result.h>
 
 #include "core/config/project_settings.h"
 
@@ -175,6 +177,7 @@ bool DisplayServerNX::has_feature(Feature p_feature) const {
 		case FEATURE_MOUSE:
 		case FEATURE_MOUSE_WARP:
         case FEATURE_TOUCHSCREEN:
+    	case FEATURE_VIRTUAL_KEYBOARD:
             return true;
         default:
             return false;
@@ -402,4 +405,84 @@ void DisplayServerNX::warp_mouse(const Point2i &p_to) {
 
 DisplayServer::MouseMode DisplayServerNX::mouse_get_mode() const {
 	return mouse_mode;
+}
+
+void DisplayServerNX::_window_callback(const Callable &p_callable, const Variant &p_arg, bool p_deferred) const {
+	if (p_callable.is_valid()) {
+		if (p_deferred) {
+			p_callable.call_deferred(p_arg);
+		} else {
+			p_callable.call(p_arg);
+		}
+	}
+}
+
+void DisplayServerNX::virtual_keyboard_show(const String &p_existing_text, const Rect2 &p_screen_rect, VirtualKeyboardType p_type, int p_max_length, int p_cursor_start, int p_cursor_end) {
+    nn::swkbd::ShowKeyboardArg showKeyboardArg{};
+
+	showKeyboardArg.keyboardConfig.textMaxLength = p_max_length;
+
+	if (p_type == KEYBOARD_TYPE_PASSWORD) {
+		// TODO NX: This does not seem to toggle the password mode properly
+		nn::swkbd::MakePreset( &( showKeyboardArg.keyboardConfig ), nn::swkbd::Preset_Password );
+		showKeyboardArg.keyboardConfig.passwordMode = nn::swkbd::PasswordMode_Hide;
+	} else {
+		nn::swkbd::MakePreset( &( showKeyboardArg.keyboardConfig ), nn::swkbd::Preset_Default );
+	}
+
+	if (p_type == KEYBOARD_TYPE_MULTILINE) {
+		showKeyboardArg.keyboardConfig.inputFormMode = nn::swkbd::InputFormMode::InputFormMode_MultiLine;
+		showKeyboardArg.keyboardConfig.isUseNewLine = true;
+	} else {
+		showKeyboardArg.keyboardConfig.inputFormMode = nn::swkbd::InputFormMode::InputFormMode_OneLine;
+		showKeyboardArg.keyboardConfig.isUseNewLine = false;
+	}
+
+	if (p_type == KEYBOARD_TYPE_NUMBER) {
+		showKeyboardArg.keyboardConfig.keyboardMode = nn::swkbd::KeyboardMode::KeyboardMode_Numeric;
+	} else if (p_type == KEYBOARD_TYPE_NUMBER_DECIMAL) {
+		showKeyboardArg.keyboardConfig.keyboardMode = nn::swkbd::KeyboardMode::KeyboardMode_Numeric;
+		showKeyboardArg.keyboardConfig.leftOptionalSymbolKey = u'-';
+		showKeyboardArg.keyboardConfig.rightOptionalSymbolKey = u'.';
+	} else if (p_type == KEYBOARD_TYPE_PHONE) {
+		showKeyboardArg.keyboardConfig.keyboardMode = nn::swkbd::KeyboardMode::KeyboardMode_Numeric;
+		showKeyboardArg.keyboardConfig.leftOptionalSymbolKey = u'+';
+	} else {
+		showKeyboardArg.keyboardConfig.keyboardMode = nn::swkbd::KeyboardMode::KeyboardMode_LanguageSet2;
+	}
+
+	if (p_type == KEYBOARD_TYPE_EMAIL_ADDRESS) {
+		showKeyboardArg.keyboardConfig.invalidCharFlag = nn::swkbd::InvalidCharFlag_Percent | nn::swkbd::InvalidCharFlag_Slash | nn::swkbd::InvalidCharFlag_Space;
+	}
+
+    //showKeyboardArg.keyboardConfig.isUseUtf8 = true;
+    showKeyboardArg.keyboardConfig.textMaxLength = p_max_length;
+    showKeyboardArg.keyboardConfig.textMinLength = 0;
+
+    // Allocate buffers for shared memory
+    size_t in_heap_size = nn::swkbd::GetRequiredWorkBufferSize( false );
+    void* swkbd_work_buffer = static_cast<char16_t *>(aligned_alloc(nn::os::MemoryPageSize, in_heap_size));
+
+    showKeyboardArg.workBuf = swkbd_work_buffer;
+    showKeyboardArg.workBufSize = in_heap_size;
+
+    Char16String text_utf16 = p_existing_text.utf16();
+    nn::swkbd::SetInitialText(&showKeyboardArg, text_utf16.get_data());
+
+    size_t out_heap_size = nn::swkbd::GetRequiredStringBufferSize();
+    nn::swkbd::String output_string{};
+    output_string.ptr = static_cast<char16_t *>(aligned_alloc(nn::os::MemoryPageSize, out_heap_size));
+    output_string.bufSize = out_heap_size;
+
+	if (nn::Result result = nn::swkbd::ShowKeyboard(&output_string, showKeyboardArg); nn::swkbd::ResultCanceled::Includes(result)) {
+        //WARN_PRINT( " -- cancel --\n" );
+    }
+    else if( result.IsSuccess() )
+    {
+        char16_t* str_ptr = static_cast< char16_t* >( output_string.ptr );
+        String s = String::utf16(str_ptr);
+        _window_callback(input_text_callback, s);
+    }
+    free(swkbd_work_buffer);
+    free(output_string.ptr);
 }

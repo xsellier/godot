@@ -114,6 +114,9 @@ public:
 	virtual MouseMode mouse_get_mode() const override;
 
 	virtual DisplayServer::VSyncMode window_get_vsync_mode(WindowID p_vsync_mode) const override;
+
+	void _window_callback(const Callable &p_callable, const Variant &p_arg, bool p_deferred = false) const;
+	virtual void virtual_keyboard_show(const String &p_existing_text, const Rect2 &p_screen_rect = Rect2(), VirtualKeyboardType p_type = KEYBOARD_TYPE_DEFAULT, int p_max_length = -1, int p_cursor_start = -1, int p_cursor_end = -1) override;
 };
 
 #endif // DISPLAY_SERVER_NX_H
