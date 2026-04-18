@@ -57,6 +57,9 @@ You don't need to fill every field in `PublishingMetadataNX` in order to export 
 
 Icons must be 1024x1024 in size, and be either a JPEG or 24-bit BMP file.  This is very important because ```.nsp``` generation will fail if the Icon file is not one of these very specific formats!
 
+In case you get a '[Error] (Issue 10-820) Big icon format is not baseline JPEG' error even if everything is correct, you need to exclude the actual icon file from Godot's imports.
+
+
 Now click ```Export Project``` to generate and save an ```.nsp``` file. This is the final file you install to your development hardware.  It's also possible to debug your game by opening and launching this ```.nsp``` file in Visual Studio.
 
 It is also possible to launch your Game directly from Godot provided you have already set valid export settings. To do this click the Nintendo Switch icon in the top right corner of the editor.
