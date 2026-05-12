@@ -4,8 +4,14 @@
 #include <nn/os.h>
 #include <nn/fs.h>
 
+#ifdef MODULE_REGEX_ENABLED
+#include "modules/regex/regex.h"
+#endif // MODULE_REGEX_ENABLED
+
 // This is what performed best for Tiny Garden, which loaded thousands of assets
 #define NX_CACHE_SIZE 131072
+
+class RegEx;
 
 class FileAccessNX : public FileAccess {
 	static int open_files_rw_user;
@@ -45,6 +51,8 @@ public:
 	virtual Error _set_hidden_attribute(const String &p_file, bool p_hidden) override { return ERR_UNAVAILABLE; }
 	virtual bool _get_read_only_attribute(const String &p_file) override { return false; }
 	virtual Error _set_read_only_attribute(const String &p_file, bool p_ro) override { return ERR_UNAVAILABLE; }
+
+	Ref<RegEx> check_valid_path;
 
     bool is_open() const override; ///< true when file is open
     String get_path() const override; /// returns the path for the current open file

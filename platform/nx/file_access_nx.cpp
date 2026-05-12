@@ -3,6 +3,8 @@
 #include "core/os/os.h"
 #include "core/config/project_settings.h"
 
+
+
 #include <nn/nn_Result.h>
 
 #include <cstring>
@@ -321,6 +323,45 @@ void FileAccessNX::close()
 
 bool FileAccessNX::file_exists(const String &p_path)
 {
+    /*
+     * An identifier that uniquely defines an entry.
+     * The fs library uses strings.
+     * Example: "MountName:/path/to/file".
+     * The path must meet all of the following conditions to be a valid path.
+     *
+     *     It begins with [mount_name + ":"].
+     *     The mount name is a valid mount name.
+     *     The mount name is one that is already mounted.
+     *     [mount name + ":"] must be followed by a string of two bytes or more, from two to nn::fs::PathSizeMax + 1 bytes, including the terminating null character.
+     *     The directory delimiter is either / (a slash) or \ (two backslashes).
+     *     Do not use the symbols < > * ? : and | for entry names.
+     *
+     * A valid path must be passed to the functions that specify a path.
+     * The encoding is UTF-8.
+     * The distinction between uppercase and lowercase characters is based on the file system. For more information, see Supported File Systems .
+     * The maximum length of a path depends on the file system. For more information, see Path and Entry Max Length .
+     * The same delimiter and encoding is used even when representing a path on the host PC.
+    **/
+#ifdef MODULE_REGEX_ENABLED
+    if !(check_valid_path->sub(p_path.utf8(), "", true).is_empty()) {
+        NN_LOG("Invalid file name !\n");
+        print_verbose("Invalid file name ! (\"" + p_path + "\") !\n");
+        return false;
+    }
+#else
+    if (p_path.is_empty() || !p_path.is_absolute_path()) {
+        NN_LOG("Invalid file name ! Empty or not absolute path !\n");
+        print_verbose("Invalid file name ! (\"" + p_path + "\"). Empty or not absolute path !\n");
+        return false;
+    }
+
+    if (p_path.contains("<") || p_path.contains(">") || p_path.contains("*") || p_path.contains("?") || p_path.contains("|")) {
+        NN_LOG("Invalid file name ! Contains at least one forbidden character !\n");
+        print_verbose("Invalid file name ! (\"" + p_path + "\"). Contains at least one forbidden character !\n");
+        return false;
+    }
+#endif // MODULE_REGEX_ENABLED
+
     nn::fs::DirectoryEntryType directoryEntryType;
     nn::Result result = nn::fs::GetEntryType(&directoryEntryType, p_path.utf8().get_data());
     return !nn::fs::ResultPathNotFound().Includes(result);
@@ -340,6 +381,12 @@ FileAccessNX::FileAccessNX()
     , offset(0)
 {
     f.handle = NULL;
+
+#ifdef MODULE_REGEX_ENABLED
+    check_valid_path.instantiate();
+    check_valid_path->detach_from_objectdb(); // Note: This RegEx instance will exist longer than ObjectDB, therefore can't be registered in ObjectDB.
+    check_valid_path->compile("^([\\w]+:[\\\\\\/][a-zA-Z0-9_\\-\\\\\\/\\+\\{\\}\\[\\]\\.,;\\s]{1,})$");
+#endif // MODULE_REGEX_ENABLED
 }
 
 FileAccessNX::~FileAccessNX()
