@@ -991,6 +991,9 @@ void FileSystemDock::_update_file_list(bool p_keep_selection) {
 		// Display the favorites.
 		Vector<String> favorites_list = EditorSettings::get_singleton()->get_favorites();
 		for (const String &favorite : favorites_list) {
+			if (!favorite.begins_with("res://")) {
+				continue;
+			}
 			String text;
 			Ref<Texture2D> icon;
 			if (favorite == "res://") {
@@ -1900,6 +1903,7 @@ void FileSystemDock::_convert_dialog_action() {
 			for (const String &target : cached_valid_conversion_targets) {
 				if (conversion_id == selected_conversion_id && conversion->converts_to() == target) {
 					Ref<Resource> converted_res = conversion->convert(res);
+					ERR_FAIL_COND(converted_res.is_null());
 					ERR_FAIL_COND(res.is_null());
 					converted_resources.push_back(converted_res);
 					resources_to_erase_history_for.insert(res);
@@ -1924,6 +1928,8 @@ void FileSystemDock::_convert_dialog_action() {
 		Ref<Resource> original_resource = selected_resources.get(i);
 		Ref<Resource> new_resource = converted_resources.get(i);
 
+		// Notify plugins that the original resource is removed.
+		emit_signal(SNAME("file_removed"), original_resource->get_path());
 		// Overwrite the path.
 		new_resource->set_path(original_resource->get_path(), true);
 
@@ -2032,6 +2038,7 @@ void FileSystemDock::_before_move(HashMap<String, ResourceUID::ID> &r_uids, Hash
 			}
 		} else {
 			EditorFileSystemDirectory *current_folder = EditorFileSystem::get_singleton()->get_filesystem_path(to_move[i].path);
+			ERR_CONTINUE(current_folder == nullptr);
 			List<EditorFileSystemDirectory *> folders;
 			folders.push_back(current_folder);
 			while (folders.front()) {

@@ -49,6 +49,7 @@
 #include "tests/core/io/test_http_client.h"
 #include "tests/core/io/test_image.h"
 #include "tests/core/io/test_ip.h"
+#include "tests/core/io/test_ip_address.h"
 #include "tests/core/io/test_json.h"
 #include "tests/core/io/test_json_native.h"
 #include "tests/core/io/test_logger.h"
@@ -190,6 +191,7 @@
 #include "tests/scene/test_navigation_obstacle_2d.h"
 #include "tests/scene/test_navigation_region_2d.h"
 #include "tests/servers/test_navigation_server_2d.h"
+#include "tests/servers/test_triangle2.h"
 #endif // MODULE_NAVIGATION_2D_ENABLED
 
 #ifdef MODULE_NAVIGATION_3D_ENABLED

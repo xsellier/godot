@@ -4,11 +4,8 @@
 #include <nn/os.h>
 #include <nn/fs.h>
 
-// #define NX_CACHE_SIZE 8192
-// #define NX_CACHE_SIZE 262144
-// #define NX_CACHE_SIZE 131072
-// Recommended 1MB by Nintendo
-#define NX_CACHE_SIZE 1048576
+// This is what performed best for Tiny Garden, which loaded thousands of assets
+#define NX_CACHE_SIZE 131072
 
 class FileAccessNX : public FileAccess {
 	static int open_files_rw_user;

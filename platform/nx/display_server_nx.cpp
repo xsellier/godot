@@ -318,7 +318,41 @@ Size2i DisplayServerNX::window_get_min_size(WindowID p_window) const {
 }
 
 void DisplayServerNX::window_set_size(const Size2i p_size, WindowID p_window) {
-    // not supported
+	if (resolution.x == p_size.width and resolution.y == p_size.height) {
+		return;
+	}
+
+	rendering_device_vulkan->screen_free(MAIN_WINDOW_ID);
+
+	context_vulkan->window_destroy(MAIN_WINDOW_ID);
+	
+    nn::vi::DestroyLayer(viLayer);
+    viLayer = nullptr;
+	
+	nn::Result result = nn::vi::CreateLayer(&viLayer, viDisplay, p_size.width, p_size.height);
+	if (!result.IsSuccess())
+		OS::get_singleton()->alert("Failed to create layer");
+	
+	union {
+		VulkanContextNX::WindowPlatformData vulkan;
+	} wpd;
+
+	wpd.vulkan.viLayer = viLayer;
+
+	if (context_vulkan->window_create(MAIN_WINDOW_ID, &wpd) != OK) {
+		memdelete(context_vulkan);
+		context_vulkan = nullptr;
+		ERR_FAIL_MSG("Failed to create Vulkan window.");
+	}
+
+	context_vulkan->window_set_size(MAIN_WINDOW_ID, p_size.width, p_size.height);
+	// context_vulkan->window_set_vsync_mode(MAIN_WINDOW_ID, p_vsync_mode);
+
+	rendering_device_vulkan->screen_create(MAIN_WINDOW_ID);
+
+	RendererCompositorRD::make_current();
+	
+	resolution = Size2i(p_size.width, p_size.height);
 }
 
 Size2i DisplayServerNX::window_get_size(WindowID p_window) const {

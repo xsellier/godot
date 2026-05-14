@@ -90,10 +90,17 @@ void OS_NX::unmountCache() {
 void OS_NX::getTouchscreenEvents()
 {
     nn::hid::GetTouchScreenState(&state);
+	
+	Size2i current_window_size = DisplayServer::get_singleton()->window_get_size(0);
+	if(current_window_size.y == 0) {
+		return;
+	}
+	float multiplier = current_window_size.y / 720.0;
+	
 	if (state.count != last_touch_count) {
 		if (state.count > last_touch_count) {
 			for (int i = last_touch_count; i < state.count; i++) {
-				Vector2 pos(state.touches[i].x, state.touches[i].y);
+				Vector2 pos(state.touches[i].x * multiplier, state.touches[i].y * multiplier);
 				Ref<InputEventScreenTouch> st;
 				st.instantiate();
 				st->set_index(i);
@@ -113,7 +120,7 @@ void OS_NX::getTouchscreenEvents()
 		}
 	} else {
 		for (int i = 0; i < state.count; i++) {
-			Vector2 pos(state.touches[i].x, state.touches[i].y);
+			Vector2 pos(state.touches[i].x * multiplier, state.touches[i].y * multiplier);
 			Ref<InputEventScreenDrag> sd;
 			sd.instantiate();
 			sd->set_index(i);

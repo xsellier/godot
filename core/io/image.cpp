@@ -2357,6 +2357,12 @@ void Image::initialize_data(const char **p_xpm) {
 			} break;
 			case READING_PIXELS: {
 				int y = line - colormap_size - 1;
+#ifdef __MINGW32__
+				// False positive only with MinGW-GCC. Don't silence for regular GCC/Clang
+				// as this is code that _could_ exhibit actual overflow bugs.
+				GODOT_GCC_WARNING_PUSH
+				GODOT_GCC_PRAGMA(GCC diagnostic warning "-Wstringop-overflow=0")
+#endif
 				for (int x = 0; x < size_width; x++) {
 					char pixelstr[6] = { 0, 0, 0, 0, 0, 0 };
 					for (int i = 0; i < pixelchars; i++) {
@@ -2371,6 +2377,9 @@ void Image::initialize_data(const char **p_xpm) {
 					}
 					_put_pixelb(x, y, pixel_size, data_write, pixel);
 				}
+#ifdef __MINGW32__
+				GODOT_GCC_WARNING_POP
+#endif
 
 				if (y == (size_height - 1)) {
 					status = DONE;
@@ -4221,14 +4230,18 @@ void Image::renormalize_uint8(uint8_t *p_rgb) {
 	n += Vector3(1, 1, 1);
 	n *= 0.5;
 	n *= 255;
-	p_rgb[0] = CLAMP(int(n.x), 0, 255);
-	p_rgb[1] = CLAMP(int(n.y), 0, 255);
-	p_rgb[2] = CLAMP(int(n.z), 0, 255);
+	p_rgb[0] = CLAMP(int(Math::round(n.x)), 0, 255);
+	p_rgb[1] = CLAMP(int(Math::round(n.y)), 0, 255);
+	p_rgb[2] = CLAMP(int(Math::round(n.z)), 0, 255);
 }
 
 void Image::renormalize_float(float *p_rgb) {
 	Vector3 n(p_rgb[0], p_rgb[1], p_rgb[2]);
+	n *= 2.0;
+	n -= Vector3(1, 1, 1);
 	n.normalize();
+	n += Vector3(1, 1, 1);
+	n *= 0.5;
 	p_rgb[0] = n.x;
 	p_rgb[1] = n.y;
 	p_rgb[2] = n.z;
@@ -4236,7 +4249,11 @@ void Image::renormalize_float(float *p_rgb) {
 
 void Image::renormalize_half(uint16_t *p_rgb) {
 	Vector3 n(Math::half_to_float(p_rgb[0]), Math::half_to_float(p_rgb[1]), Math::half_to_float(p_rgb[2]));
+	n *= 2.0;
+	n -= Vector3(1, 1, 1);
 	n.normalize();
+	n += Vector3(1, 1, 1);
+	n *= 0.5;
 	p_rgb[0] = Math::make_half_float(n.x);
 	p_rgb[1] = Math::make_half_float(n.y);
 	p_rgb[2] = Math::make_half_float(n.z);
