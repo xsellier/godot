@@ -6,22 +6,39 @@
   </a>
 </p>
 
+## Nintendo SDK
+
+Check this website to find out which verison of the SDK you should download & install:
+
+https://developer.nintendo.com/group/development/g1kr9vj6/tech-info/master-submission-information
+
+Link to download the SDK:
+
+https://developer.nintendo.com/group/development/g1kr9vj6/downloads
+
+
 ## Build Instructions
 
-First make sure you have a valid Nintendo SDK (at least version 15) install, which should also add the environment variable ```NINTENDO_SDK_ROOT```. Make sure that is set because it is required both for building Godot as well as when exporting from the editor. This instruction guide also assumes you have a recent MSVC (tested with 2022) environment and a console already configured for its use.
+First make sure you have a valid Nintendo SDK (at least version 21.4.0) install, which should also add the environment variable ```NINTENDO_SDK_ROOT```. Make sure that is set because it is required both for building Godot as well as when exporting from the editor. This instruction guide also assumes you have a recent MSVC (tested with 2022) environment and a console already configured for its use.
 
 Multiple builds must be done before Godot can be used for Nintendo Switch development.  Clone this repo, change into the directory and build the following configurations:
 
-```shell
+```batch
+@echo off
+REM You can create a file called build-nx.bat
+REM so you simply have to call it to build export templates
+
+set BUILD_REVISION=official
+
+echo "Build Editor"
 scons platform=windows target=editor
 
+echo "Build Release (nx)"
 scons platform=nx target=template_release arch=arm64
+
+echo "Build Debug (nx)"
 scons platform=nx target=template_debug debug_symbols=yes arch=arm64
-
-scons platform=nx target=template_release arch=arm32
-scons platform=nx target=template_debug debug_symbols=yes arch=arm32
 ```
-
 
 You don't necessarily need to build for all 4 device configurations but these are all the potential export templates.  The Windows build provides the editor and exporter for the NX.
 
@@ -66,7 +83,7 @@ It is also possible to launch your Game directly from Godot provided you have al
 
 ## Important Notes for Exporting to Nintendo Switch
 
-Please use Nintendo SDK version 19.x.
+Please use Nintendo SDK version 21.x.
 
 Currently, Godot NX 4.x only supports Vulkan. To ensure proper functionality, follow these steps:
 

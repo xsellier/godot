@@ -23,9 +23,3 @@ if (os.path.isfile('bin\\godot_nx.nx.template_debug.arm64.nss')):
 # 64 bit release
 if (os.path.isfile('bin\\godot_nx.nx.template_release.arm64.nss')):
     os.system('copy bin\\godot_nx.nx.template_release.arm64.nss ' + target_dir)
-# 32 bit debug
-if (os.path.isfile('bin\\godot_nx.nx.template_debug.arm32.nss')):
-    os.system('copy bin\\godot_nx.nx.template_debug.arm32.nss ' + target_dir)
-# 32 bit release
-if (os.path.isfile('bin\\godot_nx.nx.template_release.arm32.nss')):
-    os.system('copy bin\\godot_nx.nx.template_release.arm32.nss ' + target_dir)
