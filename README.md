@@ -8,7 +8,7 @@
 
 ## Nintendo SDK
 
-Check this website to find out which verison of the SDK you should download & install:
+Check this website to find out which version of the SDK you should download & install:
 
 https://developer.nintendo.com/group/development/g1kr9vj6/tech-info/master-submission-information
 
