@@ -106,6 +106,7 @@ void OS_NX::getTouchscreenEvents()
 				st->set_index(i);
 				st->set_position(pos);
 				st->set_pressed(true);
+				last_touch_pos[i] = pos;
 				queue_event(st);
 			}
 		} else {
