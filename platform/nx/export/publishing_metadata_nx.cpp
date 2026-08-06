@@ -1,8 +1,8 @@
 #include "publishing_metadata_nx.h"
 
 // Taken from: https://developer.nintendo.com/html/online-docs/g1kr9vj6-en/Packages/SDK/NintendoSDK/Documents/Package/contents/Pages/Page_166503043.html
-static const char *organizations_raw_string = "CERO,GRACGCRB,GSRMR,ESRB,ClassInd,USK,PEGI,PEGIBBFC,Russian,ACB,OFLC,IARCGeneric";
-static const char *languages_raw_string = "AmericanEnglish,BritishEnglish,Japanese,French,German,LatinAmericanSpanish,Spanish,Italian,Dutch,CanadianFrench,Portuguese,Russian,SimplifiedChinese,TraditionalChinese,Korean,BrazilianPortuguese";
+static const char *organizations_raw_string = "CERO,GRACGCRB,GSRMR,ESRB,ClassInd,USK,PEGI,PEGIPortugal,PEGIBBFC,Russian,ACB,OFLC,IARCGeneric";
+static const char *languages_raw_string = "AmericanEnglish,BritishEnglish,Japanese,French,German,LatinAmericanSpanish,Spanish,Italian,Dutch,CanadianFrench,Portuguese,Russian,SimplifiedChinese,TraditionalChinese,Korean,BrazilianPortuguese,Polish";
 static const char *ages_for_china_raw_string = "None,Age8,Age12,Age16";
 
 static HashSet<String> supported_organizations;
