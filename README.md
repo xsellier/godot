@@ -94,6 +94,23 @@ Currently, Godot NX 4.x only supports Vulkan. To ensure proper functionality, fo
 
 Important: If you set Rendering Method/Rendering Method.mobile to ```gl_compatibility```, the exported file will crash when executed.
 
+### VRAM compression
+
+If you are using VRAM Compression (as you should), then you need to enable `S3TC BPTC` VRAM compression via the project settings:
+
+`Project` -> `Project settings` -> `Rendering` -> `Textures` and check `Import S3TC BPTC` under `VRAM Compression`
+
+When importing `Texture2D`, don't check `High Quality`, and disable `HDR Compression`.
+Once done, you need to reimport everything (or to remove the `.godot` directory).
+
+### Lossless compression
+
+Then if you are, like me, a fan of lossless compression, you need to activat PNG Lossless by default and not WebP:
+
+`Project` -> `Project settings` -> `Rendering` -> `Textures` and check `Force PNG` under `Lossless Compression`
+
+Once done, you need to reimport everything (or to remove the `.godot` directory).
+
 ## Debugging
 
 ### C/C++
