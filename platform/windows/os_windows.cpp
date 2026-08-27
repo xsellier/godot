@@ -58,6 +58,7 @@
 #include <regstr.h>
 
 static const WORD MAX_CONSOLE_LINES = 1500;
+int constexpr FS_TRANSP_BORDER = 2;
 
 extern "C" {
 __declspec(dllexport) DWORD NvOptimusEnablement = 1;
@@ -227,7 +228,7 @@ bool OS_Windows::can_draw() const {
 
 #define MI_WP_SIGNATURE 0xFF515700
 #define SIGNATURE_MASK 0xFFFFFF00
-#define IsPenEvent(dw) (((dw)&SIGNATURE_MASK) == MI_WP_SIGNATURE)
+#define IsPenEvent(dw) (((dw) & SIGNATURE_MASK) == MI_WP_SIGNATURE)
 
 void OS_Windows::_touch_event(bool p_pressed, int p_x, int p_y, int idx) {
 
@@ -598,7 +599,7 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 							pressrc = 0;
 						}
 					}
-				} else if (mouse_mode != MOUSE_MODE_CAPTURED) {
+				} else {
 					// for reasons unknown to mankind, wheel comes in screen cordinates
 					POINT coords;
 					coords.x = mb.x;
@@ -626,13 +627,32 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 			break;
 
 		case WM_SIZE: {
-			int window_w = LOWORD(lParam);
-			int window_h = HIWORD(lParam);
-			if (window_w > 0 && window_h > 0) {
-				video_mode.width = window_w;
-				video_mode.height = window_h;
+			if (wParam != SIZE_MINIMIZED) {
+				int window_w = LOWORD(lParam);
+				int window_h = HIWORD(lParam);
+
+				if (window_w > 0 && window_h > 0 && !preserve_window_size) {
+					video_mode.width = window_w;
+					video_mode.height = window_h;
+				} else {
+					preserve_window_size = false;
+					set_window_size(Size2(video_mode.width, video_mode.height));
+				}
 			}
-			// return 0;								// Jump Back
+
+			if (wParam == SIZE_MAXIMIZED) {
+				maximized = true;
+				minimized = false;
+
+			} else if (wParam == SIZE_MINIMIZED) {
+				maximized = false;
+				minimized = true;
+
+			} else if (wParam == SIZE_RESTORED) {
+				maximized = false;
+				minimized = false;
+			}
+
 		} break;
 
 		case WM_ENTERSIZEMOVE: {
@@ -665,8 +685,13 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 					gr_mem = alt_mem;
 			}
 
-			// if (wParam==VK_WIN) TODO wtf is this?
-			//	meta_mem=uMsg==WM_KEYDOWN;
+			if (mouse_mode == MOUSE_MODE_CAPTURED) {
+				// When SetCapture is used, ALT+F4 hotkey is ignored by Windows, so handle it ourselves
+				if (wParam == VK_F4 && alt_mem && (uMsg == WM_KEYDOWN || uMsg == WM_SYSKEYDOWN)) {
+					if (main_loop)
+						main_loop->notification(MainLoop::NOTIFICATION_WM_QUIT_REQUEST);
+				}
+			}
 
 		} // fallthrough
 		case WM_CHAR: {
@@ -748,10 +773,11 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 			if (LOWORD(lParam) == HTCLIENT) {
 				if (window_has_focus && (mouse_mode == MOUSE_MODE_HIDDEN || mouse_mode == MOUSE_MODE_CAPTURED)) {
 					// Hide the cursor
-					if (hCursor == NULL)
+					if (hCursor == NULL) {
 						hCursor = SetCursor(NULL);
-					else
+					} else {
 						SetCursor(NULL);
+					}
 				} else {
 					if (hCursor != NULL) {
 						CursorShape c = cursor_shape;
@@ -765,8 +791,7 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 		} break;
 		case WM_DROPFILES: {
 
-			HDROP hDropInfo = NULL;
-			hDropInfo = (HDROP)wParam;
+			HDROP hDropInfo = (HDROP)wParam;
 			const int buffsize = 4096;
 			wchar_t buf[buffsize];
 
@@ -1002,19 +1027,6 @@ void OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int 
 		WindowRect.right = current.dmPelsWidth;
 		WindowRect.bottom = current.dmPelsHeight;
 
-		/*  DEVMODE dmScreenSettings;
-		memset(&dmScreenSettings,0,sizeof(dmScreenSettings));
-		dmScreenSettings.dmSize=sizeof(dmScreenSettings);
-		dmScreenSettings.dmPelsWidth	= video_mode.width;
-		dmScreenSettings.dmPelsHeight	= video_mode.height;
-		dmScreenSettings.dmBitsPerPel	= current.dmBitsPerPel;
-		dmScreenSettings.dmFields=DM_BITSPERPEL|DM_PELSWIDTH|DM_PELSHEIGHT;
-
-		LONG err = ChangeDisplaySettings(&dmScreenSettings,CDS_FULLSCREEN);
-		if (err!=DISP_CHANGE_SUCCESSFUL) {
-
-			video_mode.fullscreen=false;
-		}*/
 		pre_fs_valid = false;
 	}
 
@@ -1105,20 +1117,6 @@ void OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int 
 		SetFocus(hWnd); // Sets Keyboard Focus To
 	}
 
-	/*
-		DEVMODE dmScreenSettings;					// Device Mode
-		memset(&dmScreenSettings,0,sizeof(dmScreenSettings));		// Makes Sure Memory's Cleared
-		dmScreenSettings.dmSize=sizeof(dmScreenSettings);		// Size Of The Devmode Structure
-		dmScreenSettings.dmPelsWidth	= width;			// Selected Screen Width
-		dmScreenSettings.dmPelsHeight	= height;			// Selected Screen Height
-		dmScreenSettings.dmBitsPerPel	= bits;				// Selected Bits Per Pixel
-		dmScreenSettings.dmFields=DM_BITSPERPEL|DM_PELSWIDTH|DM_PELSHEIGHT;
-		if (ChangeDisplaySettings(&dmScreenSettings,CDS_FULLSCREEN)!=DISP_CHANGE_SUCCESSFUL)
-
-
-
-
-  */
 	visual_server->init();
 
 	input = memnew(InputDefault);
@@ -1152,6 +1150,19 @@ void OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int 
 	DragAcceptFiles(hWnd, true);
 
 	move_timer_id = 1;
+	update_real_mouse_position();
+}
+
+void OS_Windows::update_real_mouse_position() {
+	POINT mouse_pos;
+	if (GetCursorPos(&mouse_pos) && ScreenToClient(hWnd, &mouse_pos)) {
+		if (mouse_pos.x > 0 && mouse_pos.y > 0 && mouse_pos.x <= video_mode.width && mouse_pos.y <= video_mode.height) {
+			old_x = mouse_pos.x;
+			old_y = mouse_pos.y;
+			old_invalid = false;
+			input->set_mouse_pos(Point2i(mouse_pos.x, mouse_pos.y));
+		}
+	}
 }
 
 void OS_Windows::set_clipboard(const String &p_text) {
@@ -1245,6 +1256,10 @@ void OS_Windows::set_main_loop(MainLoop *p_main_loop) {
 }
 
 void OS_Windows::finalize() {
+
+	if (video_mode.fullscreen) {
+		set_window_fullscreen(false);
+	}
 
 	if (main_loop)
 		memdelete(main_loop);
@@ -1558,26 +1573,34 @@ Point2 OS_Windows::get_window_position() const {
 	GetWindowRect(hWnd, &r);
 	return Point2(r.left, r.top);
 }
+
 void OS_Windows::set_window_position(const Point2 &p_position) {
 
-	if (video_mode.fullscreen) return;
+	if (video_mode.fullscreen) {
+		return;
+	}
+
 	RECT r;
 	GetWindowRect(hWnd, &r);
 	MoveWindow(hWnd, p_position.x, p_position.y, r.right - r.left, r.bottom - r.top, TRUE);
 	_update_cursor_window();
+	update_real_mouse_position();
 }
+
 Size2 OS_Windows::get_window_size() const {
 
 	RECT r;
 	GetClientRect(hWnd, &r);
 	return Vector2(r.right - r.left, r.bottom - r.top);
 }
+
 Size2 OS_Windows::get_real_window_size() const {
 
 	RECT r;
 	GetWindowRect(hWnd, &r);
 	return Vector2(r.right - r.left, r.bottom - r.top);
 }
+
 void OS_Windows::set_window_size(const Size2 p_size) {
 
 	video_mode.width = p_size.width;
@@ -1627,9 +1650,6 @@ void OS_Windows::set_window_fullscreen(bool p_enabled) {
 
 		if (pre_fs_valid) {
 			GetWindowRect(hWnd, &pre_fs_rect);
-			// print_line("A: "+itos(pre_fs_rect.left)+","+itos(pre_fs_rect.top)+","+itos(pre_fs_rect.right-pre_fs_rect.left)+","+itos(pre_fs_rect.bottom-pre_fs_rect.top));
-			// MapWindowPoints(hWnd, GetParent(hWnd), (LPPOINT) &pre_fs_rect, 2);
-			// print_line("B: "+itos(pre_fs_rect.left)+","+itos(pre_fs_rect.top)+","+itos(pre_fs_rect.right-pre_fs_rect.left)+","+itos(pre_fs_rect.bottom-pre_fs_rect.top));
 		}
 
 		int cs = get_current_screen();
@@ -1640,7 +1660,8 @@ void OS_Windows::set_window_fullscreen(bool p_enabled) {
 
 		_update_window_style(false);
 
-		MoveWindow(hWnd, pos.x, pos.y, size.width, size.height, TRUE);
+		int off_x = (video_mode.borderless_window) ? FS_TRANSP_BORDER : 0;
+		MoveWindow(hWnd, pos.x, pos.y, size.width + off_x, size.height, TRUE);
 
 	} else {
 
@@ -1665,10 +1686,12 @@ void OS_Windows::set_window_fullscreen(bool p_enabled) {
 	}
 	_update_cursor_window();
 }
+
 bool OS_Windows::is_window_fullscreen() const {
 
 	return video_mode.fullscreen;
 }
+
 void OS_Windows::set_window_resizable(bool p_enabled) {
 
 	if (video_mode.resizable == p_enabled)
@@ -1678,10 +1701,12 @@ void OS_Windows::set_window_resizable(bool p_enabled) {
 
 	_update_window_style();
 }
+
 bool OS_Windows::is_window_resizable() const {
 
 	return video_mode.resizable;
 }
+
 void OS_Windows::set_window_minimized(bool p_enabled) {
 
 	if (p_enabled) {
@@ -1694,10 +1719,12 @@ void OS_Windows::set_window_minimized(bool p_enabled) {
 		minimized = false;
 	}
 }
+
 bool OS_Windows::is_window_minimized() const {
 
 	return minimized;
 }
+
 void OS_Windows::set_window_maximized(bool p_enabled) {
 
 	if (p_enabled) {
@@ -1710,6 +1737,7 @@ void OS_Windows::set_window_maximized(bool p_enabled) {
 		minimized = false;
 	}
 }
+
 bool OS_Windows::is_window_maximized() const {
 
 	return maximized;
@@ -1734,6 +1762,7 @@ void OS_Windows::set_borderless_window(int p_borderless) {
 
 	video_mode.borderless_window = p_borderless;
 
+	preserve_window_size = true;
 	_update_window_style();
 }
 
@@ -1742,22 +1771,36 @@ bool OS_Windows::get_borderless_window() {
 }
 
 void OS_Windows::_update_window_style(bool repaint) {
+	DWORD style_ex = WS_EX_WINDOWEDGE | WS_EX_APPWINDOW;
+	DWORD style = WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
+
 	if (video_mode.fullscreen || video_mode.borderless_window) {
-		SetWindowLongPtr(hWnd, GWL_STYLE, WS_SYSMENU | WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_VISIBLE);
+		style = style | WS_POPUP;
+
+		if (!video_mode.fullscreen) {
+			style = style | WS_SYSMENU;
+		}
+
 	} else {
+		style = style | WS_CAPTION | WS_POPUPWINDOW;
+
 		if (video_mode.resizable) {
-			SetWindowLongPtr(hWnd, GWL_STYLE, WS_OVERLAPPEDWINDOW | WS_VISIBLE);
+			style = style | WS_OVERLAPPEDWINDOW;
+
 		} else {
-			SetWindowLongPtr(hWnd, GWL_STYLE, WS_CAPTION | WS_MINIMIZEBOX | WS_POPUPWINDOW | WS_VISIBLE);
+			style = style | WS_OVERLAPPED | WS_SYSMENU;
 		}
 	}
 
-	SetWindowPos(hWnd, video_mode.always_on_top ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+	SetWindowLongPtr(hWnd, GWL_STYLE, style);
+	SetWindowLongPtr(hWnd, GWL_EXSTYLE, style_ex);
+	SetWindowPos(hWnd, video_mode.always_on_top ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_FRAMECHANGED);
 
 	if (repaint) {
 		RECT rect;
 		GetWindowRect(hWnd, &rect);
-		MoveWindow(hWnd, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, TRUE);
+		int off_x = (video_mode.fullscreen && video_mode.borderless_window) ? FS_TRANSP_BORDER : 0;
+		MoveWindow(hWnd, rect.left, rect.top, rect.right - rect.left + off_x, rect.bottom - rect.top, TRUE);
 	}
 }
 
@@ -1983,12 +2026,10 @@ uint64_t OS_Windows::get_ticks_usec() const {
 
 void OS_Windows::process_events() {
 
-	MSG msg;
-
 	last_id = joystick->process_joysticks(last_id);
 
+	MSG msg = {};
 	while (PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE)) {
-
 		TranslateMessage(&msg);
 		DispatchMessageW(&msg);
 	}

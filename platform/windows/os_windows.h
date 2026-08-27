@@ -108,6 +108,7 @@ class OS_Windows : public OS {
 
 	Size2 window_rect;
 	VideoMode video_mode;
+	bool preserve_window_size = false;
 
 	MainLoop *main_loop;
 
@@ -204,6 +205,7 @@ public:
 
 	virtual void warp_mouse_pos(const Point2 &p_to);
 	virtual Point2 get_mouse_pos() const;
+	void update_real_mouse_position();
 	virtual int get_mouse_button_state() const;
 	virtual void set_window_title(const String &p_title);
 

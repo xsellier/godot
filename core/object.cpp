@@ -259,7 +259,7 @@ bool Object::_predelete() {
 	_predelete_ok = 1;
 	notification(NOTIFICATION_PREDELETE, true);
 	if (_predelete_ok) {
-		_type_ptr = NULL; //must restore so destructors can access type ptr correctly
+		_type_ptr = NULL; // must restore so destructors can access type ptr correctly
 	}
 	return _predelete_ok;
 }
@@ -318,10 +318,10 @@ void Object::set(const StringName &p_name, const Variant &p_value, bool *r_valid
 		}
 	}
 
-	//try built-in setgetter
+	// try built-in setgetter
 	{
 		if (ObjectTypeDB::set_property(this, p_name, p_value, r_valid)) {
-			//if (r_valid)
+			// if (r_valid)
 			//	*r_valid=true;
 			return;
 		}
@@ -334,13 +334,13 @@ void Object::set(const StringName &p_name, const Variant &p_value, bool *r_valid
 		return;
 
 	} else if (p_name == CoreStringNames::get_singleton()->_meta) {
-		//set_meta(p_name,p_value);
+		// set_meta(p_name,p_value);
 		metadata = p_value;
 		if (r_valid)
 			*r_valid = true;
 		return;
 	} else {
-		//something inside the object... :|
+		// something inside the object... :|
 		bool success = _setv(p_name, p_value);
 		if (success) {
 			if (r_valid)
@@ -364,7 +364,7 @@ Variant Object::get(const StringName &p_name, bool *r_valid) const {
 		}
 	}
 
-	//try built-in setgetter
+	// try built-in setgetter
 	{
 		if (ObjectTypeDB::get_property(const_cast<Object *>(this), p_name, ret)) {
 			if (r_valid)
@@ -385,14 +385,14 @@ Variant Object::get(const StringName &p_name, bool *r_valid) const {
 			*r_valid = true;
 		return ret;
 	} else {
-		//something inside the object... :|
+		// something inside the object... :|
 		bool success = _getv(p_name, ret);
 		if (success) {
 			if (r_valid)
 				*r_valid = true;
 			return ret;
 		}
-		//if nothing else, use getvar
+		// if nothing else, use getvar
 		return getvar(p_name, r_valid);
 	}
 }
@@ -545,12 +545,12 @@ void Object::call_multilevel(const StringName &p_method, const Variant **p_args,
 		}
 #endif
 
-		//must be here, must be before everything,
+		// must be here, must be before everything,
 		memdelete(this);
 		return;
 	}
 
-	//Variant ret;
+	// Variant ret;
 	OBJ_DEBUG_LOCK
 
 	Variant::CallError error;
@@ -582,7 +582,7 @@ void Object::call_multilevel_reversed(const StringName &p_method, const Variant 
 		_test_call_error(p_method, error);
 	}
 
-	//Variant ret;
+	// Variant ret;
 
 	if (script_instance) {
 		script_instance->call_multilevel_reversed(p_method, p_args, p_argcount);
@@ -760,7 +760,7 @@ void Object::call_multilevel(const StringName &p_name, VARIANT_ARG_DECLARE) {
 		argc++;
 	}
 
-	//Variant::CallError error;
+	// Variant::CallError error;
 	call_multilevel(p_name, argptr, argc);
 
 #endif
@@ -771,7 +771,7 @@ Variant Object::call(const StringName &p_method, const Variant **p_args, int p_a
 	r_error.error = Variant::CallError::CALL_OK;
 
 	if (p_method == CoreStringNames::get_singleton()->_free) {
-//free must be here, before anything, always ready
+// free must be here, before anything, always ready
 #ifdef DEBUG_ENABLED
 		if (p_argcount != 0) {
 			r_error.argument = 0;
@@ -793,7 +793,7 @@ Variant Object::call(const StringName &p_method, const Variant **p_args, int p_a
 		}
 
 #endif
-		//must be here, must be before everything,
+		// must be here, must be before everything,
 		memdelete(this);
 		r_error.error = Variant::CallError::CALL_OK;
 		return Variant();
@@ -803,7 +803,7 @@ Variant Object::call(const StringName &p_method, const Variant **p_args, int p_a
 	OBJ_DEBUG_LOCK
 	if (script_instance) {
 		ret = script_instance->call(p_method, p_args, p_argcount, r_error);
-		//force jumptable
+		// force jumptable
 		switch (r_error.error) {
 
 			case Variant::CallError::CALL_OK:
@@ -962,7 +962,7 @@ Array Object::_get_method_list_bind() const {
 	for (List<MethodInfo>::Element *E = ml.front(); E; E = E->next()) {
 
 		Dictionary d = _get_dict_from_method(E->get());
-		//va.push_back(d);
+		// va.push_back(d);
 		ret.push_back(d);
 	}
 
@@ -1063,27 +1063,27 @@ Variant Object::_emit_signal(const Variant **p_args, int p_argcount, Variant::Ca
 void Object::emit_signal(const StringName &p_name, const Variant **p_args, int p_argcount) {
 
 	if (_block_signals)
-		return; //no emit, signals blocked
+		return; // no emit, signals blocked
 
 	Signal *s = signal_map.getptr(p_name);
 	if (!s) {
 #ifdef DEBUG_ENABLED
 		bool signal_is_valid = ObjectTypeDB::has_signal(get_type_name(), p_name);
-		//check in script
+		// check in script
 		if (!signal_is_valid && !script.is_null() && !Ref<Script>(script)->has_script_signal(p_name)) {
 			ERR_EXPLAIN("Can't emit non-existing signal " + String("\"") + p_name + "\".");
 			ERR_FAIL();
 		}
 #endif
-		//not connected? just return
+		// not connected? just return
 		return;
 	}
 
 	List<_ObjectSignalDisconnectData> disconnect_data;
 
-	//copy on write will ensure that disconnecting the signal or even deleting the object will not affect the signal calling.
-	//this happens automatically and will not change the performance of calling.
-	//awesome, isn't it?
+	// copy on write will ensure that disconnecting the signal or even deleting the object will not affect the signal calling.
+	// this happens automatically and will not change the performance of calling.
+	// awesome, isn't it?
 	VMap<Signal::Target, Signal::Slot> slot_map = s->slot_map;
 
 	int ssize = slot_map.size();
@@ -1108,7 +1108,7 @@ void Object::emit_signal(const StringName &p_name, const Variant **p_args, int p
 		int argc = p_argcount;
 
 		if (c.binds.size()) {
-			//handle binds
+			// handle binds
 			bind_mem.resize(p_argcount + c.binds.size());
 
 			for (int j = 0; j < p_argcount; j++) {
@@ -1130,7 +1130,7 @@ void Object::emit_signal(const StringName &p_name, const Variant **p_args, int p
 			if (ce.error != Variant::CallError::CALL_OK) {
 
 				if (ce.error == Variant::CallError::CALL_ERROR_INVALID_METHOD && !ObjectTypeDB::type_exists(target->get_type_name())) {
-					//most likely object is not initialized yet, do not throw error.
+					// most likely object is not initialized yet, do not throw error.
 				} else {
 					ERR_PRINTS("Error calling method from signal '" + String(p_name) + "': " + Variant::get_call_error_text(target, c.method, args, argc, ce));
 				}
@@ -1253,13 +1253,13 @@ void Object::get_signal_list(List<MethodInfo> *p_signals) const {
 	}
 
 	ObjectTypeDB::get_signal_list(get_type_name(), p_signals);
-	//find maybe usersignals?
+	// find maybe usersignals?
 	const StringName *S = NULL;
 
 	while ((S = signal_map.next(S))) {
 
 		if (signal_map[*S].user.name != "") {
-			//user signal
+			// user signal
 			p_signals->push_back(signal_map[*S].user);
 		}
 	}
@@ -1284,7 +1284,7 @@ void Object::get_signal_connection_list(const StringName &p_signal, List<Connect
 
 	const Signal *s = signal_map.getptr(p_signal);
 	if (!s)
-		return; //nothing
+		return; // nothing
 
 	for (int i = 0; i < s->slot_map.size(); i++)
 		p_connections->push_back(s->slot_map.getv(i).conn);
@@ -1322,7 +1322,7 @@ Error Object::connect(const StringName &p_signal, Object *p_to_object, const Str
 	Signal *s = signal_map.getptr(p_signal);
 	if (!s) {
 		bool signal_is_valid = ObjectTypeDB::has_signal(get_type_name(), p_signal);
-		//check in script
+		// check in script
 		if (!signal_is_valid && !script.is_null() && Ref<Script>(script)->has_script_signal(p_signal))
 			signal_is_valid = true;
 
@@ -1336,9 +1336,6 @@ Error Object::connect(const StringName &p_signal, Object *p_to_object, const Str
 
 	Signal::Target target(p_to_object->get_instance_ID(), p_to_method);
 	if (s->slot_map.has(target)) {
-#ifdef DEBUG_ENABLED
-		WARN_PRINTS("Signal '" + p_signal + "' is already connected to given method '" + p_to_method + "' in that object.");
-#endif
 		return ERR_INVALID_PARAMETER;
 	}
 
@@ -1377,8 +1374,8 @@ bool Object::is_connected(const StringName &p_signal, Object *p_to_object, const
 	Signal::Target target(p_to_object->get_instance_ID(), p_to_method);
 
 	return s->slot_map.has(target);
-	//const Map<Signal::Target,Signal::Slot>::Element *E = s->slot_map.find(target);
-	//return (E!=NULL);
+	// const Map<Signal::Target,Signal::Slot>::Element *E = s->slot_map.find(target);
+	// return (E!=NULL);
 }
 
 void Object::disconnect(const StringName &p_signal, Object *p_to_object, const StringName &p_to_method) {
@@ -1387,9 +1384,6 @@ void Object::disconnect(const StringName &p_signal, Object *p_to_object, const S
 	Signal *s = signal_map.getptr(p_signal);
 
 	if (!s) {
-#ifdef DEBUG_ENABLED
-		WARN_PRINTS("Nonexistent signal: '" + p_signal + "'");
-#endif
 		return;
 	}
 	if (s->lock > 0) {
@@ -1399,9 +1393,6 @@ void Object::disconnect(const StringName &p_signal, Object *p_to_object, const S
 	Signal::Target target(p_to_object->get_instance_ID(), p_to_method);
 
 	if (!s->slot_map.has(target)) {
-#ifdef DEBUG_ENABLED
-		WARN_PRINTS("Disconnecting nonexistent signal '" + p_signal + "', slot: " + itos(target._id) + ":" + target.method);
-#endif
 		return;
 	}
 
@@ -1409,7 +1400,7 @@ void Object::disconnect(const StringName &p_signal, Object *p_to_object, const S
 	s->slot_map.erase(target);
 
 	if (s->slot_map.empty() && ObjectTypeDB::has_signal(get_type_name(), p_signal)) {
-		//not user signal, delete
+		// not user signal, delete
 		signal_map.erase(p_signal);
 	}
 }
@@ -1458,7 +1449,7 @@ void Object::_clear_internal_resource_paths(const Variant &p_var) {
 				return;
 
 			if (!r->get_path().begins_with("res://") || r->get_path().find("::") == -1)
-				return; //not an internal resource
+				return; // not an internal resource
 
 			Object *object = p_var;
 			if (!object)
@@ -1521,7 +1512,7 @@ void Object::_bind_methods() {
 	ObjectTypeDB::bind_method(_MD("has_meta", "name"), &Object::has_meta);
 	ObjectTypeDB::bind_method(_MD("get_meta_list"), &Object::_get_meta_list_bind);
 
-	//todo reimplement this per language so all 5 arguments can be called
+	// todo reimplement this per language so all 5 arguments can be called
 
 	//	ObjectTypeDB::bind_method(_MD("call","method","arg1","arg2","arg3","arg4"),&Object::_call_bind,DEFVAL(Variant()),DEFVAL(Variant()),DEFVAL(Variant()),DEFVAL(Variant()));
 	//	ObjectTypeDB::bind_method(_MD("call_deferred","method","arg1","arg2","arg3","arg4"),&Object::_call_deferred_bind,DEFVAL(Variant()),DEFVAL(Variant()),DEFVAL(Variant()),DEFVAL(Variant()));
@@ -1739,7 +1730,7 @@ Object::~Object() {
 	for (List<Connection>::Element *E = sconnections.front(); E; E = E->next()) {
 
 		Connection &c = E->get();
-		ERR_CONTINUE(c.source != this); //bug?
+		ERR_CONTINUE(c.source != this); // bug?
 
 		this->disconnect(c.signal, c.target, c.method);
 	}
