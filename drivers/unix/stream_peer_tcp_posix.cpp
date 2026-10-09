@@ -86,7 +86,13 @@ Error StreamPeerTCPPosix::_block(int p_sockfd, bool p_read, bool p_write) const 
 		pfd.events |= POLLOUT;
 	pfd.revents = 0;
 
-	int ret = poll(&pfd, 1, -1);
+	// Never block forever: a peer that stops answering (stalled TLS handshake, filtered
+	// network...) would freeze the calling thread, usually the main thread.
+	int ret = poll(&pfd, 1, BLOCK_TIMEOUT_MSEC);
+	if (ret == 0) {
+		return ERR_TIMEOUT;
+	}
+
 	return ret < 0 ? FAILED : OK;
 };
 
@@ -145,7 +151,7 @@ Error StreamPeerTCPPosix::connect(const IP_Address &p_host, uint16_t p_port) {
 	if (sockfd == -1) {
 		ERR_PRINT("Socket creation failed!");
 		disconnect();
-		//perror("socket");
+		// perror("socket");
 		return FAILED;
 	};
 
@@ -208,7 +214,7 @@ Error StreamPeerTCPPosix::write(const uint8_t *p_data, int p_bytes, int &r_sent,
 	while (data_to_send) {
 
 		int sent_amount = send(sockfd, offset, data_to_send, MSG_NOSIGNAL);
-		//printf("Sent TCP data of %d bytes, errno %d\n", sent_amount, errno);
+		// printf("Sent TCP data of %d bytes, errno %d\n", sent_amount, errno);
 
 		if (sent_amount == -1) {
 
@@ -225,7 +231,11 @@ Error StreamPeerTCPPosix::write(const uint8_t *p_data, int p_bytes, int &r_sent,
 				return OK;
 			};
 
-			_block(sockfd, false, true);
+			if (_block(sockfd, false, true) != OK) {
+				disconnect();
+				ERR_PRINT("Socket write timed out");
+				return FAILED;
+			}
 		} else {
 
 			data_to_send -= sent_amount;
@@ -282,7 +292,11 @@ Error StreamPeerTCPPosix::read(uint8_t *p_buffer, int p_bytes, int &r_received, 
 				r_received = total_read;
 				return OK;
 			};
-			_block(sockfd, true, false);
+			if (_block(sockfd, true, false) != OK) {
+				disconnect();
+				ERR_PRINT("Socket read timed out");
+				return FAILED;
+			}
 
 		} else if (read == 0) {
 

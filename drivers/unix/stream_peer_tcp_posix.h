@@ -45,6 +45,10 @@ protected:
 	IP::Type sock_type;
 	int sockfd;
 
+	enum {
+		BLOCK_TIMEOUT_MSEC = 5000,
+	};
+
 	Error _block(int p_sockfd, bool p_read, bool p_write) const;
 
 	Error _poll_connection() const;

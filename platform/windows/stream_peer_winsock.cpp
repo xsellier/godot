@@ -75,7 +75,17 @@ Error StreamPeerWinsock::_block(int p_sockfd, bool p_read, bool p_write) const {
 	if (p_write)
 		FD_SET(p_sockfd, &write);
 
-	int ret = select(p_sockfd + 1, &read, &write, NULL, NULL); // block forever
+	// Never block forever: a peer that stops answering (stalled TLS handshake, filtered
+	// network...) would freeze the calling thread, usually the main thread.
+	struct timeval tv;
+	tv.tv_sec = BLOCK_TIMEOUT_MSEC / 1000;
+	tv.tv_usec = (BLOCK_TIMEOUT_MSEC % 1000) * 1000;
+
+	int ret = select(p_sockfd + 1, &read, &write, NULL, &tv);
+	if (ret == 0) {
+		return ERR_TIMEOUT;
+	}
+
 	return ret < 0 ? FAILED : OK;
 };
 
@@ -153,7 +163,11 @@ Error StreamPeerWinsock::write(const uint8_t *p_data, int p_bytes, int &r_sent, 
 				return OK;
 			};
 
-			_block(sockfd, false, true);
+			if (_block(sockfd, false, true) != OK) {
+				disconnect();
+				ERR_PRINT("Socket write timed out");
+				return FAILED;
+			}
 		} else {
 
 			data_to_send -= sent_amount;
@@ -209,7 +223,11 @@ Error StreamPeerWinsock::read(uint8_t *p_buffer, int p_bytes, int &r_received, b
 				r_received = total_read;
 				return OK;
 			};
-			_block(sockfd, true, false);
+			if (_block(sockfd, true, false) != OK) {
+				disconnect();
+				ERR_PRINT("Socket read timed out");
+				return FAILED;
+			}
 		} else if (read == 0) {
 			disconnect();
 			return ERR_FILE_EOF;
@@ -300,7 +318,7 @@ Error StreamPeerWinsock::connect(const IP_Address &p_host, uint16_t p_port) {
 	if (sockfd == INVALID_SOCKET) {
 		ERR_PRINT("Socket creation failed!");
 		disconnect();
-		//perror("socket");
+		// perror("socket");
 		return FAILED;
 	};
 

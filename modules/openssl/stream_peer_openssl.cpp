@@ -41,9 +41,9 @@
 #define BIO_get_data(b) ((b)->ptr)
 #endif
 
-//hostname matching code from curl
+// hostname matching code from curl
 
-//#include <openssl/applink.c> // To prevent crashing (see the OpenSSL FAQ)
+// #include <openssl/applink.c> // To prevent crashing (see the OpenSSL FAQ)
 
 bool StreamPeerOpenSSL::_match_host_name(const char *name, const char *hostname) {
 
@@ -87,9 +87,9 @@ Error StreamPeerOpenSSL::_match_common_name(const char *hostname, const X509 *se
 }
 
 /**
-* Tries to find a match for hostname in the certificate's Subject Alternative Name extension.
-*
-*/
+ * Tries to find a match for hostname in the certificate's Subject Alternative Name extension.
+ *
+ */
 
 Error StreamPeerOpenSSL::_match_subject_alternative_name(const char *hostname, const X509 *server_cert) {
 
@@ -225,7 +225,7 @@ int StreamPeerOpenSSL::_bio_read(BIO *b, char *buf, int len) {
 		return got;
 	}
 
-	//unreachable
+	// unreachable
 	return 0;
 }
 
@@ -259,7 +259,7 @@ int StreamPeerOpenSSL::_bio_write(BIO *b, const char *buf, int len) {
 		return sent;
 	}
 
-	//unreachable
+	// unreachable
 	return 0;
 }
 
@@ -334,7 +334,7 @@ Error StreamPeerOpenSSL::connect(Ref<StreamPeer> p_base, bool p_validate_certs, 
 	if (p_validate_certs) {
 
 		if (certs.size()) {
-			//yay for undocumented OpenSSL functions
+			// yay for undocumented OpenSSL functions
 
 			X509_STORE *store = SSL_CTX_get_cert_store(ctx);
 			for (int i = 0; i < certs.size(); i++) {
@@ -357,9 +357,9 @@ Error StreamPeerOpenSSL::connect(Ref<StreamPeer> p_base, bool p_validate_certs, 
 #endif
 		}
 
-		//used for testing
-		//int res = SSL_CTX_load_verify_locations(ctx,"/etc/ssl/certs/ca-certificates.crt",NULL);
-		//print_line("verify locations res: "+itos(res));
+		// used for testing
+		// int res = SSL_CTX_load_verify_locations(ctx,"/etc/ssl/certs/ca-certificates.crt",NULL);
+		// print_line("verify locations res: "+itos(res));
 
 		/* Ask OpenSSL to verify the server certificate.  Note that this
 		 * does NOT include verifying that the hostname is correct.
@@ -385,7 +385,7 @@ Error StreamPeerOpenSSL::connect(Ref<StreamPeer> p_base, bool p_validate_certs, 
 		 * "wrapping" OpenSSL's routine, not replacing it. */
 		SSL_CTX_set_cert_verify_callback(ctx, _cert_verify_callback, this);
 
-		//Let the verify_callback catch the verify_depth error so that we get an appropriate error in the logfile. (??)
+		// Let the verify_callback catch the verify_depth error so that we get an appropriate error in the logfile. (??)
 		SSL_CTX_set_verify_depth(ctx, max_cert_chain_depth + 1);
 	}
 
@@ -409,6 +409,18 @@ Error StreamPeerOpenSSL::connect(Ref<StreamPeer> p_base, bool p_validate_certs, 
 	if (result < 1) {
 		ERR_print_errors_fp(stdout);
 		_print_error(result);
+
+		// The handshake failed (socket timeout, closed connection...): report it instead of
+		// pretending to be connected, so HTTPClient ends in STATUS_SSL_HANDSHAKE_ERROR.
+		SSL_free(ssl); // also frees the BIO attached by SSL_set_bio
+		SSL_CTX_free(ctx);
+		ssl = NULL;
+		ctx = NULL;
+		bio = NULL;
+		base = Ref<StreamPeer>();
+		status = STATUS_DISCONNECTED;
+
+		return ERR_CANT_CONNECT;
 	}
 
 	X509 *peer = SSL_get_peer_certificate(ssl);
@@ -536,7 +548,7 @@ StreamPeerOpenSSL::StreamPeerOpenSSL() {
 	ssl = NULL;
 	bio = NULL;
 	connected = false;
-	use_blocking = true; //might be improved int the future, but for now it always blocks
+	use_blocking = true; // might be improved int the future, but for now it always blocks
 	max_cert_chain_depth = 9;
 	flags = 0;
 }
@@ -611,7 +623,7 @@ void StreamPeerOpenSSL::initialize_ssl() {
 			{
 				ByteArray::Write w = arr.write();
 				f->get_buffer(w.ptr(), flen);
-				w[flen] = 0; //end f string
+				w[flen] = 0; // end f string
 			}
 
 			memdelete(f);

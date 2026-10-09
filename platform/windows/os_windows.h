@@ -152,6 +152,7 @@ class OS_Windows : public OS {
 	void _touch_event(bool p_pressed, int p_x, int p_y, int idx);
 
 	void _update_window_style(bool repaint = true);
+	void _sync_video_mode_with_client();
 
 	void _set_mouse_mode_impl(MouseMode p_mode);
 	void _update_cursor_window();

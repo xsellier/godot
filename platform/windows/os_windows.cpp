@@ -739,13 +739,18 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 				if (GetTouchInputInfo((HTOUCHINPUT)lParam, cInputs, pInputs, sizeof(TOUCHINPUT))) {
 					for (UINT i = 0; i < cInputs; i++) {
 						TOUCHINPUT ti = pInputs[i];
-						// do something with each touch input entry
+
+						// TOUCHINPUT coordinates are in hundredths of a pixel, in screen space:
+						// convert them to client space like mouse events
+						POINT touch_pos = { TOUCH_COORD_TO_PIXEL(ti.x), TOUCH_COORD_TO_PIXEL(ti.y) };
+						ScreenToClient(hWnd, &touch_pos);
+
 						if (ti.dwFlags & TOUCHEVENTF_MOVE) {
 
-							_drag_event(ti.x / 100, ti.y / 100, ti.dwID);
+							_drag_event(touch_pos.x, touch_pos.y, ti.dwID);
 						} else if (ti.dwFlags & (TOUCHEVENTF_UP | TOUCHEVENTF_DOWN)) {
 
-							_touch_event(ti.dwFlags & TOUCHEVENTF_DOWN, ti.x / 100, ti.y / 100, ti.dwID);
+							_touch_event(ti.dwFlags & TOUCHEVENTF_DOWN, touch_pos.x, touch_pos.y, ti.dwID);
 						};
 					}
 					bHandled = TRUE;
@@ -1115,6 +1120,9 @@ void OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int 
 		ShowWindow(hWnd, SW_SHOW); // Show The Window
 		SetForegroundWindow(hWnd); // Slightly Higher Priority
 		SetFocus(hWnd); // Sets Keyboard Focus To
+
+		// Windows may have clamped the window at creation (larger than the screen)
+		_sync_video_mode_with_client();
 	}
 
 	visual_server->init();
@@ -1625,6 +1633,7 @@ void OS_Windows::set_window_size(const Size2 p_size) {
 	}
 
 	MoveWindow(hWnd, rect.left, rect.top, w, h, TRUE);
+	_sync_video_mode_with_client();
 	_update_cursor_window();
 }
 
@@ -1681,6 +1690,7 @@ void OS_Windows::set_window_fullscreen(bool p_enabled) {
 		_update_window_style(false);
 
 		MoveWindow(hWnd, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, TRUE);
+		_sync_video_mode_with_client();
 
 		pre_fs_valid = true;
 	}
@@ -1764,10 +1774,34 @@ void OS_Windows::set_borderless_window(int p_borderless) {
 
 	preserve_window_size = true;
 	_update_window_style();
+	// The WM_SIZE triggered by the style change (if any) is handled synchronously above.
+	// When the client area doesn't change (e.g. while fullscreen), no WM_SIZE comes and
+	// the flag would discard the next real resize (leaving fullscreen, maximize, snap...).
+	preserve_window_size = false;
 }
 
 bool OS_Windows::get_borderless_window() {
 	return video_mode.borderless_window;
+}
+
+void OS_Windows::_sync_video_mode_with_client() {
+
+	if (video_mode.fullscreen || IsIconic(hWnd))
+		return;
+
+	RECT crect;
+	GetClientRect(hWnd, &crect);
+
+	int w = crect.right - crect.left;
+	int h = crect.bottom - crect.top;
+
+	// Windows may clamp the window (e.g. larger than the screen) without sending WM_SIZE
+	// when the clamped size equals the current one: video_mode would then keep the
+	// requested size while the client area is smaller, misaligning rendering and mouse input.
+	if (w > 0 && h > 0) {
+		video_mode.width = w;
+		video_mode.height = h;
+	}
 }
 
 void OS_Windows::_update_window_style(bool repaint) {

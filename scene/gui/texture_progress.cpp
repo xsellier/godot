@@ -182,7 +182,10 @@ void TextureProgress::_notification(int p_what) {
 								uvs.push_back(uv);
 								points.push_back(Point2(uv.x * s.x, uv.y * s.y));
 							}
-							draw_polygon(points, Vector<Color>(), uvs, progress);
+							// A very small value can map start and end to the same UV: the duplicate
+							// is skipped above, leaving fewer than 3 points (nothing visible to draw)
+							if (points.size() >= 3)
+								draw_polygon(points, Vector<Color>(), uvs, progress);
 						}
 						if (get_tree()->is_editor_hint()) {
 							Point2 p = progress->get_size();
