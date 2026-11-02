@@ -515,13 +515,7 @@ bool SceneTree::idle(float p_time) {
 	if (win_size != last_screen_size) {
 
 		last_screen_size = win_size;
-		_update_root_rect();
-
-		if (use_font_oversampling) {
-			Size2 windows_size = OS::get_singleton()->get_window_size();
-			DynamicFontAtSize::font_oversampling = MIN(windows_size.width / root->get_visible_rect().size.width, windows_size.height / root->get_visible_rect().size.height);
-			DynamicFont::update_oversampling();
-		}
+		_update_root_rect(); // also updates the font oversampling
 
 		emit_signal("screen_resized");
 	}
@@ -1022,6 +1016,8 @@ void SceneTree::_update_root_rect() {
 
 		root->set_rect(visible_rectangle);
 
+		_update_font_oversampling(1.0);
+
 		return; // user will take care
 	}
 
@@ -1105,6 +1101,13 @@ void SceneTree::_update_root_rect() {
 			root->set_size_override_stretch(true);
 			root->set_size_override(true, viewport_size);
 
+			// Glyphs must be rasterized at the real canvas scale (screen pixels per canvas unit)
+			if (viewport_size.x > 0 && viewport_size.y > 0) {
+				_update_font_oversampling(MIN(screen_size.x / viewport_size.x, screen_size.y / viewport_size.y));
+			} else {
+				_update_font_oversampling(1.0);
+			}
+
 		} break;
 		case STRETCH_MODE_VIEWPORT: {
 			Rect2 visible_rectangle = Rect2(Point2(), viewport_size);
@@ -1118,8 +1121,24 @@ void SceneTree::_update_root_rect() {
 			root->set_render_target_update_mode(Viewport::RENDER_TARGET_UPDATE_ALWAYS);
 			root->set_render_target_to_screen_rect(Rect2(margin, screen_size));
 
+			// Text is drawn into the low resolution render target, then the whole target is scaled:
+			// rasterizing glyphs bigger than the target only makes them shrink and lose rows
+			_update_font_oversampling(1.0);
+
 		} break;
 	}
+}
+
+void SceneTree::_update_font_oversampling(float p_ratio) {
+
+	if (!use_font_oversampling || !(p_ratio > 0.0))
+		p_ratio = 1.0;
+
+	if (DynamicFontAtSize::font_oversampling == p_ratio)
+		return;
+
+	DynamicFontAtSize::font_oversampling = p_ratio;
+	DynamicFont::update_oversampling();
 }
 
 void SceneTree::set_screen_stretch(StretchMode p_mode, StretchAspect p_aspect, const Size2 p_minsize) {
@@ -1168,12 +1187,7 @@ void SceneTree::_change_scene(Node *p_to) {
 void SceneTree::set_use_font_oversampling(bool p_oversampling) {
 
 	use_font_oversampling = p_oversampling;
-	if (use_font_oversampling) {
-		Size2 windows_size = OS::get_singleton()->get_window_size();
-		DynamicFontAtSize::font_oversampling = MIN(windows_size.width / root->get_visible_rect().size.width, windows_size.height / root->get_visible_rect().size.height);
-	} else {
-		DynamicFontAtSize::font_oversampling = 1.0;
-	}
+	_update_root_rect(); // recomputes the oversampling from the current stretch settings
 }
 
 bool SceneTree::is_using_font_oversampling() const {

@@ -74,7 +74,7 @@ private:
 	struct Group {
 
 		Vector<Node *> nodes;
-		//uint64_t last_tree_version;
+		// uint64_t last_tree_version;
 		bool changed;
 		Group() { changed = false; };
 	};
@@ -120,15 +120,16 @@ private:
 		bool operator<(const UGCall &p_with) const { return group == p_with.group ? call < p_with.call : group < p_with.group; }
 	};
 
-	//safety for when a node is deleted while a group is being called
+	// safety for when a node is deleted while a group is being called
 	int call_lock;
-	Set<Node *> call_skip; //skip erased nodes
+	Set<Node *> call_skip; // skip erased nodes
 
 	StretchMode stretch_mode;
 	StretchAspect stretch_aspect;
 	Size2i stretch_min;
 
 	void _update_root_rect();
+	void _update_font_oversampling(float p_ratio);
 
 	List<ObjectID> delete_queue;
 
@@ -155,7 +156,7 @@ private:
 	int collision_debug_contacts;
 
 	void _change_scene(Node *p_to);
-	//void _call_group(uint32_t p_call_flags,const StringName& p_group,const StringName& p_function,const Variant& p_arg1,const Variant& p_arg2);
+	// void _call_group(uint32_t p_call_flags,const StringName& p_group,const StringName& p_function,const Variant& p_arg1,const Variant& p_arg2);
 
 	static SceneTree *singleton;
 	friend class Node;
@@ -172,7 +173,7 @@ private:
 
 	static void _debugger_request_tree(void *self);
 	void _flush_delete_queue();
-	//optimization
+	// optimization
 	friend class CanvasItem;
 	friend class Spatial;
 	friend class Viewport;
@@ -339,8 +340,8 @@ public:
 	void set_use_font_oversampling(bool p_oversampling);
 	bool is_using_font_oversampling() const;
 
-	//void change_scene(const String& p_path);
-	//Node *get_loaded_scene();
+	// void change_scene(const String& p_path);
+	// Node *get_loaded_scene();
 
 #ifdef TOOLS_ENABLED
 	void set_edited_scene_root(Node *p_node);
@@ -353,7 +354,7 @@ public:
 	Error change_scene_to(const Ref<PackedScene> &p_scene);
 	Error reload_current_scene();
 
-	//used by Main::start, don't use otherwise
+	// used by Main::start, don't use otherwise
 	void add_current_scene(Node *p_current);
 
 	static SceneTree *get_singleton() { return singleton; }
