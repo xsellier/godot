@@ -10919,6 +10919,17 @@
 				Erase a dictionary key/value pair by key.
 			</description>
 		</method>
+		<method name="get">
+			<return type="var">
+			</return>
+			<argument index="0" name="key" type="var">
+			</argument>
+			<argument index="1" name="default" type="var" default="null">
+			</argument>
+			<description>
+				Return the value for the given key, or [code]default[/code] (null if omitted) if the key does not exist.
+			</description>
+		</method>
 		<method name="has">
 			<return type="bool">
 			</return>

@@ -52,7 +52,7 @@ void Dictionary::get_key_list(List<Variant> *p_keys) const {
 
 void Dictionary::_copy_on_write() const {
 
-	//make a copy of what we have
+	// make a copy of what we have
 	if (_p->shared)
 		return;
 
@@ -93,6 +93,14 @@ Variant Dictionary::get_valid(const Variant &p_key) const {
 	return *v;
 }
 
+Variant Dictionary::get(const Variant &p_key, const Variant &p_default) const {
+
+	const Variant *v = getptr(p_key);
+	if (!v)
+		return p_default;
+	return *v;
+}
+
 int Dictionary::size() const {
 
 	return _p->variant_map.size();
@@ -128,11 +136,11 @@ bool Dictionary::operator==(const Dictionary &p_dictionary) const {
 
 void Dictionary::_ref(const Dictionary &p_from) const {
 
-	//make a copy first (thread safe)
+	// make a copy first (thread safe)
 	if (!p_from._p->refcount.ref())
 		return; // couldn't copy
 
-	//if this is the same, unreference the other one
+	// if this is the same, unreference the other one
 	if (p_from._p == _p) {
 		_p->refcount.unref();
 		return;

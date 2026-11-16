@@ -39,7 +39,7 @@ typedef void (*VariantFunc)(Variant &r_ret, Variant &p_self, const Variant **p_a
 typedef void (*VariantConstructFunc)(Variant &r_ret, const Variant **p_args);
 
 VARIANT_ENUM_CAST(Image::CompressMode);
-//VARIANT_ENUM_CAST(Image::Format);
+// VARIANT_ENUM_CAST(Image::Format);
 
 struct _VariantCall {
 
@@ -106,7 +106,7 @@ struct _VariantCall {
 					newargs[i] = p_args[i];
 				int defargcount = def_argcount;
 				for (int i = p_argcount; i < arg_count; i++)
-					newargs[i] = &default_args[defargcount - (i - p_argcount) - 1]; //default arguments
+					newargs[i] = &default_args[defargcount - (i - p_argcount) - 1]; // default arguments
 #ifdef DEBUG_ENABLED
 				if (!verify_arguments(newargs, r_error))
 					return;
@@ -386,7 +386,7 @@ struct _VariantCall {
 	VCALL_LOCALMEM2R(Plane, has_point);
 	VCALL_LOCALMEM1R(Plane, project);
 
-	//return vector3 if intersected, nil if not
+	// return vector3 if intersected, nil if not
 	static void _call_Plane_intersect_3(Variant &r_ret, Variant &p_self, const Variant **p_args) {
 		Vector3 result;
 		if (reinterpret_cast<Plane *>(p_self._data._mem)->intersect_3(*p_args[0], *p_args[1], &result))
@@ -449,6 +449,7 @@ struct _VariantCall {
 	VCALL_LOCALMEM0(Dictionary, clear);
 	VCALL_LOCALMEM1R(Dictionary, has);
 	VCALL_LOCALMEM1R(Dictionary, has_all);
+	VCALL_LOCALMEM2R(Dictionary, get);
 	VCALL_LOCALMEM1(Dictionary, erase);
 	VCALL_LOCALMEM0R(Dictionary, hash);
 	VCALL_LOCALMEM0R(Dictionary, keys);
@@ -1032,7 +1033,7 @@ void Variant::call_ptr(const StringName &p_method, const Variant **p_args, int p
 	Variant ret;
 
 	if (type == Variant::OBJECT) {
-		//call object
+		// call object
 		Object *obj = _get_obj().obj;
 		if (!obj) {
 			r_error.error = CallError::CALL_ERROR_INSTANCE_IS_NULL;
@@ -1040,7 +1041,7 @@ void Variant::call_ptr(const StringName &p_method, const Variant **p_args, int p
 		}
 #ifdef DEBUG_ENABLED
 		if (ScriptDebugger::get_singleton() && _get_obj().ref.is_null()) {
-			//only if debugging!
+			// only if debugging!
 			if (!ObjectDB::instance_validate(obj)) {
 				r_error.error = CallError::CALL_ERROR_INSTANCE_IS_NULL;
 				return;
@@ -1050,7 +1051,7 @@ void Variant::call_ptr(const StringName &p_method, const Variant **p_args, int p
 #endif
 		ret = _get_obj().obj->call(p_method, p_args, p_argcount, r_error);
 
-		//else if (type==Variant::METHOD) {
+		// else if (type==Variant::METHOD) {
 
 	} else {
 
@@ -1079,7 +1080,7 @@ Variant Variant::construct(const Variant::Type p_type, const Variant **p_args, i
 	ERR_FAIL_INDEX_V(p_type, VARIANT_MAX, Variant());
 
 	r_error.error = Variant::CallError::CALL_OK;
-	if (p_argcount == 0) { //generic construct
+	if (p_argcount == 0) { // generic construct
 
 		switch (p_type) {
 			case NIL:
@@ -1101,7 +1102,7 @@ Variant Variant::construct(const Variant::Type p_type, const Variant **p_args, i
 			case PLANE: return Plane();
 			case QUAT: return Quat();
 			case _AABB:
-				return AABB(); //sorry naming convention fail :( not like it's used often // 10
+				return AABB(); // sorry naming convention fail :( not like it's used often // 10
 			case MATRIX3: return Matrix3();
 			case TRANSFORM:
 				return Transform();
@@ -1139,10 +1140,10 @@ Variant Variant::construct(const Variant::Type p_type, const Variant **p_args, i
 			if (cd.arg_count != p_argcount)
 				continue;
 
-			//validate parameters
+			// validate parameters
 			for (int i = 0; i < cd.arg_count; i++) {
 				if (!Variant::can_convert(p_args[i]->type, cd.arg_types[i])) {
-					r_error.error = Variant::CallError::CALL_ERROR_INVALID_ARGUMENT; //no such constructor
+					r_error.error = Variant::CallError::CALL_ERROR_INVALID_ARGUMENT; // no such constructor
 					r_error.argument = i;
 					r_error.expected = cd.arg_types[i];
 					return Variant();
@@ -1155,9 +1156,9 @@ Variant Variant::construct(const Variant::Type p_type, const Variant **p_args, i
 		}
 
 	} else if (p_argcount == 1 && p_args[0]->type == p_type) {
-		return *p_args[0]; //copy construct
+		return *p_args[0]; // copy construct
 	} else if (p_argcount == 1 && (!p_strict || Variant::can_convert(p_args[0]->type, p_type))) {
-		//near match construct
+		// near match construct
 
 		switch (p_type) {
 			case NIL: {
@@ -1184,7 +1185,7 @@ Variant Variant::construct(const Variant::Type p_type, const Variant **p_args, i
 			case PLANE: return (Plane(*p_args[0]));
 			case QUAT: return (Quat(*p_args[0]));
 			case _AABB:
-				return (AABB(*p_args[0])); //sorry naming convention fail :( not like it's used often // 10
+				return (AABB(*p_args[0])); // sorry naming convention fail :( not like it's used often // 10
 			case MATRIX3: return (Matrix3(p_args[0]->operator Matrix3()));
 			case TRANSFORM:
 				return (Transform(p_args[0]->operator Transform()));
@@ -1214,7 +1215,7 @@ Variant Variant::construct(const Variant::Type p_type, const Variant **p_args, i
 			default: return Variant();
 		}
 	}
-	r_error.error = Variant::CallError::CALL_ERROR_INVALID_METHOD; //no such constructor
+	r_error.error = Variant::CallError::CALL_ERROR_INVALID_METHOD; // no such constructor
 	return Variant();
 }
 
@@ -1277,7 +1278,7 @@ void Variant::get_constructor_list(Variant::Type p_type, List<MethodInfo> *p_lis
 
 	ERR_FAIL_INDEX(p_type, VARIANT_MAX);
 
-	//custom constructors
+	// custom constructors
 	for (const List<_VariantCall::ConstructData>::Element *E = _VariantCall::construct_funcs[p_type].constructors.front(); E; E = E->next()) {
 
 		const _VariantCall::ConstructData &cd = E->get();
@@ -1293,7 +1294,7 @@ void Variant::get_constructor_list(Variant::Type p_type, List<MethodInfo> *p_lis
 		}
 		p_list->push_back(mi);
 	}
-	//default constructors
+	// default constructors
 	for (int i = 0; i < VARIANT_MAX; i++) {
 		if (i == p_type)
 			continue;
@@ -1459,7 +1460,7 @@ void register_variant_methods() {
 	ADDFUNC1(VECTOR2, REAL, Vector2, dot, VECTOR2, "with", varray());
 	ADDFUNC1(VECTOR2, VECTOR2, Vector2, slide, VECTOR2, "vec", varray());
 	ADDFUNC1(VECTOR2, VECTOR2, Vector2, reflect, VECTOR2, "vec", varray());
-	//ADDFUNC1(VECTOR2,REAL,Vector2,cross,VECTOR2,"with",varray());
+	// ADDFUNC1(VECTOR2,REAL,Vector2,cross,VECTOR2,"with",varray());
 	ADDFUNC0(VECTOR2, VECTOR2, Vector2, abs, varray());
 	ADDFUNC1(VECTOR2, VECTOR2, Vector2, clamped, REAL, "length", varray());
 
@@ -1567,6 +1568,7 @@ void register_variant_methods() {
 	ADDFUNC0(DICTIONARY, NIL, Dictionary, clear, varray());
 	ADDFUNC1(DICTIONARY, BOOL, Dictionary, has, NIL, "key", varray());
 	ADDFUNC1(DICTIONARY, BOOL, Dictionary, has_all, ARRAY, "keys", varray());
+	ADDFUNC2(DICTIONARY, NIL, Dictionary, get, NIL, "key", NIL, "default", varray(Variant()));
 	ADDFUNC1(DICTIONARY, NIL, Dictionary, erase, NIL, "key", varray());
 	ADDFUNC0(DICTIONARY, INT, Dictionary, hash, varray());
 	ADDFUNC0(DICTIONARY, ARRAY, Dictionary, keys, varray());
@@ -1677,7 +1679,7 @@ void register_variant_methods() {
 	ADDFUNC1(COLOR_ARRAY, NIL, ColorArray, resize, INT, "idx", varray());
 	ADDFUNC0(COLOR_ARRAY, NIL, ColorArray, invert, varray());
 
-	//pointerbased
+	// pointerbased
 
 	ADDFUNC0(_AABB, REAL, AABB, get_area, varray());
 	ADDFUNC0(_AABB, BOOL, AABB, has_no_area, varray());
@@ -1743,6 +1745,7 @@ void register_variant_methods() {
 #ifdef DEBUG_ENABLED
 	_VariantCall::type_funcs[Variant::TRANSFORM].functions["xform"].returns = true;
 	_VariantCall::type_funcs[Variant::TRANSFORM].functions["xform_inv"].returns = true;
+	_VariantCall::type_funcs[Variant::DICTIONARY].functions["get"].returns = true;
 #endif
 
 	ADDFUNC0(INPUT_EVENT, BOOL, InputEvent, is_pressed, varray());
