@@ -216,7 +216,7 @@ void ResourceInteractiveLoaderXML::unquote(String &p_str) {
 	}
 	p_str=p_str.replace("&amp;","&");
 */
-	//p_str.parse_utf8( p_str.ascii(true).get_data() );
+	// p_str.parse_utf8( p_str.ascii(true).get_data() );
 }
 
 Error ResourceInteractiveLoaderXML::goto_end_of_tag() {
@@ -225,7 +225,7 @@ Error ResourceInteractiveLoaderXML::goto_end_of_tag() {
 	while (true) {
 
 		c = get_char();
-		if (c == '>') //closetag
+		if (c == '>') // closetag
 			break;
 		if (f->eof_reached()) {
 
@@ -347,12 +347,12 @@ Error ResourceInteractiveLoaderXML::parse_property(Variant &r_v, String &r_name,
 	r_v = Variant();
 	r_name = "";
 
-	//ERR_FAIL_COND_V(tag->name!="property",ERR_FILE_CORRUPT);
-	//ERR_FAIL_COND_V(!tag->args.has("name"),ERR_FILE_CORRUPT);
+	// ERR_FAIL_COND_V(tag->name!="property",ERR_FILE_CORRUPT);
+	// ERR_FAIL_COND_V(!tag->args.has("name"),ERR_FILE_CORRUPT);
 	//	ERR_FAIL_COND_V(!tag->args.has("type"),ERR_FILE_CORRUPT);
 
-	//String name=tag->args["name"];
-	//ERR_FAIL_COND_V(name=="",ERR_FILE_CORRUPT);
+	// String name=tag->args["name"];
+	// ERR_FAIL_COND_V(name=="",ERR_FILE_CORRUPT);
 	String type = tag->name;
 	String name = tag->args["name"];
 
@@ -379,7 +379,7 @@ Error ResourceInteractiveLoaderXML::parse_property(Variant &r_v, String &r_name,
 				ERR_EXPLAIN(local_path + ":" + itos(get_current_line()) + ": Error parsing dictionary: " + name + " (from line " + itos(dictline) + ")");
 				ERR_FAIL_COND_V(err && err != ERR_FILE_EOF, err);
 			}
-			//ERR_FAIL_COND_V(tagname!="key",ERR_FILE_CORRUPT);
+			// ERR_FAIL_COND_V(tagname!="key",ERR_FILE_CORRUPT);
 			if (err)
 				break;
 			Variant value;
@@ -389,13 +389,13 @@ Error ResourceInteractiveLoaderXML::parse_property(Variant &r_v, String &r_name,
 			}
 
 			ERR_FAIL_COND_V(err, err);
-			//ERR_FAIL_COND_V(tagname!="value",ERR_FILE_CORRUPT);
+			// ERR_FAIL_COND_V(tagname!="value",ERR_FILE_CORRUPT);
 
 			d[key] = value;
 		}
 
-		//err=parse_property_data(name); // skip the rest
-		//ERR_FAIL_COND_V(err,err);
+		// err=parse_property_data(name); // skip the rest
+		// ERR_FAIL_COND_V(err,err);
 
 		r_name = name;
 		r_v = d;
@@ -436,8 +436,8 @@ Error ResourceInteractiveLoaderXML::parse_property(Variant &r_v, String &r_name,
 			ERR_FAIL_COND_V(err != ERR_FILE_EOF, err);
 		}
 
-		//err=parse_property_data(name); // skip the rest
-		//ERR_FAIL_COND_V(err,err);
+		// err=parse_property_data(name); // skip the rest
+		// ERR_FAIL_COND_V(err,err);
 
 		r_name = name;
 		r_v = array;
@@ -461,49 +461,43 @@ Error ResourceInteractiveLoaderXML::parse_property(Variant &r_v, String &r_name,
 				}
 
 				r_v = prop;
-				return OK;
+			} else {
+
+				if (path.begins_with("local://"))
+
+					path = path.replace("local://", local_path + "::");
+				else if (path.find("://") == -1 && path.is_rel_path()) {
+					// path is relative to file being loaded, so convert to a resource path
+					path = Globals::get_singleton()->localize_path(local_path.get_base_dir().plus_file(path));
+				}
+
+				if (remaps.has(path)) {
+					path = remaps[path];
+				}
+
+				// take advantage of the resource loader cache. The resource is cached on it, even if
+				RES res = ResourceLoader::load(path, hint);
+
+				if (res.is_null()) {
+
+					WARN_PRINT(String("Couldn't load resource: " + path).ascii().get_data());
+				}
+
+				r_v = res.get_ref_ptr();
 			}
-
-			if (path.begins_with("local://"))
-
-				path = path.replace("local://", local_path + "::");
-			else if (path.find("://") == -1 && path.is_rel_path()) {
-				// path is relative to file being loaded, so convert to a resource path
-				path = Globals::get_singleton()->localize_path(local_path.get_base_dir().plus_file(path));
-			}
-
-			if (remaps.has(path)) {
-				path = remaps[path];
-			}
-
-			//take advantage of the resource loader cache. The resource is cached on it, even if
-			RES res = ResourceLoader::load(path, hint);
-
-			if (res.is_null()) {
-
-				WARN_PRINT(String("Couldn't load resource: " + path).ascii().get_data());
-			}
-
-			r_v = res.get_ref_ptr();
 		} else if (tag->args.has("external")) {
 
 			int index = tag->args["external"].to_int();
 
 			if (p_for_export_data) {
 
-				String prop;
-
-				prop = "@RESEXTERNAL:" + itos(index);
-
-				r_v = prop;
-				return OK;
-			}
-
-			if (ext_resources.has(index)) {
+				// The end of the tag still has to be parsed, see below
+				r_v = "@RESEXTERNAL:" + itos(index);
+			} else if (ext_resources.has(index)) {
 				String path = ext_resources[index].path;
 				String type = ext_resources[index].type;
 
-				//take advantage of the resource loader cache. The resource is cached on it, even if
+				// take advantage of the resource loader cache. The resource is cached on it, even if
 				RES res = ResourceLoader::load(path, type);
 
 				if (res.is_null()) {
@@ -530,7 +524,7 @@ Error ResourceInteractiveLoaderXML::parse_property(Variant &r_v, String &r_name,
 	} else if (type == "image") {
 
 		if (!tag->args.has("encoding")) {
-			//empty image
+			// empty image
 			r_v = Image();
 			String sdfsdfg;
 			Error err = parse_property_data(sdfsdfg);
@@ -611,7 +605,7 @@ Error ResourceInteractiveLoaderXML::parse_property(Variant &r_v, String &r_name,
 			int h = height.to_int();
 
 			if (w == 0 && h == 0) {
-				//r_v = Image(w, h, imgformat);
+				// r_v = Image(w, h, imgformat);
 				r_v = Image();
 				String sdfsdfg;
 				Error err = parse_property_data(sdfsdfg);
@@ -627,7 +621,7 @@ Error ResourceInteractiveLoaderXML::parse_property(Variant &r_v, String &r_name,
 			}
 
 			if (datasize == 0) {
-				//r_v = Image(w, h, imgformat);
+				// r_v = Image(w, h, imgformat);
 				r_v = Image();
 				String sdfsdfg;
 				Error err = parse_property_data(sdfsdfg);
@@ -699,7 +693,7 @@ Error ResourceInteractiveLoaderXML::parse_property(Variant &r_v, String &r_name,
 
 				byte |= HEX2CHR(c);
 				bytesptr[idx >> 1] = byte;
-				//printf("%x\n",int(byte));
+				// printf("%x\n",int(byte));
 			} else {
 
 				byte = HEX2CHR(c) << 4;
@@ -939,7 +933,7 @@ Error ResourceInteractiveLoaderXML::parse_property(Variant &r_v, String &r_name,
 		while ((err = parse_property(v, tagname)) == OK) {
 
 			ERR_CONTINUE(idx < 0 || idx >= len);
-			String str = v; //convert back to string
+			String str = v; // convert back to string
 			w[idx] = str;
 			idx++;
 		}
@@ -954,8 +948,8 @@ Error ResourceInteractiveLoaderXML::parse_property(Variant &r_v, String &r_name,
 			ERR_FAIL_COND_V(err != ERR_FILE_EOF, err);
 		}
 
-		//err=parse_property_data(name); // skip the rest
-		//ERR_FAIL_COND_V(err,err);
+		// err=parse_property_data(name); // skip the rest
+		// ERR_FAIL_COND_V(err,err);
 
 		r_name = name;
 		r_v = array;
@@ -1377,7 +1371,7 @@ Error ResourceInteractiveLoaderXML::poll() {
 	}
 
 	RES res;
-	//Object *obj=NULL;
+	// Object *obj=NULL;
 
 	bool main;
 
@@ -1451,7 +1445,7 @@ Error ResourceInteractiveLoaderXML::poll() {
 	int subres = 0;
 
 	if (!main) {
-		//loading resource
+		// loading resource
 
 		error = ERR_FILE_CORRUPT;
 		ERR_EXPLAIN(local_path + ":" + itos(get_current_line()) + ": <resource> missing 'len' field.");
@@ -1463,7 +1457,7 @@ Error ResourceInteractiveLoaderXML::poll() {
 		error = OK;
 
 		if (path.begins_with("local://")) {
-			//built-in resource (but really external)
+			// built-in resource (but really external)
 
 			path = path.replace("local://", "");
 			subres = path.to_int();
@@ -1497,7 +1491,7 @@ Error ResourceInteractiveLoaderXML::poll() {
 	Resource *r = obj->cast_to<Resource>();
 	if (!r) {
 		error = ERR_FILE_CORRUPT;
-		memdelete(obj); //bye
+		memdelete(obj); // bye
 		ERR_EXPLAIN(local_path + ":" + itos(get_current_line()) + ": Object type in resource field not a resource, type is: " + obj->get_type());
 		ERR_FAIL_COND_V(!r, ERR_FILE_CORRUPT);
 	}
@@ -1507,7 +1501,7 @@ Error ResourceInteractiveLoaderXML::poll() {
 		r->set_path(path);
 	r->set_subindex(subres);
 
-	//load properties
+	// load properties
 
 	while (true) {
 
@@ -1515,7 +1509,7 @@ Error ResourceInteractiveLoaderXML::poll() {
 		Variant v;
 		Error err;
 		err = parse_property(v, name);
-		if (err == ERR_FILE_EOF) //tag closed
+		if (err == ERR_FILE_EOF) // tag closed
 			break;
 		if (err != OK) {
 			ERR_EXPLAIN(local_path + ":" + itos(get_current_line()) + ": XML Parsing aborted.");
@@ -1527,7 +1521,7 @@ Error ResourceInteractiveLoaderXML::poll() {
 #ifdef TOOLS_ENABLED
 	res->set_edited(false);
 #endif
-	resource_cache.push_back(res); //keep it in mem until finished loading
+	resource_cache.push_back(res); // keep it in mem until finished loading
 	resource_current++;
 	if (main) {
 		f->close();
@@ -1682,14 +1676,14 @@ Error ResourceInteractiveLoaderXML::get_export_data(FileAccess *p_f, ExportData 
 		res_data.index = -1;
 
 		if (!main) {
-			//loading resource
+			// loading resource
 
 			String path = tag->args["path"];
 
 			error = OK;
 
 			if (path.begins_with("local://")) {
-				//built-in resource (but really external)
+				// built-in resource (but really external)
 
 				path = path.replace("local://", "");
 				res_data.index = path.to_int();
@@ -1699,7 +1693,7 @@ Error ResourceInteractiveLoaderXML::get_export_data(FileAccess *p_f, ExportData 
 		} else {
 			res_data.type = resource_type;
 		}
-		//load properties
+		// load properties
 
 		while (true) {
 
@@ -1707,9 +1701,9 @@ Error ResourceInteractiveLoaderXML::get_export_data(FileAccess *p_f, ExportData 
 			Variant v;
 			Error err;
 
-			err = parse_property(v, name);
+			err = parse_property(v, name, true);
 
-			if (err == ERR_FILE_EOF) //tag closed
+			if (err == ERR_FILE_EOF) // tag closed
 				break;
 
 			if (err != OK) {
@@ -1734,7 +1728,7 @@ Error ResourceInteractiveLoaderXML::rename_dependencies(FileAccess *p_f, const S
 	open(p_f);
 	ERR_FAIL_COND_V(error != OK, error);
 
-	//FileAccess
+	// FileAccess
 
 	bool old_format = false;
 
@@ -1771,7 +1765,7 @@ Error ResourceInteractiveLoaderXML::rename_dependencies(FileAccess *p_f, const S
 			if (!fw) {
 
 				fw = FileAccess::open(p_path + ".depren", FileAccess::WRITE);
-				fw->store_line("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"); //no escape
+				fw->store_line("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"); // no escape
 				fw->store_line("<resource_file type=\"" + resource_type + "\" subresource_count=\"" + itos(resources_total) + "\" version=\"" + itos(VERSION_MAJOR) + "." + itos(VERSION_MINOR) + "\" version_name=\"" + VERSION_FULL_NAME + "\">");
 			}
 
@@ -1791,7 +1785,7 @@ Error ResourceInteractiveLoaderXML::rename_dependencies(FileAccess *p_f, const S
 			}
 
 			if (relative) {
-				//restore relative
+				// restore relative
 				path = base_path.path_to_file(path);
 			}
 
@@ -1827,7 +1821,7 @@ Error ResourceInteractiveLoaderXML::rename_dependencies(FileAccess *p_f, const S
 		DirAccess *da = DirAccess::create(DirAccess::ACCESS_FILESYSTEM);
 		da->remove(p_path + ".depren");
 		memdelete(da);
-		//fuck it, use the old approach;
+		// fuck it, use the old approach;
 
 		WARN_PRINT(("This file is old, so it can't refactor dependencies, opening and resaving: " + p_path).utf8().get_data());
 
@@ -1859,7 +1853,7 @@ Error ResourceInteractiveLoaderXML::rename_dependencies(FileAccess *p_f, const S
 
 	if (!fw) {
 
-		return OK; //nothing to rename, do nothing
+		return OK; // nothing to rename, do nothing
 	}
 
 	uint8_t c = f->get_8();
@@ -1961,7 +1955,7 @@ String ResourceInteractiveLoaderXML::recognize(FileAccess *p_f) {
 	ResourceInteractiveLoaderXML::Tag *tag = parse_tag();
 	if (!tag || tag->name != "?xml" || !tag->args.has("version") || !tag->args.has("encoding") || tag->args["encoding"] != "UTF-8") {
 
-		return ""; //unrecognized
+		return ""; // unrecognized
 	}
 
 	tag_stack.clear();
@@ -1970,7 +1964,7 @@ String ResourceInteractiveLoaderXML::recognize(FileAccess *p_f) {
 
 	if (!tag || tag->name != "resource_file" || !tag->args.has("type") || !tag->args.has("version")) {
 
-		return ""; //unrecognized
+		return ""; // unrecognized
 	}
 
 	return tag->args["type"];
@@ -2044,13 +2038,13 @@ bool ResourceFormatLoaderXML::handles_type(const String &p_type) const {
 String ResourceFormatLoaderXML::get_resource_type(const String &p_path) const {
 
 	String ext = p_path.extension().to_lower();
-	if (!ext.begins_with("x")) //a lie but..
+	if (!ext.begins_with("x")) // a lie but..
 		return "";
 
 	FileAccess *f = FileAccess::open(p_path, FileAccess::READ);
 	if (!f) {
 
-		return ""; //could not rwead
+		return ""; // could not rwead
 	}
 
 	Ref<ResourceInteractiveLoaderXML> ria = memnew(ResourceInteractiveLoaderXML);
@@ -2300,13 +2294,13 @@ void ResourceFormatSaverXMLInstance::write_property(const String &p_name, const 
 				params = "resource_type=\"" + res->get_save_type() + "\"";
 
 				if (res->get_path().length() && res->get_path().find("::") == -1) {
-					//external resource
+					// external resource
 					String path = relative_paths ? local_path.path_to_file(res->get_path()) : res->get_path();
 					escape(path);
 					params += " path=\"" + path + "\"";
 				} else {
 
-					//internal resource
+					// internal resource
 					ERR_EXPLAIN("Resource was not pre cached for the resource section, bug?");
 					ERR_FAIL_COND(!resource_set.has(res));
 
@@ -2556,7 +2550,7 @@ void ResourceFormatSaverXMLInstance::write_property(const String &p_name, const 
 
 			for (List<Variant>::Element *E = keys.front(); E; E = E->next()) {
 
-				//if (!_check_type(dict[E->get()]))
+				// if (!_check_type(dict[E->get()]))
 				//	continue;
 				bool ok;
 				write_property("", E->get(), &ok);
@@ -2564,7 +2558,7 @@ void ResourceFormatSaverXMLInstance::write_property(const String &p_name, const 
 
 				write_property("", dict[E->get()], &ok);
 				if (!ok)
-					write_property("", Variant()); //at least make the file consistent..
+					write_property("", Variant()); // at least make the file consistent..
 			}
 
 		} break;
@@ -2642,7 +2636,7 @@ void ResourceFormatSaverXMLInstance::write_property(const String &p_name, const 
 			const String *ptr = r.ptr();
 			;
 			String s;
-			//write_string("\n");
+			// write_string("\n");
 
 			for (int i = 0; i < len; i++) {
 
@@ -2764,7 +2758,7 @@ void ResourceFormatSaverXMLInstance::_find_resources(const Variant &p_variant, b
 				I = I->next();
 			}
 
-			resource_set.insert(res); //saved after, so the childs it needs are available when loaded
+			resource_set.insert(res); // saved after, so the childs it needs are available when loaded
 			saved_resources.push_back(res);
 
 		} break;
@@ -2818,7 +2812,7 @@ Error ResourceFormatSaverXMLInstance::save(const String &p_path, const RES &p_re
 
 	ERR_FAIL_COND_V(err != OK, err);
 
-	write_string("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>", false); //no escape
+	write_string("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>", false); // no escape
 	write_string("\n", false);
 	enter_tag("resource_file", "type=\"" + p_resource->get_type() + "\" subresource_count=\"" + itos(saved_resources.size() + external_resources.size()) + "\" version=\"" + itos(VERSION_MAJOR) + "." + itos(VERSION_MINOR) + "\" version_name=\"" + VERSION_FULL_NAME + "\"");
 	write_string("\n", false);
@@ -2828,8 +2822,8 @@ Error ResourceFormatSaverXMLInstance::save(const String &p_path, const RES &p_re
 		write_tabs();
 		String p = E->key()->get_path();
 
-		enter_tag("ext_resource", "path=\"" + p + "\" type=\"" + E->key()->get_save_type() + "\" index=\"" + itos(E->get()) + "\""); //bundled
-		exit_tag("ext_resource"); //bundled
+		enter_tag("ext_resource", "path=\"" + p + "\" type=\"" + E->key()->get_save_type() + "\" index=\"" + itos(E->get()) + "\""); // bundled
+		exit_tag("ext_resource"); // bundled
 		write_string("\n", false);
 	}
 
@@ -2842,7 +2836,7 @@ Error ResourceFormatSaverXMLInstance::save(const String &p_path, const RES &p_re
 
 			if (res->get_subindex() != 0) {
 				if (used_indices.has(res->get_subindex())) {
-					res->set_subindex(0); //repeated
+					res->set_subindex(0); // repeated
 				} else {
 					used_indices.insert(res->get_subindex());
 				}
@@ -2859,9 +2853,9 @@ Error ResourceFormatSaverXMLInstance::save(const String &p_path, const RES &p_re
 		write_tabs();
 
 		if (main)
-			enter_tag("main_resource", ""); //bundled
+			enter_tag("main_resource", ""); // bundled
 		else if (res->get_path().length() && res->get_path().find("::") == -1)
-			enter_tag("resource", "type=\"" + res->get_type() + "\" path=\"" + res->get_path() + "\""); //bundled
+			enter_tag("resource", "type=\"" + res->get_type() + "\" path=\"" + res->get_path() + "\""); // bundled
 		else {
 
 			if (res->get_subindex() == 0) {
@@ -2919,7 +2913,7 @@ Error ResourceFormatSaverXMLInstance::save(const String &p_path, const RES &p_re
 	}
 
 	f->close();
-	//memdelete(f);
+	// memdelete(f);
 
 	return OK;
 }
@@ -2936,7 +2930,7 @@ bool ResourceFormatSaverXML::recognize(const RES &p_resource) const {
 }
 void ResourceFormatSaverXML::get_recognized_extensions(const RES &p_resource, List<String> *p_extensions) const {
 
-	//here comes the sun, lalalala
+	// here comes the sun, lalalala
 	String base = p_resource->get_base_extension().to_lower();
 	p_extensions->push_back("xml");
 	if (base != "res") {

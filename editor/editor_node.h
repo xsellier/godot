@@ -168,7 +168,7 @@ private:
 		RUN_SETTINGS,
 		RUN_PROJECT_MANAGER,
 		RUN_FILE_SERVER,
-		//RUN_DEPLOY_DUMB_CLIENTS,
+		// RUN_DEPLOY_DUMB_CLIENTS,
 		RUN_LIVE_DEBUG,
 		RUN_DEBUG_COLLISONS,
 		RUN_DEBUG_NAVIGATION,
@@ -197,16 +197,16 @@ private:
 		OBJECT_METHOD_BASE = 500
 	};
 
-	//Node *edited_scene; //scene being edited
-	Viewport *scene_root; //root of the scene being edited
+	// Node *edited_scene; //scene being edited
+	Viewport *scene_root; // root of the scene being edited
 
-	//Ref<ResourceImportMetadata> scene_import_metadata;
+	// Ref<ResourceImportMetadata> scene_import_metadata;
 
 	Control *scene_root_parent;
 	Control *gui_base;
 	VBoxContainer *main_vbox;
 
-	//split
+	// split
 
 	HSplitContainer *left_l_hsplit;
 	VSplitContainer *left_l_vsplit;
@@ -219,7 +219,7 @@ private:
 
 	VSplitContainer *center_split;
 
-	//main tabs
+	// main tabs
 
 	Tabs *scene_tabs;
 	int tab_closing;
@@ -231,11 +231,11 @@ private:
 	HBoxContainer *bottom_hb;
 	Control *vp_base;
 	PaneDrag *pd;
-	//PaneDrag *pd_anim;
+	// PaneDrag *pd_anim;
 	Panel *menu_panel;
 
-	//HSplitContainer *editor_hsplit;
-	//VSplitContainer *editor_vsplit;
+	// HSplitContainer *editor_hsplit;
+	// VSplitContainer *editor_vsplit;
 	CenterContainer *play_cc;
 	HBoxContainer *menu_hb;
 	Control *viewport;
@@ -256,19 +256,19 @@ private:
 	MenuButton *debug_button;
 	ToolButton *search_button;
 	TextureProgress *audio_vu;
-	//MenuButton *fileserver_menu;
+	// MenuButton *fileserver_menu;
 
 	RichTextLabel *load_errors;
 	AcceptDialog *load_error_dialog;
 
-	//Control *scene_root_base;
+	// Control *scene_root_base;
 	Ref<Theme> theme;
 
 	PopupMenu *recent_scenes;
 	Button *property_back;
 	Button *property_forward;
 	SceneTreeDock *scene_tree_dock;
-	//ResourcesDock *resources_dock;
+	// ResourcesDock *resources_dock;
 	PropertyEditor *property_editor;
 	NodeDock *node_dock;
 	VBoxContainer *prop_editor_vb;
@@ -280,8 +280,8 @@ private:
 
 	EditorExportGodot3 export_godot3;
 	FileDialog *export_godot3_dialog;
-	CheckButton *export_godot3_dialog_convert_scripts;
-	CheckButton *export_godot3_dialog_mark_converted_lines;
+	CheckButton *export_godot3_dialog_annotations;
+	Tree *export_godot3_dialog_renames;
 
 	CreateDialog *create_dialog;
 
@@ -299,7 +299,7 @@ private:
 	PopupMenu *editor_layouts;
 	EditorNameDialog *layout_dialog;
 
-	//OptimizedPresetsDialog *optimized_presets;
+	// OptimizedPresetsDialog *optimized_presets;
 	EditorSettingsDialog *settings_config_dialog;
 	RunSettingsDialog *run_settings_dialog;
 	ProjectSettings *project_settings;
@@ -313,8 +313,8 @@ private:
 	String current_path;
 	MenuButton *update_menu;
 	ToolButton *sources_button;
-	//TabContainer *prop_pallete;
-	//TabContainer *top_pallete;
+	// TabContainer *prop_pallete;
+	// TabContainer *top_pallete;
 	String defer_load_scene;
 	String defer_translatable;
 	String defer_optimize;
@@ -419,7 +419,7 @@ private:
 	void _dialog_display_file_error(String p_file, Error p_error);
 
 	int current_option;
-	//void _animation_visibility_toggle();
+	// void _animation_visibility_toggle();
 	void _resource_created();
 	void _resource_selected(const RES &p_res, const String &p_property = "");
 	void _menu_option(int p_option);
@@ -474,7 +474,7 @@ private:
 	void _update_recent_scenes();
 	void _open_recent_scene(int p_idx);
 	void _dropped_files(const Vector<String> &p_files, int p_screen);
-	//void _open_recent_scene_confirm();
+	// void _open_recent_scene_confirm();
 	String _recent_scene;
 
 	bool convert_old;
@@ -528,6 +528,8 @@ private:
 		String path;
 		bool debug;
 		String password;
+		String godot3_path;
+		bool godot3_mark;
 
 	} export_defer;
 
@@ -570,6 +572,9 @@ private:
 	void _update_addon_config();
 
 	void _export_godot3_path(const String &p_path);
+	void _export_godot3_fill_renames();
+	void _export_godot3_add_rename();
+	void _export_godot3_remove_rename();
 
 	static void _file_access_close_error_notify(const String &p_str);
 
@@ -636,15 +641,15 @@ public:
 	static EditorLog *get_log() { return singleton->log; }
 	Control *get_viewport();
 
-	//void animation_editor_make_visible(bool p_visible);
-	//void hide_animation_player_editors();
-	//void animation_panel_make_visible(bool p_visible);
+	// void animation_editor_make_visible(bool p_visible);
+	// void hide_animation_player_editors();
+	// void animation_panel_make_visible(bool p_visible);
 
 	void set_edited_scene(Node *p_scene);
 
 	Node *get_edited_scene() { return editor_data.get_edited_scene_root(); }
 
-	Viewport *get_scene_root() { return scene_root; } //root of the scene being edited
+	Viewport *get_scene_root() { return scene_root; } // root of the scene being edited
 	Error save_optimized_copy(const String &p_scene, const String &p_preset);
 
 	void fix_dependencies(const String &p_for_file);
@@ -684,6 +689,7 @@ public:
 	void show_warning(const String &p_text, const String &p_title = "Warning!");
 
 	Error export_platform(const String &p_platform, const String &p_path, bool p_debug, const String &p_password, bool p_quit_after = false);
+	void export_godot3_cli(const String &p_path, bool p_mark_converted_lines);
 
 	static void register_editor_types();
 	static void unregister_editor_types();
