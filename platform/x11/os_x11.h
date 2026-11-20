@@ -166,6 +166,7 @@ class OS_X11 : public OS_Unix {
 	Cursor cursors[CURSOR_MAX];
 	Cursor null_cursor;
 	CursorShape current_cursor;
+	void _show_current_cursor();
 
 	InputDefault *input;
 
@@ -188,7 +189,7 @@ class OS_X11 : public OS_Unix {
 	int audio_driver_index;
 	unsigned int capture_idle;
 	bool maximized;
-	//void set_wm_border(bool p_enabled);
+	// void set_wm_border(bool p_enabled);
 	void set_wm_fullscreen(bool p_enabled);
 	void set_wm_above(bool p_enabled);
 

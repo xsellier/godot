@@ -1205,6 +1205,7 @@ void OS_Windows::set_clipboard(const String &p_text) {
 
 	HGLOBAL mem = GlobalAlloc(GMEM_MOVEABLE, (p_text.length() + 1) * sizeof(CharType));
 	if (mem == NULL) {
+		CloseClipboard(); // was left open, blocking the clipboard for the other applications
 		ERR_EXPLAIN("Unable to allocate memory for clipboard contents.");
 		ERR_FAIL();
 	};
@@ -1215,19 +1216,8 @@ void OS_Windows::set_clipboard(const String &p_text) {
 
 	SetClipboardData(CF_UNICODETEXT, mem);
 
-	// set the CF_TEXT version (not needed?)
-	CharString utf8 = p_text.utf8();
-	mem = GlobalAlloc(GMEM_MOVEABLE, utf8.length() + 1);
-	if (mem == NULL) {
-		ERR_EXPLAIN("Unable to allocate memory for clipboard contents.");
-		ERR_FAIL();
-	};
-	LPTSTR ptr = (LPTSTR)GlobalLock(mem);
-	memcpy(ptr, utf8.get_data(), utf8.length());
-	ptr[utf8.length()] = 0;
-	GlobalUnlock(mem);
-
-	SetClipboardData(CF_TEXT, mem);
+	// No CF_TEXT: Windows converts CF_UNICODETEXT to it (in the ANSI code page) when an application
+	// asks for it. Setting it in UTF-8 made accented characters wrong in those applications.
 
 	CloseClipboard();
 };
@@ -1255,7 +1245,7 @@ String OS_Windows::get_clipboard() const {
 
 	} else if (IsClipboardFormatAvailable(CF_TEXT)) {
 
-		HGLOBAL mem = GetClipboardData(CF_UNICODETEXT);
+		HGLOBAL mem = GetClipboardData(CF_TEXT);
 		if (mem != NULL) {
 
 			LPTSTR ptr = (LPTSTR)GlobalLock(mem);
@@ -2368,9 +2358,15 @@ Error OS_Windows::execute(const String &p_path, const List<String> &p_arguments,
 
 	if (p_blocking) {
 
-		DWORD ret = WaitForSingleObject(pi.pi.hProcess, INFINITE);
-		if (r_exitcode)
+		WaitForSingleObject(pi.pi.hProcess, INFINITE);
+		if (r_exitcode) {
+			// the result of WaitForSingleObject() (WAIT_OBJECT_0, so 0) was returned
+			DWORD ret = 0;
+			GetExitCodeProcess(pi.pi.hProcess, &ret);
 			*r_exitcode = ret;
+		}
+		CloseHandle(pi.pi.hProcess);
+		CloseHandle(pi.pi.hThread);
 
 	} else {
 
@@ -2386,9 +2382,11 @@ Error OS_Windows::execute(const String &p_path, const List<String> &p_arguments,
 Error OS_Windows::kill(const ProcessID &p_pid) {
 
 	HANDLE h;
+	HANDLE h_thread;
 
 	if (process_map->has(p_pid)) {
 		h = (*process_map)[p_pid].pi.hProcess;
+		h_thread = (*process_map)[p_pid].pi.hThread;
 		process_map->erase(p_pid);
 	} else {
 
@@ -2396,6 +2394,9 @@ Error OS_Windows::kill(const ProcessID &p_pid) {
 	};
 
 	int ret = TerminateProcess(h, 0);
+
+	CloseHandle(h); // were never closed
+	CloseHandle(h_thread);
 
 	return ret != 0 ? OK : FAILED;
 };
@@ -2473,7 +2474,8 @@ void OS_Windows::set_icon(const Image &p_icon) {
 
 bool OS_Windows::has_environment(const String &p_var) const {
 
-	return getenv(p_var.utf8().get_data()) != NULL;
+	// wide version, like get_environment(): getenv() expects the ANSI code page, not UTF-8
+	return GetEnvironmentVariableW(p_var.c_str(), NULL, 0) > 0;
 };
 
 String OS_Windows::get_environment(const String &p_var) const {

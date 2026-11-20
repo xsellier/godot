@@ -60,7 +60,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-//stupid linux.h
+// stupid linux.h
 #ifdef KEY_TAB
 #undef KEY_TAB
 #endif
@@ -248,7 +248,7 @@ void OS_X11::initialize(const VideoMode &p_desired, int p_video_driver, int p_au
 	*/
 
 // maybe contextgl wants to be in charge of creating the window
-//print_line("def videomode "+itos(current_videomode.width)+","+itos(current_videomode.height));
+// print_line("def videomode "+itos(current_videomode.width)+","+itos(current_videomode.height));
 #if defined(OPENGL_ENABLED) || defined(LEGACYGL_ENABLED)
 
 	context_gl = memnew(ContextGL_X11(x11_display, x11_window, current_videomode, false));
@@ -397,7 +397,7 @@ void OS_X11::initialize(const VideoMode &p_desired, int p_video_driver, int p_au
 	current_cursor = CURSOR_ARROW;
 
 	if (cursor_theme) {
-		//print_line("cursor theme: "+String(cursor_theme));
+		// print_line("cursor theme: "+String(cursor_theme));
 		for (int i = 0; i < CURSOR_MAX; i++) {
 
 			static const char *cursor_file[] = {
@@ -423,7 +423,7 @@ void OS_X11::initialize(const VideoMode &p_desired, int p_video_driver, int p_au
 			img[i] = XcursorLibraryLoadImage(cursor_file[i], cursor_theme, cursor_size);
 			if (img[i]) {
 				cursors[i] = XcursorImageLoadCursor(x11_display, img[i]);
-				//print_line("found cursor: "+String(cursor_file[i])+" id "+itos(cursors[i]));
+				// print_line("found cursor: "+String(cursor_file[i])+" id "+itos(cursors[i]));
 			} else {
 				if (OS::is_stdout_verbose())
 					print_line("failed cursor: " + String(cursor_file[i]));
@@ -459,7 +459,7 @@ void OS_X11::initialize(const VideoMode &p_desired, int p_video_driver, int p_au
 	}
 	set_cursor_shape(CURSOR_BUSY);
 
-	//Set Xdnd (drag & drop) support
+	// Set Xdnd (drag & drop) support
 	Atom XdndAware = XInternAtom(x11_display, "XdndAware", False);
 	Atom version = 5;
 	XChangeProperty(x11_display, x11_window, XdndAware, XA_ATOM, 32, PropModeReplace, (unsigned char *)&version, 1);
@@ -477,7 +477,7 @@ void OS_X11::initialize(const VideoMode &p_desired, int p_video_driver, int p_au
 	//
 	physics_server = memnew(PhysicsServerSW);
 	physics_server->init();
-	//physics_2d_server = memnew( Physics2DServerSW );
+	// physics_2d_server = memnew( Physics2DServerSW );
 	physics_2d_server = Physics2DServerWrapMT::init_server<Physics2DServerSW>();
 	physics_2d_server->init();
 
@@ -502,9 +502,9 @@ void OS_X11::finalize() {
 	spatial_sound_2d_server->finish();
 	memdelete(spatial_sound_2d_server);
 
-	//if (debugger_connection_console) {
+	// if (debugger_connection_console) {
 	//	memdelete(debugger_connection_console);
-	//}
+	// }
 
 #ifdef JOYDEV_ENABLED
 	memdelete(joystick);
@@ -569,7 +569,7 @@ void OS_X11::set_mouse_mode(MouseMode p_mode) {
 	bool showCursor = (p_mode == MOUSE_MODE_VISIBLE || p_mode == MOUSE_MODE_CONFINED);
 
 	if (showCursor) {
-		XUndefineCursor(x11_display, x11_window);
+		_show_current_cursor();
 	} else {
 		XDefineCursor(x11_display, x11_window, null_cursor);
 	}
@@ -579,7 +579,7 @@ void OS_X11::set_mouse_mode(MouseMode p_mode) {
 	if (mouse_mode == MOUSE_MODE_CAPTURED || mouse_mode == MOUSE_MODE_CONFINED) {
 
 		while (true) {
-			//flush pending motion events
+			// flush pending motion events
 
 			if (XPending(x11_display) > 0) {
 				XEvent event;
@@ -812,10 +812,10 @@ Size2 OS_X11::get_screen_size(int p_screen) const {
 
 int OS_X11::get_screen_dpi(int p_screen) const {
 
-	//invalid screen?
+	// invalid screen?
 	ERR_FAIL_INDEX_V(p_screen, get_screen_count(), 0);
 
-	//Get physical monitor Dimensions through XRandR and calculate dpi
+	// Get physical monitor Dimensions through XRandR and calculate dpi
 	Size2 sc = get_screen_size(p_screen);
 	if (xrandr_ext_ok) {
 		int count = 0;
@@ -845,7 +845,7 @@ int OS_X11::get_screen_dpi(int p_screen) const {
 	if (xdpi || xdpi)
 		return (xdpi + ydpi) / (xdpi && ydpi ? 2 : 1);
 
-	//could not get dpi
+	// could not get dpi
 	return 96;
 }
 
@@ -1149,7 +1149,7 @@ InputModifierState OS_X11::get_key_modifier_state(unsigned int p_x11_state) {
 
 	state.shift = (p_x11_state & ShiftMask);
 	state.control = (p_x11_state & ControlMask);
-	state.alt = (p_x11_state & Mod1Mask /*|| p_x11_state&Mod5Mask*/); //altgr should not count as alt
+	state.alt = (p_x11_state & Mod1Mask /*|| p_x11_state&Mod5Mask*/); // altgr should not count as alt
 	state.meta = (p_x11_state & Mod4Mask);
 
 	return state;
@@ -1233,11 +1233,14 @@ void OS_X11::handle_key_event(XKeyEvent *p_event, bool p_echo) {
 		do {
 
 			int mnbytes = XmbLookupString(xic, xkeyevent, xmbstring, xmblen - 1, &keysym_unicode, &status);
-			xmbstring[mnbytes] = '\0';
 
 			if (status == XBufferOverflow) {
+				// nothing was written, mnbytes is the size needed: terminating the string
+				// here wrote past the end of the buffer (IME strings longer than 7 bytes)
 				xmblen = mnbytes + 1;
 				xmbstring = (char *)memrealloc(xmbstring, xmblen);
+			} else {
+				xmbstring[mnbytes] = '\0';
 			}
 		} while (status == XBufferOverflow);
 	}
@@ -1254,7 +1257,7 @@ void OS_X11::handle_key_event(XKeyEvent *p_event, bool p_echo) {
 	// KeyMappingX11 also translates keysym to unicode.
 	// It does a binary search on a table to translate
 	// most properly.
-	//print_line("keysym_unicode: "+rtos(keysym_unicode));
+	// print_line("keysym_unicode: "+rtos(keysym_unicode));
 	unsigned int unicode = keysym_unicode > 0 ? KeyMappingX11::get_unicode_from_keysym(keysym_unicode) : 0;
 
 	/* Phase 4, determine if event must be filtered */
@@ -1282,7 +1285,7 @@ void OS_X11::handle_key_event(XKeyEvent *p_event, bool p_echo) {
 	// know Mod1 was ALT and Mod4 was META (applekey/winkey)
 	// just tried Mods until i found them.
 
-	//print_line("mod1: "+itos(xkeyevent->state&Mod1Mask)+" mod 5: "+itos(xkeyevent->state&Mod5Mask));
+	// print_line("mod1: "+itos(xkeyevent->state&Mod1Mask)+" mod 5: "+itos(xkeyevent->state&Mod5Mask));
 
 	InputModifierState state = get_key_modifier_state(xkeyevent->state);
 
@@ -1313,9 +1316,9 @@ void OS_X11::handle_key_event(XKeyEvent *p_event, bool p_echo) {
 				XLookupString((XKeyEvent *)&peek_event, str, 256, &rk, NULL);
 				if (rk == keysym_keycode) {
 					XEvent event;
-					XNextEvent(x11_display, &event); //erase next event
+					XNextEvent(x11_display, &event); // erase next event
 					handle_key_event((XKeyEvent *)&event, true);
-					return; //ignore current, echo next
+					return; // ignore current, echo next
 				}
 			}
 
@@ -1342,13 +1345,13 @@ void OS_X11::handle_key_event(XKeyEvent *p_event, bool p_echo) {
 	event.key.echo = p_echo;
 
 	if (event.key.scancode == KEY_BACKTAB) {
-		//make it consistent accross platforms.
+		// make it consistent accross platforms.
 		event.key.scancode = KEY_TAB;
 		event.key.mod.shift = true;
 	}
 
-	//don't set mod state if modifier keys are released by themselves
-	//else event.is_action() will not work correctly here
+	// don't set mod state if modifier keys are released by themselves
+	// else event.is_action() will not work correctly here
 	if (!event.key.pressed) {
 		if (event.key.scancode == KEY_SHIFT)
 			event.key.mod.shift = false;
@@ -1360,7 +1363,7 @@ void OS_X11::handle_key_event(XKeyEvent *p_event, bool p_echo) {
 			event.key.mod.meta = false;
 	}
 
-	//printf("key: %x\n",event.key.scancode);
+	// printf("key: %x\n",event.key.scancode);
 	input->parse_input_event(event);
 }
 
@@ -1380,8 +1383,8 @@ static Property read_property(Display *p_display, Window p_window, Atom p_proper
 
 	int read_bytes = 1024;
 
-	//Keep trying to read the property until there are no
-	//bytes unread.
+	// Keep trying to read the property until there are no
+	// bytes unread.
 	do {
 		if (ret != 0)
 			XFree(ret);
@@ -1399,6 +1402,15 @@ static Property read_property(Display *p_display, Window p_window, Atom p_proper
 	return p;
 }
 
+static bool _atom_name_is(Display *p_display, Atom p_atom, const char *p_name) {
+
+	char *name = XGetAtomName(p_display, p_atom); // must be freed
+	bool is = name && String(name) == p_name;
+	if (name)
+		XFree(name);
+	return is;
+}
+
 static Atom pick_target_from_list(Display *p_display, Atom *p_list, int p_count) {
 
 	static const char *target_type = "text/uri-list";
@@ -1407,7 +1419,7 @@ static Atom pick_target_from_list(Display *p_display, Atom *p_list, int p_count)
 
 		Atom atom = p_list[i];
 
-		if (atom != None && String(XGetAtomName(p_display, atom)) == target_type)
+		if (atom != None && _atom_name_is(p_display, atom, target_type))
 			return atom;
 	}
 	return None;
@@ -1416,13 +1428,13 @@ static Atom pick_target_from_list(Display *p_display, Atom *p_list, int p_count)
 static Atom pick_target_from_atoms(Display *p_disp, Atom p_t1, Atom p_t2, Atom p_t3) {
 
 	static const char *target_type = "text/uri-list";
-	if (p_t1 != None && String(XGetAtomName(p_disp, p_t1)) == target_type)
+	if (p_t1 != None && _atom_name_is(p_disp, p_t1, target_type))
 		return p_t1;
 
-	if (p_t2 != None && String(XGetAtomName(p_disp, p_t2)) == target_type)
+	if (p_t2 != None && _atom_name_is(p_disp, p_t2, target_type))
 		return p_t2;
 
-	if (p_t3 != None && String(XGetAtomName(p_disp, p_t3)) == target_type)
+	if (p_t3 != None && _atom_name_is(p_disp, p_t3, target_type))
 		return p_t3;
 
 	return None;
@@ -1430,7 +1442,7 @@ static Atom pick_target_from_atoms(Display *p_disp, Atom p_t1, Atom p_t2, Atom p
 
 void OS_X11::process_xevents() {
 
-	//printf("checking events %i\n", XPending(x11_display));
+	// printf("checking events %i\n", XPending(x11_display));
 
 	do_mouse_warp = false;
 
@@ -1461,8 +1473,8 @@ void OS_X11::process_xevents() {
 				switch (event_data->evtype) {
 
 					case XI_TouchBegin: // Fall-through
-							// Disabled hand-in-hand with the grabbing
-							//XIAllowTouchEvents(x11_display, event_data->deviceid, event_data->detail, x11_window, XIAcceptTouch);
+										// Disabled hand-in-hand with the grabbing
+										// XIAllowTouchEvents(x11_display, event_data->deviceid, event_data->detail, x11_window, XIAcceptTouch);
 
 					case XI_TouchEnd: {
 
@@ -1588,7 +1600,7 @@ void OS_X11::process_xevents() {
 				if (mouse_mode_grab) {
 					// Show and update the cursor if confined and the window regained focus.
 					if (mouse_mode == MOUSE_MODE_CONFINED) {
-						XUndefineCursor(x11_display, x11_window);
+						_show_current_cursor();
 					} else if (mouse_mode == MOUSE_MODE_CAPTURED) {
 						// or re-hide it in captured mode
 						XDefineCursor(x11_display, x11_window, null_cursor);
@@ -1612,6 +1624,8 @@ void OS_X11::process_xevents() {
 
 			case FocusOut:
 				window_has_focus = false;
+				// keys and mouse buttons held now are released in another window: release them here
+				event_id = input->release_pressed_events(event_id);
 				main_loop->notification(MainLoop::NOTIFICATION_WM_FOCUS_OUT);
 				if (mouse_mode_grab) {
 					if (mouse_mode == MOUSE_MODE_CAPTURED) {
@@ -1706,7 +1720,7 @@ void OS_X11::process_xevents() {
 
 				while (true) {
 					if (mouse_mode == MOUSE_MODE_CAPTURED && event.xmotion.x == current_videomode.width / 2 && event.xmotion.y == current_videomode.height / 2) {
-						//this is likely the warp event since it was warped here
+						// this is likely the warp event since it was warped here
 						center = Vector2(event.xmotion.x, event.xmotion.y);
 						break;
 					}
@@ -1732,10 +1746,10 @@ void OS_X11::process_xevents() {
 				Point2i pos(event.xmotion.x, event.xmotion.y);
 
 				if (mouse_mode == MOUSE_MODE_CAPTURED) {
-					//Vector2 c = Point2i(current_videomode.width/2,current_videomode.height/2);
+					// Vector2 c = Point2i(current_videomode.width/2,current_videomode.height/2);
 					if (pos == Point2i(current_videomode.width / 2, current_videomode.height / 2)) {
-						//this sucks, it's a hack, etc and is a little inaccurate, etc.
-						//but nothing I can do, X11 sucks.
+						// this sucks, it's a hack, etc and is a little inaccurate, etc.
+						// but nothing I can do, X11 sucks.
 
 						center = pos;
 						break;
@@ -1813,12 +1827,14 @@ void OS_X11::process_xevents() {
 					respond.xselection.property = req->property;
 				} else if (req->target == XInternAtom(x11_display, "TARGETS", 0)) {
 
-					Atom data[2];
-					data[0] = XInternAtom(x11_display, "UTF8_STRING", 0);
-					data[1] = XA_STRING;
-					XChangeProperty(x11_display, req->requestor, req->property, req->target,
-							8, PropModeReplace, (unsigned char *)&data,
-							sizeof(data));
+					// ICCCM: TARGETS is a list of atoms (type ATOM, format 32)
+					Atom data[3];
+					data[0] = XInternAtom(x11_display, "TARGETS", 0);
+					data[1] = XInternAtom(x11_display, "UTF8_STRING", 0);
+					data[2] = XA_STRING;
+					XChangeProperty(x11_display, req->requestor, req->property, XA_ATOM,
+							32, PropModeReplace, (unsigned char *)&data,
+							sizeof(data) / sizeof(data[0]));
 					respond.xselection.property = req->property;
 
 				} else {
@@ -1842,13 +1858,17 @@ void OS_X11::process_xevents() {
 
 					Property p = read_property(x11_display, x11_window, XInternAtom(x11_display, "PRIMARY", 0));
 
-					Vector<String> files = String((char *)p.data).split("\n", false);
+					String uri_list;
+					uri_list.parse_utf8((const char *)p.data);
+					XFree(p.data);
+					Vector<String> files = uri_list.split("\n", false);
 					for (int i = 0; i < files.size(); i++) {
-						files[i] = files[i].replace("file://", "").replace("%20", " ").strip_escapes();
+						// text/uri-list: UTF-8, percent-encoded ("%C3%A9", "%23", not only "%20")
+						files[i] = files[i].replace("file://", "").strip_escapes().percent_decode();
 					}
 					main_loop->drop_files(files);
 
-					//Reply that all is well.
+					// Reply that all is well.
 					XClientMessageEvent m;
 					memset(&m, 0, sizeof(m));
 					m.type = ClientMessage;
@@ -1858,7 +1878,7 @@ void OS_X11::process_xevents() {
 					m.format = 32;
 					m.data.l[0] = x11_window;
 					m.data.l[1] = 1;
-					m.data.l[2] = xdnd_action_copy; //We only ever copy.
+					m.data.l[2] = xdnd_action_copy; // We only ever copy.
 
 					XSendEvent(x11_display, xdnd_source_window, False, NoEventMask, (XEvent *)&m);
 				}
@@ -1871,19 +1891,21 @@ void OS_X11::process_xevents() {
 
 				else if ((unsigned int)event.xclient.message_type == (unsigned int)xdnd_enter) {
 
-					//File(s) have been dragged over the window, check for supported target (text/uri-list)
+					// File(s) have been dragged over the window, check for supported target (text/uri-list)
 					xdnd_version = (event.xclient.data.l[1] >> 24);
 					Window source = event.xclient.data.l[0];
 					bool more_than_3 = event.xclient.data.l[1] & 1;
 					if (more_than_3) {
 						Property p = read_property(x11_display, source, XInternAtom(x11_display, "XdndTypeList", False));
 						requested = pick_target_from_list(x11_display, (Atom *)p.data, p.nitems);
+						if (p.data)
+							XFree(p.data);
 					} else
 						requested = pick_target_from_atoms(x11_display, event.xclient.data.l[2], event.xclient.data.l[3], event.xclient.data.l[4]);
 				} else if ((unsigned int)event.xclient.message_type == (unsigned int)xdnd_position) {
 
-					//xdnd position event, reply with an XDND status message
-					//just depending on type of data for now
+					// xdnd position event, reply with an XDND status message
+					// just depending on type of data for now
 					XClientMessageEvent m;
 					memset(&m, 0, sizeof(m));
 					m.type = ClientMessage;
@@ -1893,7 +1915,7 @@ void OS_X11::process_xevents() {
 					m.format = 32;
 					m.data.l[0] = x11_window;
 					m.data.l[1] = (requested != None);
-					m.data.l[2] = 0; //empty rectangle
+					m.data.l[2] = 0; // empty rectangle
 					m.data.l[3] = 0;
 					m.data.l[4] = xdnd_action_copy;
 
@@ -1908,7 +1930,7 @@ void OS_X11::process_xevents() {
 						else
 							XConvertSelection(x11_display, xdnd_selection, requested, XInternAtom(x11_display, "PRIMARY", 0), x11_window, CurrentTime);
 					} else {
-						//Reply that we're not interested.
+						// Reply that we're not interested.
 						XClientMessageEvent m;
 						memset(&m, 0, sizeof(m));
 						m.type = ClientMessage;
@@ -1918,7 +1940,7 @@ void OS_X11::process_xevents() {
 						m.format = 32;
 						m.data.l[0] = x11_window;
 						m.data.l[1] = 0;
-						m.data.l[2] = None; //Failed.
+						m.data.l[2] = None; // Failed.
 						XSendEvent(x11_display, event.xclient.data.l[0], False, NoEventMask, (XEvent *)&m);
 					}
 				}
@@ -1979,7 +2001,12 @@ void OS_X11::set_clipboard(const String &p_text) {
 	XSetSelectionOwner(x11_display, XInternAtom(x11_display, "CLIPBOARD", 0), x11_window, CurrentTime);
 };
 
-static String _get_clipboard_impl(Atom p_source, Window x11_window, ::Display *x11_display, String p_internal_clipboard, Atom target) {
+static Bool _predicate_clipboard_selection(Display *p_display, XEvent *p_event, XPointer p_arg) {
+
+	return p_event->type == SelectionNotify && p_event->xselection.requestor == *(Window *)p_arg;
+}
+
+static String _get_clipboard_impl(Atom p_source, Window x11_window, ::Display *x11_display, String p_internal_clipboard, Atom target, bool *r_no_answer = NULL) {
 
 	String ret;
 
@@ -1987,7 +2014,7 @@ static String _get_clipboard_impl(Atom p_source, Window x11_window, ::Display *x
 	Atom selection = XA_PRIMARY;
 	int format, result;
 	unsigned long len, bytes_left, dummy;
-	unsigned char *data;
+	unsigned char *data = NULL;
 	Window Sown = XGetSelectionOwner(x11_display, p_source);
 
 	if (Sown == x11_window) {
@@ -1999,13 +2026,25 @@ static String _get_clipboard_impl(Atom p_source, Window x11_window, ::Display *x
 		XConvertSelection(x11_display, p_source, target, selection,
 				x11_window, CurrentTime);
 		XFlush(x11_display);
-		while (true) {
-			XEvent event;
-			XNextEvent(x11_display, &event);
-			if (event.type == SelectionNotify && event.xselection.requestor == x11_window) {
+
+		// Wait for the answer, but not forever (a selection owner that never answers froze the game),
+		// and without taking the other events out of the queue (XNextEvent() here lost them).
+		XEvent event;
+		bool answered = false;
+		uint64_t start = OS::get_singleton()->get_ticks_msec();
+		while (OS::get_singleton()->get_ticks_msec() - start < 1000) {
+			if (XCheckIfEvent(x11_display, &event, _predicate_clipboard_selection, (XPointer)&x11_window)) {
+				answered = true;
 				break;
-			};
-		};
+			}
+			OS::get_singleton()->delay_usec(1000);
+		}
+
+		if (!answered || event.xselection.property == None) {
+			if (r_no_answer)
+				*r_no_answer = !answered;
+			return ret; // no answer, or the owner refused the conversion
+		}
 
 		//
 		// Do not get any data, see how much data is there
@@ -2014,11 +2053,15 @@ static String _get_clipboard_impl(Atom p_source, Window x11_window, ::Display *x
 				selection, // Tricky..
 				0, 0, // offset - len
 				0, // Delete 0==FALSE
-				AnyPropertyType, //flag
+				AnyPropertyType, // flag
 				&type, // return type
 				&format, // return format
-				&len, &bytes_left, //that
+				&len, &bytes_left, // that
 				&data);
+		if (data) {
+			XFree(data);
+			data = NULL;
+		}
 		// DATA is There
 		if (bytes_left > 0) {
 			result = XGetWindowProperty(x11_display, x11_window,
@@ -2039,10 +2082,11 @@ static String _get_clipboard_impl(Atom p_source, Window x11_window, ::Display *x
 static String _get_clipboard(Atom p_source, Window x11_window, ::Display *x11_display, String p_internal_clipboard) {
 	String ret;
 	Atom utf8_atom = XInternAtom(x11_display, "UTF8_STRING", True);
+	bool no_answer = false;
 	if (utf8_atom != None) {
-		ret = _get_clipboard_impl(p_source, x11_window, x11_display, p_internal_clipboard, utf8_atom);
+		ret = _get_clipboard_impl(p_source, x11_window, x11_display, p_internal_clipboard, utf8_atom, &no_answer);
 	}
-	if (ret == "") {
+	if (ret == "" && !no_answer) { // do not wait again for an owner that does not answer
 		ret = _get_clipboard_impl(p_source, x11_window, x11_display, p_internal_clipboard, XA_STRING);
 	}
 	return ret;
@@ -2146,14 +2190,23 @@ void OS_X11::set_cursor_shape(CursorShape p_shape) {
 
 	if (p_shape == current_cursor)
 		return;
-	if (mouse_mode == MOUSE_MODE_VISIBLE) {
-		if (cursors[p_shape] != None)
-			XDefineCursor(x11_display, x11_window, cursors[p_shape]);
-		else if (cursors[CURSOR_ARROW] != None)
-			XDefineCursor(x11_display, x11_window, cursors[CURSOR_ARROW]);
-	}
 
 	current_cursor = p_shape;
+
+	// the cursor is also visible in confined mode
+	if (mouse_mode == MOUSE_MODE_VISIBLE || mouse_mode == MOUSE_MODE_CONFINED)
+		_show_current_cursor();
+}
+
+void OS_X11::_show_current_cursor() {
+
+	// XUndefineCursor() would show the desktop default cursor, not the current (or custom) shape
+	if (cursors[current_cursor] != None)
+		XDefineCursor(x11_display, x11_window, cursors[current_cursor]);
+	else if (cursors[CURSOR_ARROW] != None)
+		XDefineCursor(x11_display, x11_window, cursors[CURSOR_ARROW]);
+	else
+		XUndefineCursor(x11_display, x11_window);
 }
 
 void OS_X11::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shape, const Vector2 &p_hotspot) {

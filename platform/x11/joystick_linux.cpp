@@ -28,7 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-//author: Andreas Haas <hondres,  liugam3@gmail.com>
+// author: Andreas Haas <hondres,  liugam3@gmail.com>
 #ifdef JOYDEV_ENABLED
 
 #include "joystick_linux.h"
@@ -44,7 +44,7 @@
 
 #define LONG_BITS (sizeof(long) * 8)
 #define test_bit(nr, addr) (((1UL << ((nr) % LONG_BITS)) & ((addr)[(nr) / LONG_BITS])) != 0)
-#define NBITS(x) ((((x)-1) / LONG_BITS) + 1)
+#define NBITS(x) ((((x) - 1) / LONG_BITS) + 1)
 
 #ifdef UDEV_ENABLED
 static const char *ignore_str = "/dev/input/js";
@@ -78,6 +78,15 @@ void joystick_linux::Joystick::reset() {
 	for (int i = 0; i < MAX_ABS; i++) {
 		abs_map[i] = -1;
 		curr_axis[i] = jx;
+		// the slot may have been used by another device (leaked before)
+		if (abs_info[i]) {
+			memdelete(abs_info[i]);
+			abs_info[i] = NULL;
+		}
+	}
+	// codes the device does not declare must not map to a button (was uninitialized)
+	for (int i = 0; i < MAX_KEY; i++) {
+		key_map[i] = -1;
 	}
 }
 
@@ -323,6 +332,10 @@ void joystick_linux::open_joystick(const char *p_path) {
 
 	int joy_num = input->get_unused_joy_id();
 	int fd = open(p_path, O_RDWR | O_NONBLOCK);
+	if (fd != -1 && joy_num == -1) {
+		close(fd); // no free joystick slot, the descriptor was leaked
+		return;
+	}
 	if (fd != -1 && joy_num != -1) {
 
 		unsigned long evbit[NBITS(EV_MAX)] = { 0 };
@@ -339,8 +352,8 @@ void joystick_linux::open_joystick(const char *p_path) {
 			return;
 		}
 
-		//check if the device supports basic gamepad events, prevents certain keyboards from
-		//being detected as joysticks
+		// check if the device supports basic gamepad events, prevents certain keyboards from
+		// being detected as joysticks
 		if (!(test_bit(EV_KEY, evbit) && test_bit(EV_ABS, evbit) &&
 					(test_bit(ABS_X, absbit) || test_bit(ABS_Y, absbit) || test_bit(ABS_HAT0X, absbit) ||
 							test_bit(ABS_GAS, absbit) || test_bit(ABS_RUDDER, absbit)) &&
@@ -453,6 +466,11 @@ InputDefault::JoyAxis joystick_linux::axis_correct(const input_absinfo *p_abs, i
 		jx.min = 0;
 		jx.value = 0.0f + (float)p_value / max;
 	}
+	if (min > 0) {
+		// positive range (some sticks and pedals): the value was left uninitialized
+		jx.min = 0;
+		jx.value = max > min ? (float)(p_value - min) / (max - min) : 0.0f;
+	}
 	return jx;
 }
 
@@ -477,13 +495,16 @@ uint32_t joystick_linux::process_joysticks(uint32_t p_event_id) {
 				input_event &ev = events[j];
 
 				// ev may be tainted and out of MAX_KEY range, which will cause
-				// joy->key_map[ev.code] to crash
+				// joy->key_map[ev.code] to crash.
+				// Skip it: returning here kept joy_mutex locked (joysticks and
+				// the udev thread stuck, hang on exit).
 				if (ev.code < 0 || ev.code >= MAX_KEY)
-					return p_event_id;
+					continue;
 
 				switch (ev.type) {
 					case EV_KEY:
-						p_event_id = input->joy_button(p_event_id, i, joy->key_map[ev.code], ev.value);
+						if (joy->key_map[ev.code] != -1)
+							p_event_id = input->joy_button(p_event_id, i, joy->key_map[ev.code], ev.value);
 						break;
 
 					case EV_ABS:
@@ -514,7 +535,7 @@ uint32_t joystick_linux::process_joysticks(uint32_t p_event_id) {
 								break;
 
 							default:
-								if (joy->abs_map[ev.code] != -1 && joy->abs_info[ev.code]) {
+								if (ev.code < MAX_ABS && joy->abs_map[ev.code] != -1 && joy->abs_info[ev.code]) {
 									InputDefault::JoyAxis value = axis_correct(joy->abs_info[ev.code], ev.value);
 									joy->curr_axis[joy->abs_map[ev.code]] = value;
 								}
