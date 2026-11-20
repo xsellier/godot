@@ -236,14 +236,14 @@ private:
 				int idx = 0;
 				while (ret == UNZ_OK) {
 
-					//get filename
+					// get filename
 					unz_file_info info;
 					char fname[16384];
 					ret = unzGetCurrentFileInfo(pkg, &info, fname, 16384, NULL, 0, NULL, 0);
 
 					String path = fname;
 
-					int depth = 1; //stuff from github comes with tag
+					int depth = 1; // stuff from github comes with tag
 					bool skip = false;
 					while (depth > 0) {
 						int pp = path.find("/");
@@ -270,7 +270,7 @@ private:
 						Vector<uint8_t> data;
 						data.resize(info.uncompressed_size);
 
-						//read
+						// read
 						unzOpenCurrentFile(pkg);
 						unzReadCurrentFile(pkg, data.ptr(), data.size());
 						unzCloseCurrentFile(pkg);
@@ -561,7 +561,7 @@ void ProjectManager::_panel_input(const InputEvent &p_ev, Node *p_hb) {
 		_update_project_buttons();
 
 		if (p_ev.mouse_button.doubleclick)
-			_open_project(); //open if doubleclicked
+			_open_project(); // open if doubleclicked
 	}
 }
 
@@ -772,8 +772,8 @@ void ProjectManager::_load_recent_projects() {
 			else
 				projects.push_back(item);
 		} else {
-			//project doesn't exist on disk but it's in the XML settings file
-			EditorSettings::get_singleton()->erase(_name); //remove it
+			// project doesn't exist on disk but it's in the XML settings file
+			EditorSettings::get_singleton()->erase(_name); // remove it
 		}
 	}
 
@@ -1214,7 +1214,7 @@ ProjectManager::ProjectManager() {
 	if (!EditorSettings::get_singleton())
 		EditorSettings::create();
 
-	EditorSettings::get_singleton()->set_optimize_save(false); //just write settings as they came
+	EditorSettings::get_singleton()->set_optimize_save(false); // just write settings as they came
 
 	{
 		int dpi_mode = EditorSettings::get_singleton()->get("global/hidpi_mode");
@@ -1263,11 +1263,11 @@ ProjectManager::ProjectManager() {
 	top_hb->add_spacer();
 	l = memnew(Label);
 	l->set_text("v" VERSION_MKSTRING);
-	//l->add_font_override("font",get_font("bold","Fonts"));
+	// l->add_font_override("font",get_font("bold","Fonts"));
 	l->set_align(Label::ALIGN_CENTER);
 	top_hb->add_child(l);
-	//vb->add_child(memnew(HSeparator));
-	//vb->add_margin_child("\n",memnew(Control));
+	// vb->add_child(memnew(HSeparator));
+	// vb->add_margin_child("\n",memnew(Control));
 
 	tabs = memnew(TabContainer);
 	vb->add_child(tabs);
@@ -1307,8 +1307,8 @@ ProjectManager::ProjectManager() {
 	scroll_childs->set_h_size_flags(SIZE_EXPAND_FILL);
 	scroll->add_child(scroll_childs);
 
-	//HBoxContainer *hb = memnew( HBoxContainer );
-	//vb->add_child(hb);
+	// HBoxContainer *hb = memnew( HBoxContainer );
+	// vb->add_child(hb);
 
 	Button *open = memnew(Button);
 	open->set_text(TTR("Edit"));
@@ -1417,14 +1417,16 @@ ProjectManager::ProjectManager() {
 		_scan_begin(EditorSettings::get_singleton()->get("global/autoscan_project_path"));
 	}
 
-	//get_ok()->set_text("Open");
-	//get_ok()->set_text("Exit");
+	// get_ok()->set_text("Open");
+	// get_ok()->set_text("Exit");
 
 	last_clicked = "";
 
 	SceneTree::get_singleton()->connect("files_dropped", this, "_files_dropped");
 
-	gui_base->set_theme(create_editor_theme());
+	Ref<Theme> editor_theme = create_editor_theme();
+	gui_base->set_theme(editor_theme);
+	editor_apply_tooltip_theme(editor_theme, get_theme());
 }
 
 ProjectManager::~ProjectManager() {
@@ -1491,7 +1493,7 @@ void ProjectListFilter::_bind_methods() {
 
 ProjectListFilter::ProjectListFilter() {
 
-	editor_initialize_certificates(); //for asset sharing
+	editor_initialize_certificates(); // for asset sharing
 
 	_current_filter = FILTER_NAME;
 

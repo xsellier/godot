@@ -37,4 +37,6 @@ Ref<Theme> create_default_theme();
 
 Ref<Theme> create_editor_theme();
 
+void editor_apply_tooltip_theme(Ref<Theme> p_from, Ref<Theme> p_to);
+
 #endif

@@ -5282,6 +5282,7 @@ EditorNode::EditorNode() {
 	theme_base->set_theme(create_default_theme());
 	theme = create_editor_theme();
 	gui_base->set_theme(theme);
+	editor_apply_tooltip_theme(theme, theme_base->get_theme());
 
 	resource_preview = memnew(EditorResourcePreview);
 	add_child(resource_preview);

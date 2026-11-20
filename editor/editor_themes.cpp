@@ -79,3 +79,36 @@ Ref<Theme> create_editor_theme() {
 
 	return theme;
 }
+
+// Tooltips are parented to the topmost Control, which holds the built-in
+// editor theme, not the custom one. Copy the tooltip items over so that
+// "global/custom_theme" also styles them.
+void editor_apply_tooltip_theme(Ref<Theme> p_from, Ref<Theme> p_to) {
+
+	if (p_from.is_null() || p_to.is_null() || p_from == p_to)
+		return;
+
+	const StringName types[2] = { "TooltipPanel", "TooltipLabel" };
+	for (int i = 0; i < 2; i++) {
+
+		List<StringName> names;
+		p_from->get_stylebox_list(types[i], &names);
+		for (List<StringName>::Element *E = names.front(); E; E = E->next())
+			p_to->set_stylebox(E->get(), types[i], p_from->get_stylebox(E->get(), types[i]));
+
+		names.clear();
+		p_from->get_font_list(types[i], &names);
+		for (List<StringName>::Element *E = names.front(); E; E = E->next())
+			p_to->set_font(E->get(), types[i], p_from->get_font(E->get(), types[i]));
+
+		names.clear();
+		p_from->get_color_list(types[i], &names);
+		for (List<StringName>::Element *E = names.front(); E; E = E->next())
+			p_to->set_color(E->get(), types[i], p_from->get_color(E->get(), types[i]));
+
+		names.clear();
+		p_from->get_constant_list(types[i], &names);
+		for (List<StringName>::Element *E = names.front(); E; E = E->next())
+			p_to->set_constant(E->get(), types[i], p_from->get_constant(E->get(), types[i]));
+	}
+}
