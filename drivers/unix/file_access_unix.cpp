@@ -109,7 +109,7 @@ Error FileAccessUnix::_open(const String &p_path, int p_mode_flags) {
 
 	f = fopen(path.utf8().get_data(), mode_string);
 
-	if (f == nullptr) {
+	if (f == NULL) {
 		last_error = ERR_FILE_CANT_OPEN;
 		return ERR_FILE_CANT_OPEN;
 	}

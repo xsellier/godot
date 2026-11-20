@@ -91,7 +91,7 @@ Error FileAccessWindows::_open(const String &p_filename, int p_mode_flags) {
 	// Authorize opening the same file more than once if it's a READ only access
 	f = _wfsopen((LPCWSTR)(filename.c_str()), mode_string, _SH_DENYNO);
 
-	if (f == nullptr) {
+	if (f == NULL) {
 		last_error = ERR_FILE_CANT_OPEN;
 
 		return ERR_FILE_CANT_OPEN;
@@ -222,7 +222,7 @@ bool FileAccessWindows::file_exists(const String &p_name) {
 
 	// Authorize opening the same file more than once if it's a READ only access
 	g = _wfsopen((LPCWSTR)(filename.c_str()), L"rb", _SH_DENYNO);
-	if (g == nullptr) {
+	if (g == NULL) {
 		return false;
 
 	} else {
