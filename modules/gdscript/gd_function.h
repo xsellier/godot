@@ -53,7 +53,7 @@ public:
 		OPCODE_ASSIGN,
 		OPCODE_ASSIGN_TRUE,
 		OPCODE_ASSIGN_FALSE,
-		OPCODE_CONSTRUCT, //only for basic types!!
+		OPCODE_CONSTRUCT, // only for basic types!!
 		OPCODE_CONSTRUCT_ARRAY,
 		OPCODE_CONSTRUCT_DICTIONARY,
 		OPCODE_CALL,
@@ -71,6 +71,8 @@ public:
 		OPCODE_RETURN,
 		OPCODE_ITERATE_BEGIN,
 		OPCODE_ITERATE,
+		OPCODE_ITERATE_RANGE_BEGIN,
+		OPCODE_ITERATE_RANGE,
 		OPCODE_ASSERT,
 		OPCODE_BREAKPOINT,
 		OPCODE_LINE,
@@ -161,7 +163,7 @@ private:
 public:
 	struct CallState {
 
-		ObjectID instance_id; //by debug only
+		ObjectID instance_id; // by debug only
 		ObjectID script_id;
 
 		GDInstance *instance;
@@ -178,7 +180,7 @@ public:
 
 	_FORCE_INLINE_ bool is_static() const { return _static; }
 
-	const int *get_code() const; //used for debug
+	const int *get_code() const; // used for debug
 	int get_code_size() const;
 	Variant get_constant(int p_idx) const;
 	StringName get_global_name(int p_idx) const;

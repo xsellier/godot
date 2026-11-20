@@ -85,7 +85,7 @@ class Ref {
 			reference = p_ref;
 	}
 
-	//virtual Reference * get_reference() const { return reference; }
+	// virtual Reference * get_reference() const { return reference; }
 public:
 	_FORCE_INLINE_ bool operator<(const Ref<T> &p_r) const {
 
@@ -223,10 +223,11 @@ public:
 
 	Ref(T *p_reference) {
 
+		// init_ref() fails when the object is being deleted (refcount 0),
+		// reference must not be left uninitialized in that case.
+		reference = NULL;
 		if (p_reference)
 			ref_pointer(p_reference);
-		else
-			reference = NULL;
 	}
 
 	Ref(const Variant &p_variant) {
@@ -264,9 +265,9 @@ public:
 	inline bool is_null() const { return reference == NULL; }
 
 	void unref() {
-		//TODO this should be moved to mutexes, since this engine does not really
-		// do a lot of referencing on references and stuff
-		// mutexes will avoid more crashes?
+		// TODO this should be moved to mutexes, since this engine does not really
+		//  do a lot of referencing on references and stuff
+		//  mutexes will avoid more crashes?
 
 		if (reference && reference->unreference()) {
 
@@ -334,7 +335,7 @@ struct PtrToArg<const Ref<T> &> {
 	}
 };
 
-//this is for RefPtr
+// this is for RefPtr
 
 template <>
 struct PtrToArg<RefPtr> {

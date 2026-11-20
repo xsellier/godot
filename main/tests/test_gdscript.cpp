@@ -173,7 +173,7 @@ static String _parser_expr(const GDParser::Node *p_expr) {
 
 					ERR_FAIL_COND_V(c_node->arguments.size() != 2, "");
 
-					//index with []
+					// index with []
 					txt = _parser_expr(c_node->arguments[0]) + "[" + _parser_expr(c_node->arguments[1]) + "]";
 
 				} break;
@@ -296,7 +296,7 @@ static String _parser_expr(const GDParser::Node *p_expr) {
 		} break;
 		case GDParser::Node::TYPE_NEWLINE: {
 
-			//skippie
+			// skippie
 		} break;
 		default: {
 
@@ -307,7 +307,7 @@ static String _parser_expr(const GDParser::Node *p_expr) {
 	}
 
 	return txt;
-	//return "("+txt+")";
+	// return "("+txt+")";
 }
 
 static void _parser_show_block(const GDParser::BlockNode *p_block, int p_indent) {
@@ -391,7 +391,7 @@ static void _parser_show_block(const GDParser::BlockNode *p_block, int p_indent)
 				_print_indent(p_indent, "var " + String(lv_node->name));
 			} break;
 			default: {
-				//expression i guess
+				// expression i guess
 				_print_indent(p_indent, _parser_expr(statement));
 			}
 		}
@@ -424,7 +424,7 @@ static void _parser_show_function(const GDParser::FunctionNode *p_func, int p_in
 
 	txt += ")";
 
-	//todo constructor check!
+	// todo constructor check!
 
 	txt += ":";
 
@@ -854,6 +854,18 @@ static void _disassemble_class(const Ref<GDScript> &p_class, const Vector<String
 					incr += 5;
 
 				} break;
+				case GDFunction::OPCODE_ITERATE_RANGE_BEGIN: {
+
+					txt += " for-range-init " + DADDR(6) + " argc " + itos(code[ip + 4]) + " counter " + DADDR(1) + " stop " + DADDR(2) + " step " + DADDR(3) + " end " + itos(code[ip + 5]);
+					incr += 7;
+
+				} break;
+				case GDFunction::OPCODE_ITERATE_RANGE: {
+
+					txt += " for-range-loop " + DADDR(5) + " counter " + DADDR(1) + " stop " + DADDR(2) + " step " + DADDR(3) + " end " + itos(code[ip + 4]);
+					incr += 6;
+
+				} break;
 				case GDFunction::OPCODE_LINE: {
 
 					int line = code[ip + 1] - 1;
@@ -895,7 +907,7 @@ MainLoop *test(TestType p_test) {
 	List<String> cmdlargs = OS::get_singleton()->get_cmdline_args();
 
 	if (cmdlargs.empty()) {
-		//try editor!
+		// try editor!
 		return NULL;
 	}
 

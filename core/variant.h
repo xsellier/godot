@@ -92,7 +92,7 @@ public:
 		MATRIX32,
 		PLANE,
 		QUAT, // 10
-		_AABB, //sorry naming convention fail :( not like it's used often
+		_AABB, // sorry naming convention fail :( not like it's used often
 		MATRIX3,
 		TRANSFORM,
 
@@ -121,6 +121,7 @@ public:
 
 private:
 	friend class _VariantCall;
+	friend class GDFunction; // direct int/array access in the 'for' loop opcodes
 	// Variant takes 20 bytes when real_t is float, and 36 if double
 	// it only allocates extra memory for aabb/matrix.
 
@@ -147,7 +148,7 @@ private:
 		RefPtr *_resource;
 		InputEvent *_input_event;
 		Image *_image;
-		void *_ptr; //generic pointer
+		void *_ptr; // generic pointer
 		uint8_t _mem[sizeof(ObjData) > (sizeof(real_t) * 4) ? sizeof(ObjData) : (sizeof(real_t) * 4)];
 	} _data;
 
@@ -183,7 +184,7 @@ public:
 	operator unsigned short() const;
 	operator signed char() const;
 	operator unsigned char() const;
-	//operator long unsigned int() const;
+	// operator long unsigned int() const;
 	operator int64_t() const;
 	operator uint64_t() const;
 #ifdef NEED_LONG_INT
@@ -252,7 +253,7 @@ public:
 #ifdef NEED_LONG_INT
 	Variant(signed long p_long); // real one
 	Variant(unsigned long p_long);
-//Variant(long unsigned int p_long);
+// Variant(long unsigned int p_long);
 #endif
 	Variant(signed short p_short); // real one
 	Variant(unsigned short p_short);
@@ -310,14 +311,14 @@ public:
 
 	enum Operator {
 
-		//comparation
+		// comparation
 		OP_EQUAL,
 		OP_NOT_EQUAL,
 		OP_LESS,
 		OP_LESS_EQUAL,
 		OP_GREATER,
 		OP_GREATER_EQUAL,
-		//mathematic
+		// mathematic
 		OP_ADD,
 		OP_SUBSTRACT,
 		OP_MULTIPLY,
@@ -325,19 +326,19 @@ public:
 		OP_NEGATE,
 		OP_MODULE,
 		OP_STRING_CONCAT,
-		//bitwise
+		// bitwise
 		OP_SHIFT_LEFT,
 		OP_SHIFT_RIGHT,
 		OP_BIT_AND,
 		OP_BIT_OR,
 		OP_BIT_XOR,
 		OP_BIT_NEGATE,
-		//logic
+		// logic
 		OP_AND,
 		OP_OR,
 		OP_XOR,
 		OP_NOT,
-		//containment
+		// containment
 		OP_IN,
 		OP_MAX
 
@@ -395,7 +396,7 @@ public:
 
 	void get_property_list(List<PropertyInfo> *p_list) const;
 
-	//argsVariant call()
+	// argsVariant call()
 
 	bool operator==(const Variant &p_variant) const;
 	bool operator!=(const Variant &p_variant) const;
@@ -425,8 +426,8 @@ public:
 	}
 };
 
-//typedef Dictionary Dictionary; no
-//typedef Array Array;
+// typedef Dictionary Dictionary; no
+// typedef Array Array;
 
 Vector<Variant> varray();
 Vector<Variant> varray(const Variant &p_arg1);

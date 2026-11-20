@@ -58,12 +58,22 @@ private:
 	}
 
 public:
+	// Shared range() rules, also used by the GDScript VM for 'for x in range(...)' loops.
+	// Step used when range() is called with 1 or 2 arguments.
+	static _ALWAYS_INLINE_ int64_t default_step(int64_t p_from, int64_t p_to) {
+		return (p_to > p_from) ? 1 : -1;
+	}
+
+	static _ALWAYS_INLINE_ bool range_finished(int64_t p_current, int64_t p_stop, int64_t p_step) {
+		return (p_step > 0) ? p_current >= p_stop : p_current <= p_stop;
+	}
+
 	_ALWAYS_INLINE_ bool use_native_iterator() const {
 		return true;
 	}
 
 	_ALWAYS_INLINE_ bool is_finished() const {
-		return (step > 0) ? current >= stop : current <= stop;
+		return range_finished(current, stop, step);
 	}
 
 	_ALWAYS_INLINE_ int get_current() const {

@@ -84,14 +84,14 @@ void RangeIterator::set_range(int stop) {
 
 	this->current = 0;
 	this->stop = stop;
-	this->step = (stop > 0) ? 1 : -1;
+	this->step = default_step(0, stop);
 }
 
 void RangeIterator::set_range(int start, int stop) {
 
 	this->current = start;
 	this->stop = stop;
-	this->step = (stop > start) ? 1 : -1;
+	this->step = default_step(start, stop);
 }
 
 void RangeIterator::set_range(int start, int stop, int step) {
