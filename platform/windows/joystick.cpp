@@ -28,7 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-//author: Andreas Haas <hondres,  liugam3@gmail.com>
+// author: Andreas Haas <hondres,  liugam3@gmail.com>
 #include "joystick.h"
 #include <oleauto.h>
 #include <wbemidl.h>
@@ -67,6 +67,7 @@ joystick_windows::joystick_windows(InputDefault *_input, HWND *hwnd) {
 	result = DirectInput8Create(GetModuleHandle(NULL), DIRECTINPUT_VERSION, IID_IDirectInput8, (void **)&dinput, NULL);
 	if (FAILED(result)) {
 		printf("failed init DINPUT: %ld\n", result);
+		dinput = NULL; // XInput gamepads still work
 	}
 	probe_joysticks();
 }
@@ -74,7 +75,8 @@ joystick_windows::joystick_windows(InputDefault *_input, HWND *hwnd) {
 joystick_windows::~joystick_windows() {
 
 	close_joystick();
-	dinput->Release();
+	if (dinput)
+		dinput->Release();
 	unload_xinput();
 }
 
@@ -82,7 +84,8 @@ bool joystick_windows::have_device(const GUID &p_guid) {
 
 	for (int i = 0; i < JOYSTICKS_MAX; i++) {
 
-		if (d_joysticks[i].guid == p_guid) {
+		// only attached slots hold a valid GUID
+		if (d_joysticks[i].attached && d_joysticks[i].guid == p_guid) {
 
 			d_joysticks[i].confirmed = true;
 			return true;
@@ -144,13 +147,25 @@ bool joystick_windows::setup_dinput_joystick(const DIDEVICEINSTANCE *instance) {
 	if (have_device(instance->guidInstance) || num == -1)
 		return false;
 
-	d_joysticks[joystick_count] = dinput_gamepad();
-	dinput_gamepad *joy = &d_joysticks[joystick_count];
+	// Joysticks are closed in any order: joystick_count is not a free slot,
+	// using it overwrote a joystick still attached after an unplug/replug.
+	int slot = -1;
+	for (int i = 0; i < JOYSTICKS_MAX; i++) {
+		if (!d_joysticks[i].attached) {
+			slot = i;
+			break;
+		}
+	}
+	if (slot == -1)
+		return false;
+
+	d_joysticks[slot] = dinput_gamepad();
+	dinput_gamepad *joy = &d_joysticks[slot];
 
 	const DWORD devtype = (instance->dwDevType & 0xFF);
 
 	if ((devtype != DI8DEVTYPE_JOYSTICK) && (devtype != DI8DEVTYPE_GAMEPAD) && (devtype != DI8DEVTYPE_1STPERSON)) {
-		//printf("ignore device %s, type %x\n", instance->tszProductName, devtype);
+		// printf("ignore device %s, type %x\n", instance->tszProductName, devtype);
 		return false;
 	}
 
@@ -158,7 +173,7 @@ bool joystick_windows::setup_dinput_joystick(const DIDEVICEINSTANCE *instance) {
 
 	if (FAILED(hr)) {
 
-		//std::wcout << "failed to create device: " << instance->tszProductName << std::endl;
+		// std::wcout << "failed to create device: " << instance->tszProductName << std::endl;
 		return false;
 	}
 
@@ -169,7 +184,7 @@ bool joystick_windows::setup_dinput_joystick(const DIDEVICEINSTANCE *instance) {
 			guid.Data4[0], guid.Data4[1], guid.Data4[2], guid.Data4[3],
 			guid.Data4[4], guid.Data4[5], guid.Data4[6], guid.Data4[7]);
 
-	id_to_change = joystick_count;
+	id_to_change = slot;
 
 	joy->di_joy->SetDataFormat(&c_dfDIJoystick2);
 	joy->di_joy->SetCooperativeLevel(*hWnd, DISCL_FOREGROUND);
@@ -306,16 +321,20 @@ void joystick_windows::probe_joysticks() {
 		}
 	}
 
-	for (int i = 0; i < joystick_count; i++) {
+	if (!dinput)
+		return; // DirectInput unavailable, XInput only
+
+	// attached slots are not contiguous: check all of them
+	for (int i = 0; i < JOYSTICKS_MAX; i++) {
 
 		d_joysticks[i].confirmed = false;
 	}
 
 	dinput->EnumDevices(DI8DEVCLASS_GAMECTRL, enumCallback, this, DIEDFL_ATTACHEDONLY);
 
-	for (int i = 0; i < joystick_count; i++) {
+	for (int i = 0; i < JOYSTICKS_MAX; i++) {
 
-		if (!d_joysticks[i].confirmed) {
+		if (d_joysticks[i].attached && !d_joysticks[i].confirmed) {
 
 			close_joystick(i);
 		}
@@ -383,7 +402,7 @@ unsigned int joystick_windows::process_joysticks(unsigned int p_last_id) {
 		}
 		if (FAILED(hr = joy->di_joy->GetDeviceState(sizeof(DIJOYSTATE2), &js))) {
 
-			//printf("failed to read joy #%d\n", i);
+			// printf("failed to read joy #%d\n", i);
 			continue;
 		}
 

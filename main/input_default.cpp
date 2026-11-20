@@ -808,6 +808,52 @@ uint32_t InputDefault::joy_button(uint32_t p_last_id, int p_device, int p_button
 	return p_last_id; // no event?
 }
 
+uint32_t InputDefault::release_pressed_events(uint32_t p_last_id) {
+
+	List<int> keys;
+	int button_mask;
+	Point2 pos;
+	{
+		// copy first: parse_input_event() takes the lock again and modifies the set
+		_THREAD_SAFE_METHOD_
+		for (Set<int>::Element *E = keys_pressed.front(); E; E = E->next())
+			keys.push_back(E->get());
+		button_mask = mouse_button_mask;
+		pos = mouse_pos;
+	}
+
+	for (List<int>::Element *E = keys.front(); E; E = E->next()) {
+
+		InputEvent ev;
+		ev.type = InputEvent::KEY;
+		ev.ID = ++p_last_id;
+		ev.key.scancode = E->get();
+		ev.key.pressed = false;
+		parse_input_event(ev);
+	}
+
+	for (int i = BUTTON_LEFT; i <= BUTTON_MIDDLE; i++) {
+
+		if (!(button_mask & (1 << i)))
+			continue;
+
+		InputEvent ev;
+		ev.type = InputEvent::MOUSE_BUTTON;
+		ev.ID = ++p_last_id;
+		ev.mouse_button.button_index = i;
+		ev.mouse_button.pressed = false;
+		ev.mouse_button.x = pos.x;
+		ev.mouse_button.y = pos.y;
+		ev.mouse_button.global_x = pos.x;
+		ev.mouse_button.global_y = pos.y;
+		button_mask &= ~(1 << i);
+		ev.mouse_button.button_mask = button_mask >> 1; // same layout as the platform events
+		parse_input_event(ev);
+	}
+
+	return p_last_id;
+}
+
 uint32_t InputDefault::joy_axis(uint32_t p_last_id, int p_device, int p_axis, const JoyAxis &p_value) {
 
 	_THREAD_SAFE_METHOD_;

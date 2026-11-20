@@ -58,7 +58,7 @@
 #include <regstr.h>
 
 static const WORD MAX_CONSOLE_LINES = 1500;
-int constexpr FS_TRANSP_BORDER = 2;
+static const int FS_TRANSP_BORDER = 2; // not constexpr: C++98 (MinGW builds)
 
 extern "C" {
 __declspec(dllexport) DWORD NvOptimusEnablement = 1;
@@ -300,6 +300,18 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
 			// Release capture unconditionally because it can be set due to dragging, in addition to captured mode
 			ReleaseCapture();
+			pressrc = 0;
+
+			// Keys and mouse buttons held while focus is lost are released in another window:
+			// their key up / button up never arrive here (stuck keys after Alt+Tab).
+			// The release events are sent from process_events(), not from here: WM_KILLFOCUS can
+			// come synchronously while a script runs (OS.alert(), ...).
+			release_pressed_pending = true;
+			last_button_state = 0;
+			alt_mem = false;
+			gr_mem = false;
+			shift_mem = false;
+			control_mem = false;
 #if WINVER >= 0x0601 // for windows 7
 			// Release every touch to avoid sticky points
 			for (Map<int, Point2i>::Element *E = touch_state.front(); E; E = E->next()) {
@@ -533,6 +545,8 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 							mb.button_index = BUTTON_WHEEL_UP;
 						else
 							mb.button_index = BUTTON_WHEEL_DOWN;
+						// precision touchpads and free spinning wheels send fractions of a notch
+						mb.factor = fabs((double)motion / (double)WHEEL_DELTA);
 
 					} break;
 					case WM_MOUSEHWHEEL: {
@@ -675,10 +689,11 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 		case WM_KEYUP:
 		case WM_KEYDOWN: {
 
+			// Shift and Ctrl pressed while Alt is held come as WM_SYSKEYDOWN
 			if (wParam == VK_SHIFT)
-				shift_mem = uMsg == WM_KEYDOWN;
+				shift_mem = (uMsg == WM_KEYDOWN || uMsg == WM_SYSKEYDOWN);
 			if (wParam == VK_CONTROL)
-				control_mem = uMsg == WM_KEYDOWN;
+				control_mem = (uMsg == WM_KEYDOWN || uMsg == WM_SYSKEYDOWN);
 			if (wParam == VK_MENU) {
 				alt_mem = (uMsg == WM_KEYDOWN || uMsg == WM_SYSKEYDOWN);
 				if (lParam & (1 << 24))
@@ -771,7 +786,9 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 #endif
 		case WM_DEVICECHANGE: {
 
-			joystick->probe_joysticks();
+			// any device change sends it, often several times in a row: probe later, once
+			joystick_probe_pending = true;
+			joystick_probe_request_msec = get_ticks_msec();
 		} break;
 		case WM_SETCURSOR: {
 
@@ -810,6 +827,8 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 				String file = buf;
 				files.push_back(file);
 			}
+
+			DragFinish(hDropInfo); // releases the memory allocated for the drop
 
 			if (files.size() && main_loop) {
 				main_loop->drop_files(files, 0);
@@ -854,7 +873,10 @@ void OS_Windows::process_key_events() {
 
 					k.mod = ke.mod_state;
 					k.pressed = true;
-					k.scancode = KeyMappingWindows::get_keysym(ke.wParam);
+					// Text only event (dead key sequences, IME, Alt+numpad codes...).
+					// wParam is a character here, not a virtual key code: mapping it with
+					// get_keysym() turned 'x' into F9, 'a' into keypad 1, etc., pressed and never released.
+					k.scancode = 0;
 					k.unicode = ke.wParam;
 					if (k.unicode && gr_mem) {
 						k.mod.alt = false;
@@ -2060,6 +2082,11 @@ uint64_t OS_Windows::get_ticks_usec() const {
 
 void OS_Windows::process_events() {
 
+	if (joystick_probe_pending && get_ticks_msec() - joystick_probe_request_msec >= 250) {
+		joystick_probe_pending = false;
+		joystick->probe_joysticks();
+	}
+
 	last_id = joystick->process_joysticks(last_id);
 
 	MSG msg = {};
@@ -2069,6 +2096,12 @@ void OS_Windows::process_events() {
 	}
 
 	process_key_events();
+
+	if (release_pressed_pending) {
+		release_pressed_pending = false;
+		if (main_loop)
+			last_id = input->release_pressed_events(last_id);
+	}
 }
 
 void OS_Windows::set_cursor_shape(CursorShape p_shape) {
@@ -2723,6 +2756,9 @@ Error OS_Windows::move_path_to_trash(String p_dir) {
 OS_Windows::OS_Windows(HINSTANCE _hInstance) {
 
 	key_event_pos = 0;
+	joystick_probe_pending = false;
+	joystick_probe_request_msec = 0;
+	release_pressed_pending = false;
 	force_quit = false;
 	alt_mem = false;
 	gr_mem = false;

@@ -129,6 +129,14 @@ class OS_Windows : public OS {
 	bool window_has_focus;
 	uint32_t last_button_state;
 
+	// WM_DEVICECHANGE often comes in bursts, and probing the joysticks can take
+	// a long time (DirectInput enumeration): probe once, after the burst
+	bool joystick_probe_pending;
+	uint64_t joystick_probe_request_msec;
+
+	// focus lost: release the keys and mouse buttons still pressed, see WM_KILLFOCUS
+	bool release_pressed_pending;
+
 	HCURSOR cursors[CURSOR_MAX] = { NULL };
 	CursorShape cursor_shape;
 	Rect2 visible_rectangle;

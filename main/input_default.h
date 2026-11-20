@@ -79,7 +79,7 @@ class InputDefault : public Input {
 		StringName name;
 		StringName uid;
 		bool connected;
-		bool last_buttons[JOY_BUTTON_MAX + 19]; //apparently SDL specifies 35 possible buttons on android
+		bool last_buttons[JOY_BUTTON_MAX + 19]; // apparently SDL specifies 35 possible buttons on android
 		float last_axis[JOY_AXIS_MAX];
 		float filter;
 		int last_hat;
@@ -194,6 +194,9 @@ public:
 	virtual Point2i warp_mouse_motion(const InputEventMouseMotion &p_motion, const Rect2 &p_rect);
 
 	virtual void parse_input_event(const InputEvent &p_event);
+	// Sends a release event for every key and mouse button still pressed.
+	// Used when the window loses focus: the matching releases never arrive.
+	uint32_t release_pressed_events(uint32_t p_last_id);
 
 	void set_gravity(const Vector3 &p_gravity);
 	void set_accelerometer(const Vector3 &p_accel);
