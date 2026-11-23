@@ -206,6 +206,18 @@ void OS_Windows::initialize_core() {
 
 #endif
 
+	// The default timer resolution is 15.6 ms: Sleep(1) lasts 15.6 ms and
+	// Sleep(16) 31.2 ms, which breaks every frame limiter (target FPS, low
+	// processor mode, frame delay). Since Windows 10 2004 another program
+	// (browser, Discord...) no longer raises it for us.
+	timer_period = 0;
+	TIMECAPS tc;
+	if (timeGetDevCaps(&tc, sizeof(tc)) == TIMERR_NOERROR) {
+		UINT period = MAX(tc.wPeriodMin, 1u);
+		if (timeBeginPeriod(period) == TIMERR_NOERROR)
+			timer_period = period;
+	}
+
 	// We need to know how often the clock is updated
 	if (!QueryPerformanceFrequency((LARGE_INTEGER *)&ticks_per_second))
 		ticks_per_second = 1000;
@@ -1327,6 +1339,9 @@ void OS_Windows::finalize() {
 }
 void OS_Windows::finalize_core() {
 
+	if (timer_period)
+		timeEndPeriod(timer_period);
+
 	memdelete(process_map);
 
 	if (mempool_dynamic)
@@ -2062,8 +2077,11 @@ uint64_t OS_Windows::get_ticks_usec() const {
 	// This is the number of clock ticks since start
 	if (!QueryPerformanceCounter((LARGE_INTEGER *)&ticks))
 		ticks = (UINT64)timeGetTime();
-	// Divide by frequency to get the time in seconds
-	time = ticks * 1000000L / ticks_per_second;
+	// Divide by frequency to get the time in seconds. ticks * 1000000 overflows
+	// once the counter (which starts at boot) reaches 1.8e13: after about
+	// 21 days of uptime at 10 MHz (fast startup keeps the uptime), or a few
+	// hours on systems with a GHz counter. Split it to avoid a time jump.
+	time = (ticks / ticks_per_second) * 1000000L + (ticks % ticks_per_second) * 1000000L / ticks_per_second;
 	// Subtract the time at game start to get
 	// the time since the game started
 	time -= ticks_start;

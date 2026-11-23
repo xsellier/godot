@@ -84,6 +84,7 @@ class OS_Windows : public OS {
 
 	uint64_t ticks_start;
 	uint64_t ticks_per_second;
+	UINT timer_period;
 
 	bool old_invalid;
 	bool outside;
