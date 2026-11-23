@@ -1770,6 +1770,17 @@ uint32_t ObjectDB::add_instance(Object *p_object) {
 	return instance_counter;
 }
 
+#ifdef DEBUG_ENABLED
+// Other threads add and remove instances while this runs (Thread scripts, the
+// resource loader...): reading the HashMap without the lock returned false
+// for live objects during a rehash ("previously freed instance") or crashed.
+bool ObjectDB::instance_validate(Object *p_ptr) {
+
+	GLOBAL_LOCK_FUNCTION;
+	return instance_checks.has(p_ptr);
+}
+#endif
+
 void ObjectDB::remove_instance(Object *p_object) {
 
 	GLOBAL_LOCK_FUNCTION;
