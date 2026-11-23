@@ -72,6 +72,14 @@ def configure(env):
         # regular native build
         env.Append(CCFLAGS=['-arch', osx_arch])
         env.Append(LINKFLAGS=['-arch', osx_arch])
+
+        # SCons does not pass the shell environment to the compiler, so an
+        # exported SDKROOT is ignored: forward it as -isysroot. arm64 needs a
+        # macOS 11+ SDK, e.g. SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX11.1.sdk
+        sdk_path = os.environ.get("SDKROOT", "")
+        if sdk_path != "":
+            env.Append(CCFLAGS=['-isysroot', sdk_path])
+            env.Append(LINKFLAGS=['-isysroot', sdk_path])
     else:
         # osxcross build
         root = os.environ.get("OSXCROSS_ROOT", 0)
