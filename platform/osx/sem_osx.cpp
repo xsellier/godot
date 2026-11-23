@@ -30,6 +30,7 @@
 
 #include "sem_osx.h"
 
+#include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -51,13 +52,16 @@ void cgsem_init(cgsem_t *cgsem) {
 void cgsem_post(cgsem_t *cgsem) {
 	const char buf = 1;
 
-	write(cgsem->pipefd[1], &buf, 1);
+	while (write(cgsem->pipefd[1], &buf, 1) < 0 && errno == EINTR) {
+	}
 }
 
 void cgsem_wait(cgsem_t *cgsem) {
 	char buf;
 
-	read(cgsem->pipefd[0], &buf, 1);
+	// a signal must not wake the waiter without a matching post
+	while (read(cgsem->pipefd[0], &buf, 1) < 0 && errno == EINTR) {
+	}
 }
 
 void cgsem_destroy(cgsem_t *cgsem) {

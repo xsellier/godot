@@ -119,6 +119,9 @@ Error AudioDriverOSX::initDevice() {
 Error AudioDriverOSX::finishDevice() {
 	OSStatus result;
 
+	if (!audio_unit)
+		return OK;
+
 	if (active) {
 		result = AudioOutputUnitStop(audio_unit);
 		ERR_FAIL_COND_V(result != noErr, FAILED);
@@ -127,6 +130,12 @@ Error AudioDriverOSX::finishDevice() {
 	}
 
 	result = AudioUnitUninitialize(audio_unit);
+	ERR_FAIL_COND_V(result != noErr, FAILED);
+
+	// reopen() creates a new unit on every output device change (headphones,
+	// AirPods, HDMI...): dispose of the old one instead of leaking it.
+	result = AudioComponentInstanceDispose(audio_unit);
+	audio_unit = NULL;
 	ERR_FAIL_COND_V(result != noErr, FAILED);
 
 	return OK;
@@ -235,7 +244,8 @@ void AudioDriverOSX::start() {
 };
 
 int AudioDriverOSX::get_mix_rate() const {
-	return 44100;
+	// the stream is opened at "audio/mix_rate", the mixer must use the same rate
+	return mix_rate;
 };
 
 AudioDriverSW::OutputFormat AudioDriverOSX::get_output_format() const {
@@ -259,19 +269,15 @@ bool AudioDriverOSX::try_lock() {
 }
 
 void AudioDriverOSX::finish() {
-	finishDevice();
-
+	// stop listening first so that reopen() cannot run during the shutdown
 	OSStatus result = AudioObjectRemovePropertyListener(kAudioObjectSystemObject, &outputDeviceAddress, &outputDeviceAddressCB, this);
 	if (result != noErr) {
 		ERR_PRINT("AudioObjectRemovePropertyListener failed");
 	}
 
-	AURenderCallbackStruct callback;
-	zeromem(&callback, sizeof(AURenderCallbackStruct));
-	result = AudioUnitSetProperty(audio_unit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, kOutputBus, &callback, sizeof(callback));
-	if (result != noErr) {
-		ERR_PRINT("AudioUnitSetProperty failed");
-	}
+	lock();
+	finishDevice(); // stops the unit (no more callbacks) and disposes of it
+	unlock();
 
 	if (mutex) {
 		memdelete(mutex);
@@ -282,12 +288,13 @@ void AudioDriverOSX::finish() {
 AudioDriverOSX::AudioDriverOSX() {
 	active = false;
 	mutex = NULL;
+	audio_unit = NULL;
 
 	mix_rate = 44100;
 	channels = 2;
 	samples_in.clear();
 };
 
-AudioDriverOSX::~AudioDriverOSX(){};
+AudioDriverOSX::~AudioDriverOSX() {};
 
 #endif

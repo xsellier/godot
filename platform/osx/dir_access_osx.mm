@@ -41,9 +41,12 @@ String DirAccessOSX::fix_unicode_name(const char *p_name) const {
 	String fname;
 	NSString *nsstr = [[NSString stringWithUTF8String:p_name] precomposedStringWithCanonicalMapping];
 
-	fname.parse_utf8([nsstr UTF8String]);
+	// nil when the name is not valid UTF-8 (some network or FAT volumes):
+	// parse_utf8(NULL) would crash while listing the folder
+	const char *utfs = nsstr ? [nsstr UTF8String] : NULL;
+	fname.parse_utf8(utfs ? utfs : p_name);
 
 	return fname;
 }
 
-#endif //posix_enabled
+#endif // posix_enabled

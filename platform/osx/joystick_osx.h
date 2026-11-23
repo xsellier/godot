@@ -81,7 +81,7 @@ struct joystick {
 	bool config_force_feedback(io_service_t p_service);
 	bool check_ff_features();
 
-	int get_hid_element_state(rec_element *p_element) const;
+	int get_hid_element_state(rec_element *p_element, bool p_calibrate = true) const;
 
 	void free();
 	joystick();

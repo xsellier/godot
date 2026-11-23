@@ -58,7 +58,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-//uses portions of glfw
+// uses portions of glfw
 
 //========================================================================
 // GLFW 3.0 - www.glfw.org
@@ -266,7 +266,7 @@ static bool mouse_down_control = false;
 		[OS_OSX::singleton->window_view setWantsBestResolutionOpenGLSurface:NO];
 	}
 	if (newBackingScaleFactor != oldBackingScaleFactor) {
-		//Set new display scale and window size
+		// Set new display scale and window size
 		float newDisplayScale = OS_OSX::singleton->is_hidpi_allowed() ? newBackingScaleFactor : 1.0;
 
 		const NSRect contentRect = [OS_OSX::singleton->window_view frame];
@@ -275,11 +275,11 @@ static bool mouse_down_control = false;
 		OS_OSX::singleton->window_size.width = fbRect.size.width * newDisplayScale;
 		OS_OSX::singleton->window_size.height = fbRect.size.height * newDisplayScale;
 
-		//Update context
+		// Update context
 		if (OS_OSX::singleton->main_loop) {
 			[OS_OSX::singleton->context update];
 
-			//Force window resize ???
+			// Force window resize ???
 			NSRect frame = [OS_OSX::singleton->window_object frame];
 			[OS_OSX::singleton->window_object setFrame:NSMakeRect(frame.origin.x, frame.origin.y, 1, 1) display:YES];
 			[OS_OSX::singleton->window_object setFrame:frame display:YES];
@@ -299,8 +299,8 @@ static bool mouse_down_control = false;
 
 	if (OS_OSX::singleton->main_loop) {
 		Main::force_redraw();
-		//Event retrieval blocks until resize is over. Call Main::iteration() directly.
-		if (!Main::is_iterating()) { //avoid cyclic loop
+		// Event retrieval blocks until resize is over. Call Main::iteration() directly.
+		if (!Main::is_iterating()) { // avoid cyclic loop
 			Main::iteration();
 		}
 	}
@@ -316,6 +316,14 @@ static bool mouse_down_control = false;
 }
 
 - (void)windowDidResignKey:(NSNotification *)notification {
+
+	// Key and button releases are sent to the window that has the focus, so
+	// anything held while switching away (Cmd+Tab...) would stay pressed.
+	if (OS_OSX::singleton->input) {
+		OS_OSX::singleton->last_id = OS_OSX::singleton->input->release_pressed_events(OS_OSX::singleton->last_id);
+		button_mask = 0;
+		mouse_down_control = false;
+	}
 
 	if (OS_OSX::singleton->get_main_loop())
 		OS_OSX::singleton->get_main_loop()->notification(MainLoop::NOTIFICATION_WM_FOCUS_OUT);
@@ -472,8 +480,8 @@ static void _mouseDownEvent(NSEvent *event, int index, int mask, bool pressed) {
 	ev.mouse_motion.y = mouse_y;
 	ev.mouse_motion.global_x = mouse_x;
 	ev.mouse_motion.global_y = mouse_y;
-	ev.mouse_motion.relative_x = [event deltaX] * OS_OSX::singleton -> _mouse_scale([[event window] backingScaleFactor]);
-	ev.mouse_motion.relative_y = [event deltaY] * OS_OSX::singleton -> _mouse_scale([[event window] backingScaleFactor]);
+	ev.mouse_motion.relative_x = [event deltaX] * OS_OSX::singleton->_mouse_scale([[event window] backingScaleFactor]);
+	ev.mouse_motion.relative_y = [event deltaY] * OS_OSX::singleton->_mouse_scale([[event window] backingScaleFactor]);
 	ev.mouse_motion.mod = translateFlags([event modifierFlags]);
 
 	OS_OSX::singleton->input->set_mouse_pos(Point2(mouse_x, mouse_y));
@@ -665,7 +673,7 @@ static int translateKey(unsigned int key) {
 		/* 4e */ KEY_KP_SUBTRACT,
 		/* 4f */ KEY_UNKNOWN,
 		/* 50 */ KEY_UNKNOWN,
-		/* 51 */ KEY_EQUAL, //wtf equal?
+		/* 51 */ KEY_EQUAL, // wtf equal?
 		/* 52 */ KEY_KP_0,
 		/* 53 */ KEY_KP_1,
 		/* 54 */ KEY_KP_2,
@@ -959,7 +967,7 @@ void OS_OSX::initialize(const VideoMode &p_desired, int p_video_driver, int p_au
 
 	if (displayScale > 1.0) {
 		[window_view setWantsBestResolutionOpenGLSurface:YES];
-		//if (current_videomode.resizable)
+		// if (current_videomode.resizable)
 		[window_object setCollectionBehavior:NSWindowCollectionBehaviorFullScreenPrimary];
 	} else {
 		[window_view setWantsBestResolutionOpenGLSurface:NO];
@@ -979,8 +987,10 @@ void OS_OSX::initialize(const VideoMode &p_desired, int p_video_driver, int p_au
 	int colorBits = 32;
 
 // Fail if a robustness strategy was requested
-#define ADD_ATTR(x) \
-	{ attributes[attributeCount++] = x; }
+#define ADD_ATTR(x)                       \
+	{                                     \
+		attributes[attributeCount++] = x; \
+	}
 #define ADD_ATTR2(x, y) \
 	{                   \
 		ADD_ATTR(x);    \
@@ -1046,8 +1056,6 @@ void OS_OSX::initialize(const VideoMode &p_desired, int p_video_driver, int p_au
 
 	bool use_gl2 = p_video_driver != 1;
 
-	AudioDriverManagerSW::add_driver(&audio_driver_osx);
-
 	rasterizer = instance_RasterizerGLES2();
 
 	visual_server = memnew(VisualServerRaster(rasterizer));
@@ -1074,7 +1082,7 @@ void OS_OSX::initialize(const VideoMode &p_desired, int p_video_driver, int p_au
 
 	physics_server = memnew(PhysicsServerSW);
 	physics_server->init();
-	//physics_2d_server = memnew( Physics2DServerSW );
+	// physics_2d_server = memnew( Physics2DServerSW );
 	physics_2d_server = Physics2DServerWrapMT::init_server<Physics2DServerSW>();
 	physics_2d_server->init();
 
@@ -1286,7 +1294,7 @@ void OS_OSX::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shape, c
 			uint8_t alpha = (color >> 24) & 0xFF;
 			pixels[i * 4 + 0] = ((color >> 16) & 0xFF) * alpha / 255;
 			pixels[i * 4 + 1] = ((color >> 8) & 0xFF) * alpha / 255;
-			pixels[i * 4 + 2] = ((color)&0xFF) * alpha / 255;
+			pixels[i * 4 + 2] = ((color) & 0xFF) * alpha / 255;
 			pixels[i * 4 + 3] = alpha;
 		}
 
@@ -1322,25 +1330,28 @@ bool OS_OSX::is_mouse_grab_enabled() const {
 
 void OS_OSX::warp_mouse_pos(const Point2 &p_to) {
 
-	//copied from windows impl with osx native calls
+	// copied from windows impl with osx native calls
 	if (mouse_mode == MOUSE_MODE_CAPTURED) {
 		mouse_x = p_to.x;
 		mouse_y = p_to.y;
 	} else {
-		//set OS position
+		// set OS position
 
-		//local point in window coords
+		// local point in window coords
 		const NSRect contentRect = [window_view frame];
 		float displayScale = _display_scale();
 		NSRect pointInWindowRect = NSMakeRect(p_to.x / displayScale, contentRect.size.height - (p_to.y / displayScale) - 1, 0, 0);
 		NSPoint pointOnScreen = [[window_view window] convertRectToScreen:pointInWindowRect].origin;
 
-		//point in scren coords
+		// point in scren coords
 		CGPoint lMouseWarpPos = { pointOnScreen.x, CGDisplayBounds(CGMainDisplayID()).size.height - pointOnScreen.y };
 
-		//do the warping
+		// do the warping
 		CGEventSourceRef lEventRef = CGEventSourceCreate(kCGEventSourceStateCombinedSessionState);
-		CGEventSourceSetLocalEventsSuppressionInterval(lEventRef, 0.0);
+		if (lEventRef) {
+			CGEventSourceSetLocalEventsSuppressionInterval(lEventRef, 0.0);
+			CFRelease(lEventRef);
+		}
 		CGAssociateMouseAndMouseCursorPosition(false);
 		CGWarpMouseCursorPosition(lMouseWarpPos);
 		CGAssociateMouseAndMouseCursorPosition(true);
@@ -1433,10 +1444,13 @@ String OS_OSX::get_clipboard() const {
 		return "";
 	}
 
-	char *utfs = strdup([object UTF8String]);
+	const char *utfs = [object UTF8String];
+	if (!utfs) {
+		return "";
+	}
+
 	String ret;
 	ret.parse_utf8(utfs);
-	free(utfs);
 
 	return ret;
 }
@@ -1453,8 +1467,24 @@ void OS_OSX::make_rendering_thread() {
 
 Error OS_OSX::shell_open(String p_uri) {
 
-	[[NSWorkspace sharedWorkspace] openURL:[[NSURL alloc] initWithString:[NSString stringWithUTF8String:p_uri.utf8().get_data()]]];
-	return OK;
+	NSString *string = [NSString stringWithUTF8String:p_uri.utf8().get_data()];
+	ERR_FAIL_COND_V(!string, ERR_INVALID_PARAMETER);
+
+	// URLWithString returns nil for unescaped spaces or accents.
+	NSURL *url = [NSURL URLWithString:string];
+	if (!url && p_uri.find("://") != -1) {
+		NSString *escaped = [string stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
+		if (escaped) {
+			url = [NSURL URLWithString:escaped];
+		}
+	}
+	if (!url || ![url scheme]) {
+		// A plain path, like the other platforms accept.
+		url = [NSURL fileURLWithPath:[string stringByExpandingTildeInPath]];
+	}
+	ERR_FAIL_COND_V(!url, ERR_INVALID_PARAMETER);
+
+	return [[NSWorkspace sharedWorkspace] openURL:url] ? OK : FAILED;
 }
 
 String OS_OSX::get_locale() const {
@@ -1611,7 +1641,7 @@ void OS_OSX::_update_window() {
 		NSRect screenRect = [[window_object screen] frame];
 
 		// Check if our window covers up the screen
-		if (frameRect.origin.x <= screenRect.origin.x && frameRect.origin.y <= frameRect.origin.y &&
+		if (frameRect.origin.x <= screenRect.origin.x && frameRect.origin.y <= screenRect.origin.y &&
 				frameRect.size.width >= screenRect.size.width && frameRect.size.height >= screenRect.size.height) {
 			borderless_full = true;
 		}
@@ -1694,20 +1724,16 @@ void OS_OSX::set_window_size(const Size2 p_size) {
 
 	Size2 size = p_size / _display_scale();
 
-	if (get_borderless_window() == false) {
-		// NSRect used by setFrame includes the title bar, so add it to our size.y
-		CGFloat menuBarHeight = [[[NSApplication sharedApplication] mainMenu] menuBarHeight];
-		if (menuBarHeight != 0.f) {
-			size.y += menuBarHeight;
-		} else {
-			if (floor(NSAppKitVersionNumber) < NSAppKitVersionNumber10_12) {
-				size.y += [[NSStatusBar systemStatusBar] thickness];
-			}
-		}
-	}
-
+	// The frame includes the title bar. Its height is not the menu bar height
+	// (which is much taller on notched screens), so let AppKit compute it.
 	NSRect frame = [window_object frame];
-	[window_object setFrame:NSMakeRect(frame.origin.x, frame.origin.y, size.x, size.y) display:YES];
+	NSRect new_frame = [window_object frameRectForContentRect:NSMakeRect(0, 0, size.x, size.y)];
+
+	// Cocoa's origin is the bottom left corner: keep the top left corner in place.
+	new_frame.origin.x = frame.origin.x;
+	new_frame.origin.y = frame.origin.y + frame.size.height - new_frame.size.height;
+
+	[window_object setFrame:new_frame display:YES];
 
 	_update_window();
 };
@@ -1857,8 +1883,10 @@ static NSString *createStringForKeys(const CGKeyCode *keyCode, int length) {
 		return nil;
 
 	CFDataRef layoutData = (CFDataRef)TISGetInputSourceProperty(currentKeyboard, kTISPropertyUnicodeKeyLayoutData);
-	if (!layoutData)
+	if (!layoutData) {
+		CFRelease(currentKeyboard);
 		return nil;
+	}
 
 	const UCKeyboardLayout *keyboardLayout = (const UCKeyboardLayout *)CFDataGetBytePtr(layoutData);
 
@@ -1884,13 +1912,16 @@ static NSString *createStringForKeys(const CGKeyCode *keyCode, int length) {
 
 		if (err != noErr) {
 			CFRelease(output);
+			CFRelease(currentKeyboard);
 			return nil;
 		}
 
 		CFStringAppendCharacters(output, chars, 1);
 	}
 
-	//CFStringUppercase(output, NULL);
+	CFRelease(currentKeyboard);
+
+	// CFStringUppercase(output, NULL);
 
 	return (NSString *)output;
 }
@@ -1968,10 +1999,10 @@ void OS_OSX::run() {
 		set_window_fullscreen(true);
 	}
 
-	//uint64_t last_ticks=get_ticks_usec();
+	// uint64_t last_ticks=get_ticks_usec();
 
-	//int frames=0;
-	//uint64_t frame=0;
+	// int frames=0;
+	// uint64_t frame=0;
 
 	while (!force_quit) {
 
@@ -1989,21 +2020,28 @@ void OS_OSX::set_mouse_mode(MouseMode p_mode) {
 	if (p_mode == mouse_mode)
 		return;
 
-	if (p_mode == MOUSE_MODE_CAPTURED) {
-		// Apple Docs state that the display parameter is not used.
-		// "This parameter is not used. By default, you may pass kCGDirectMainDisplay."
-		// https://developer.apple.com/library/mac/documentation/graphicsimaging/reference/Quartz_Services_Ref/Reference/reference.html
+	// CGDisplayHideCursor/ShowCursor calls are counted: hide only when going
+	// from visible to hidden and show only on the way back, or switching
+	// between HIDDEN and CAPTURED leaves the cursor hidden for good.
+	// Apple Docs state that the display parameter is not used.
+	bool was_hidden = mouse_mode == MOUSE_MODE_HIDDEN || mouse_mode == MOUSE_MODE_CAPTURED;
+	bool hide = p_mode == MOUSE_MODE_HIDDEN || p_mode == MOUSE_MODE_CAPTURED;
+
+	if (hide && !was_hidden) {
 		CGDisplayHideCursor(kCGDirectMainDisplay);
-		CGAssociateMouseAndMouseCursorPosition(false);
-	} else if (p_mode == MOUSE_MODE_HIDDEN) {
-		CGDisplayHideCursor(kCGDirectMainDisplay);
-		CGAssociateMouseAndMouseCursorPosition(true);
-	} else {
+	} else if (!hide && was_hidden) {
 		CGDisplayShowCursor(kCGDirectMainDisplay);
-		CGAssociateMouseAndMouseCursorPosition(true);
 	}
+	CGAssociateMouseAndMouseCursorPosition(p_mode != MOUSE_MODE_CAPTURED);
 
 	mouse_mode = p_mode;
+
+	if (!hide) {
+		// the shape requested while hidden was only recorded
+		CursorShape shape = cursor_shape;
+		cursor_shape = CURSOR_MAX;
+		set_cursor_shape(shape);
+	}
 }
 
 OS::MouseMode OS_OSX::get_mouse_mode() const {

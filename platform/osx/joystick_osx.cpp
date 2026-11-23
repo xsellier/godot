@@ -65,8 +65,15 @@ void joystick::free() {
 	if (ff_device) {
 		FFDeviceReleaseEffect(ff_device, ff_object);
 		FFReleaseDevice(ff_device);
+		ff_device = NULL;
+	}
+	if (ff_axes) {
 		memfree(ff_axes);
+		ff_axes = NULL;
+	}
+	if (ff_directions) {
 		memfree(ff_directions);
+		ff_directions = NULL;
 	}
 }
 
@@ -79,7 +86,7 @@ bool joystick::has_element(IOHIDElementCookie p_cookie, Vector<rec_element> *p_l
 	return false;
 }
 
-int joystick::get_hid_element_state(rec_element *p_element) const {
+int joystick::get_hid_element_state(rec_element *p_element, bool p_calibrate) const {
 	int value = 0;
 	if (p_element && p_element->ref) {
 		IOHIDValueRef valueRef;
@@ -87,6 +94,9 @@ int joystick::get_hid_element_state(rec_element *p_element) const {
 			value = (SInt32)IOHIDValueGetIntegerValue(valueRef);
 
 			/* record min and max for auto calibration */
+			if (!p_calibrate) {
+				return value;
+			}
 			if (value < p_element->min) {
 				p_element->min = value;
 			}
@@ -247,7 +257,9 @@ void JoystickOSX::_device_added(IOReturn p_res, IOHIDDeviceRef p_device) {
 
 	joystick new_joystick;
 	if (is_joystick(p_device)) {
-		configure_joystick(p_device, &new_joystick);
+		if (!configure_joystick(p_device, &new_joystick)) {
+			return; // no free joystick slot
+		}
 #if MAC_OS_X_VERSION_MIN_REQUIRED < 1060
 		if (IOHIDDeviceGetService != NULL) {
 #endif
@@ -266,7 +278,9 @@ void JoystickOSX::_device_added(IOReturn p_res, IOHIDDeviceRef p_device) {
 void JoystickOSX::_device_removed(IOReturn p_res, IOHIDDeviceRef p_device) {
 
 	int device = get_joy_ref(p_device);
-	ERR_FAIL_COND(device == -1);
+	if (device == -1) {
+		return; // a matched HID device that was not a joystick
+	}
 
 	input->joy_connection_changed(device_list[device].id, false, "");
 	device_list[device].free();
@@ -299,8 +313,9 @@ bool JoystickOSX::configure_joystick(IOHIDDeviceRef p_device_ref, joystick *p_jo
 	}
 	if ((!refCF) || (!CFStringGetCString((CFStringRef)refCF, c_name, sizeof(c_name), kCFStringEncodingUTF8))) {
 		name = "Unidentified Joystick";
+	} else {
+		name.parse_utf8(c_name);
 	}
-	name = c_name;
 
 	int id = input->get_unused_joy_id();
 	ERR_FAIL_COND_V(id == -1, false);
@@ -321,7 +336,7 @@ bool JoystickOSX::configure_joystick(IOHIDDeviceRef p_device_ref, joystick *p_jo
 		sprintf(uid, "%04x%08x%04x%08x", OSSwapHostToBigInt32(vendor), 0, OSSwapHostToBigInt32(product_id), 0);
 		input->joy_connection_changed(id, true, name, uid);
 	} else {
-		//bluetooth device
+		// bluetooth device
 		String guid = "05000000";
 		for (int i = 0; i < 12; i++) {
 			if (i < name.size())
@@ -345,6 +360,7 @@ bool JoystickOSX::configure_joystick(IOHIDDeviceRef p_device_ref, joystick *p_jo
 	{                                   \
 		if (ret != FF_OK) {             \
 			FFReleaseDevice(ff_device); \
+			ff_device = NULL;           \
 			return false;               \
 		}                               \
 	}
@@ -364,7 +380,9 @@ bool joystick::config_force_feedback(io_service_t p_service) {
 		FF_ERR();
 		return true;
 	}
+	// free() releases ff_device again when it is not NULL
 	FFReleaseDevice(ff_device);
+	ff_device = NULL;
 	return false;
 }
 #undef FF_ERR
@@ -443,16 +461,18 @@ void JoystickOSX::poll_joysticks() const {
 
 static const InputDefault::JoyAxis axis_correct(int p_value, int p_min, int p_max) {
 	InputDefault::JoyAxis jx;
+	jx.min = p_min < 0 ? -1 : 0;
+	jx.value = 0.0f;
+
 	if (p_min < 0) {
-		jx.min = -1;
 		if (p_value < 0) {
 			jx.value = (float)-p_value / p_min;
-		} else
+		} else if (p_max > 0) {
 			jx.value = (float)p_value / p_max;
-	}
-	if (p_min == 0) {
-		jx.min = 0;
-		jx.value = 0.0f + (float)p_value / p_max;
+		}
+	} else if (p_max > p_min) {
+		// 0..max, or min > 0 which left the value uninitialized before
+		jx.value = (float)(p_value - p_min) / (p_max - p_min);
 	}
 	return jx;
 }
@@ -474,7 +494,9 @@ uint32_t JoystickOSX::process_joysticks(uint32_t p_last_id) {
 		}
 		for (int j = 0; j < joy.hat_elements.size(); j++) {
 			rec_element &elem = joy.hat_elements[j];
-			int value = joy.get_hid_element_state(&elem);
+			// no calibration: the centered value is outside the logical range,
+			// it would widen it and break the 4 positions (range == 4) case
+			int value = joy.get_hid_element_state(&elem, false);
 			int hat_value = process_hat_value(elem.min, elem.max, value);
 			p_last_id = input->joy_hat(p_last_id, joy.id, hat_value);
 		}
