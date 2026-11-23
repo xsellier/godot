@@ -114,8 +114,11 @@ static void handle_crash(int sig) {
 				args.push_back("-o");
 				args.push_back(_execpath);
 				args.push_back("-arch");
-
+#if defined(__aarch64__) || defined(__arm64__)
+				args.push_back("arm64");
+#else
 				args.push_back("x86_64");
+#endif
 
 				args.push_back("-l");
 				snprintf(str, 1024, "%p", load_addr);

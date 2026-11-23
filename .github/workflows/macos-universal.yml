@@ -1,0 +1,58 @@
+# Builds the macOS export templates as universal binaries (Intel + Apple Silicon)
+# on a GitHub Apple Silicon runner. Run it by hand from the Actions tab.
+name: macOS universal templates
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install SCons
+        run: pip install scons
+
+      - name: Build Intel (x86_64)
+        run: |
+          scons -j$(sysctl -n hw.ncpu) platform=osx target=release tools=no
+          scons -j$(sysctl -n hw.ncpu) platform=osx target=release_debug tools=no
+
+      - name: Build Apple Silicon (arm64)
+        run: |
+          scons -j$(sysctl -n hw.ncpu) platform=osx target=release tools=no arch=arm64
+          scons -j$(sysctl -n hw.ncpu) platform=osx target=release_debug tools=no arch=arm64
+
+      - name: Merge into universal binaries
+        run: |
+          lipo -create bin/godot.osx.opt.64 bin/godot.osx.opt.arm64 -output bin/godot_osx_release.64
+          lipo -create bin/godot.osx.opt.debug.64 bin/godot.osx.opt.debug.arm64 -output bin/godot_osx_debug.64
+          # Apple Silicon refuses to run unsigned arm64 code: ad-hoc signature
+          codesign --force --sign - bin/godot_osx_release.64 bin/godot_osx_debug.64
+          lipo -info bin/godot_osx_release.64 bin/godot_osx_debug.64
+
+      - name: Smoke test (both architectures start)
+        run: |
+          ./bin/godot_osx_release.64 -h 2>&1 | head -3
+          arch -x86_64 ./bin/godot_osx_release.64 -h 2>&1 | head -3
+
+      - name: Package osx.zip export template
+        run: |
+          rm -rf osx_template.app osx.zip
+          cp -R misc/dist/osx_template.app .
+          mkdir -p osx_template.app/Contents/MacOS
+          cp bin/godot_osx_release.64 bin/godot_osx_debug.64 osx_template.app/Contents/MacOS/
+          zip -q -9 -r osx.zip osx_template.app
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: osx-universal-templates
+          path: |
+            osx.zip
+            bin/godot_osx_release.64
+            bin/godot_osx_debug.64

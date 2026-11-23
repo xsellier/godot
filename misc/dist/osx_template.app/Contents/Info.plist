@@ -32,6 +32,8 @@
 	<dict>
 		<key>x86_64</key>
 		<string>10.9.0</string>
+		<key>arm64</key>
+		<string>11.0.0</string>
 	</dict>
 	<key>NSHighResolutionCapable</key>
 	$highres

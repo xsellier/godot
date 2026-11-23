@@ -41,9 +41,24 @@ def configure(env):
     # As such, we only support 64-bit
     env["bits"] = "64"
 
+    # arch=arm64 builds for Apple Silicon (bin/godot.osx.*.arm64). Anything
+    # else builds for Intel (bin/godot.osx.*.64, as before). Merge both with
+    # lipo to get a universal binary.
+    if env["arch"] in ("arm64", "aarch64"):
+        env["arch"] = "arm64"
+        osx_arch = "arm64"
+        # first macOS version running on Apple Silicon
+        osx_min_version = "11.0"
+    else:
+        env["arch"] = ""
+        osx_arch = "x86_64"
+        osx_min_version = "10.9"
+
     if (env["target"] == "release"):
 
-        env.Append(CCFLAGS=['-O3', '-fomit-frame-pointer', '-ftree-vectorize', '-msse2'])
+        env.Append(CCFLAGS=['-O3', '-fomit-frame-pointer', '-ftree-vectorize'])
+        if osx_arch == "x86_64":
+            env.Append(CCFLAGS=['-msse2'])
 
     elif (env["target"] == "release_debug"):
 
@@ -55,12 +70,13 @@ def configure(env):
 
     if ("OSXCROSS_ROOT" not in os.environ):
         # regular native build
-        env.Append(CCFLAGS=['-arch', 'x86_64'])
-        env.Append(LINKFLAGS=['-arch', 'x86_64'])
+        env.Append(CCFLAGS=['-arch', osx_arch])
+        env.Append(LINKFLAGS=['-arch', osx_arch])
     else:
         # osxcross build
         root = os.environ.get("OSXCROSS_ROOT", 0)
-        basecmd = root + "/target/bin/x86_64-apple-" + env["osxcross_sdk"] + "-"
+        # arm64 needs a macOS 11+ SDK (osxcross_sdk=darwin20.x or later)
+        basecmd = root + "/target/bin/" + osx_arch + "-apple-" + env["osxcross_sdk"] + "-"
 
         ccache_path = os.environ.get("CCACHE")
         if ccache_path == None:
@@ -77,12 +93,12 @@ def configure(env):
 
     env.Append(CPPFLAGS=["-DAPPLE_STYLE_KEYS"])
     env.Append(CPPFLAGS=['-DUNIX_ENABLED', '-DGLES2_ENABLED', '-DOSX_ENABLED'])
-    env.Append(CPPFLAGS=["-mmacosx-version-min=10.9"])
+    env.Append(CPPFLAGS=["-mmacosx-version-min=" + osx_min_version])
     env.Append(LIBS=['pthread'])
     #env.Append(CPPFLAGS=['-F/Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks', '-isysroot', '/Developer/SDKs/MacOSX10.4u.sdk', '-mmacosx-version-min=10.4'])
     #env.Append(LINKFLAGS=['-mmacosx-version-min=10.4', '-isysroot', '/Developer/SDKs/MacOSX10.4u.sdk', '-Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk'])
-    env.Append(LINKFLAGS=['-framework', 'Cocoa', '-framework', 'Carbon', '-framework', 'OpenGL', '-framework', 'AGL', '-framework', 'AudioUnit', '-framework', 'CoreAudio', '-lz', '-framework', 'IOKit', '-framework', 'ForceFeedback'])
-    env.Append(LINKFLAGS=["-mmacosx-version-min=10.9"])
+    env.Append(LINKFLAGS=['-framework', 'Cocoa', '-framework', 'Carbon', '-framework', 'OpenGL', '-framework', 'AudioUnit', '-framework', 'CoreAudio', '-lz', '-framework', 'IOKit', '-framework', 'ForceFeedback'])
+    env.Append(LINKFLAGS=["-mmacosx-version-min=" + osx_min_version])
 
     if (env["CXX"] == "clang++"):
         env.Append(CPPFLAGS=['-DTYPED_METHOD_BIND'])
@@ -96,4 +112,5 @@ def configure(env):
     env.Append(BUILDERS={'GLSL120GLES': env.Builder(action=methods.build_gles2_headers, suffix='glsl.gen.h', src_suffix='.glsl')})
     #env.Append( BUILDERS = { 'HLSL9' : env.Builder(action = methods.build_hlsl_dx9_headers, suffix = 'hlsl.gen.h',src_suffix = '.hlsl') } )
 
-    env["x86_libtheora_opt_gcc"] = True
+    # x86 assembly, it does not build for arm64
+    env["x86_libtheora_opt_gcc"] = osx_arch == "x86_64"
