@@ -1829,6 +1829,18 @@ void OS_OSX::request_attention() {
 
 void OS_OSX::set_borderless_window(int p_borderless) {
 
+	// Changing the style mask of a window in native fullscreen (or during the
+	// fullscreen transition) raises an NSInternalInconsistencyException on
+	// recent macOS versions, which aborts the process.
+	if (zoomed || ([window_object styleMask] & NSWindowStyleMaskFullScreen)) {
+		return;
+	}
+
+	// Nothing to change, avoid hiding and showing the window again
+	if ((bool)p_borderless == get_borderless_window()) {
+		return;
+	}
+
 	// OrderOut prevents a lose focus bug with the window
 	[window_object orderOut:nil];
 
@@ -1853,7 +1865,7 @@ void OS_OSX::set_borderless_window(int p_borderless) {
 
 bool OS_OSX::get_borderless_window() {
 
-	return [window_object styleMask] == NSWindowStyleMaskBorderless;
+	return ([window_object styleMask] & ~NSWindowStyleMaskFullScreen) == NSWindowStyleMaskBorderless;
 }
 
 String OS_OSX::get_executable_path() const {
